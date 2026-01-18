@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { units } from "@/data/units";
 import { setStoredUnitSlug } from "@/lib/unitSelection";
+import { trackEvent } from "@/lib/analytics";
 
 export default function UnitFilter({ onSelect }: { onSelect?: (slug: string) => void } = {}) {
   const [q, setQ] = useState("");
@@ -38,6 +39,7 @@ export default function UnitFilter({ onSelect }: { onSelect?: (slug: string) => 
             key={u.slug}
             onClick={() => {
               setStoredUnitSlug(u.slug);
+              trackEvent("unit_select", { unitSlug: u.slug, placement: "unit_filter" });
               if (onSelect) {
                 onSelect(u.slug);
                 return;

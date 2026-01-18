@@ -11,6 +11,8 @@ export default function HomePage() {
     <>
       <Header />
 
+      <h1 className="srOnly">Espaço Facial</h1>
+
       <section className="hero" aria-label="Destaque">
         <Image
           src="/images/hero.svg"

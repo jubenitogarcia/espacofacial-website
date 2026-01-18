@@ -1,9 +1,36 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FloatingContact from "@/components/FloatingContact";
 import UnitSelectionSync from "@/components/UnitSelectionSync";
 import { units } from "@/data/units";
+
+const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://espacofacial.com").replace(/\/$/, "");
+
+export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
+  const unit = units.find((u) => u.slug === params.slug);
+  if (!unit) return {};
+
+  const title = `${unit.name} — Unidade`;
+  const description = unit.addressLine
+    ? `Endereço: ${unit.addressLine}. Selecione esta unidade para agendar.`
+    : "Selecione esta unidade para agendar.";
+
+  const canonical = `${siteUrl}/unidades/${unit.slug}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      title: `${unit.name} | Espaço Facial`,
+      description,
+      url: canonical,
+      type: "website",
+    },
+  };
+}
 
 export default function UnitPage({ params }: { params: { slug: string } }) {
   const unit = units.find((u) => u.slug === params.slug);
