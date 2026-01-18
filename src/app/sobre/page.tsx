@@ -1,10 +1,14 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FloatingContact from "@/components/FloatingContact";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "Sobre Nós | Espaço Facial",
-  description: "Conheça a história e a proposta da Espaço Facial.",
+const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://espacofacial.com").replace(/\/$/, "");
+
+export const metadata: Metadata = {
+  title: "Sobre Nós",
+  description: "Conheça a proposta da Espaço Facial.",
+  alternates: { canonical: `${siteUrl}/sobre` },
 };
 
 export default function AboutPage() {

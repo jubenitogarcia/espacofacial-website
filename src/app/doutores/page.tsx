@@ -2,10 +2,14 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FloatingContact from "@/components/FloatingContact";
 import DoctorsGrid from "@/components/DoctorsGrid";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "Doutores | Espaço Facial",
-  description: "Conheça nossos especialistas e agende seu atendimento.",
+const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://espacofacial.com").replace(/\/$/, "");
+
+export const metadata: Metadata = {
+  title: "Doutores",
+  description: "Conheça nossos profissionais e agende na unidade selecionada.",
+  alternates: { canonical: `${siteUrl}/doutores` },
 };
 
 export default function DoctorsIndex() {

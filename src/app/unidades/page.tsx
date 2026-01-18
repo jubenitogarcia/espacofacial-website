@@ -2,10 +2,14 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import UnitCards from "@/components/UnitCards";
 import FloatingContact from "@/components/FloatingContact";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "Unidades | Espaço Facial",
-  description: "Veja todas as unidades da Espaço Facial e selecione a mais próxima.",
+const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://espacofacial.com").replace(/\/$/, "");
+
+export const metadata: Metadata = {
+  title: "Unidades",
+  description: "Veja as unidades e selecione a mais próxima para agendar.",
+  alternates: { canonical: `${siteUrl}/unidades` },
 };
 
 export default function UnitsIndex() {

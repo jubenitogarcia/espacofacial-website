@@ -2,10 +2,14 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FloatingContact from "@/components/FloatingContact";
 import UnitFilter from "@/components/UnitFilter";
+import type { Metadata } from "next";
 
-export const metadata = {
-    title: "Agendamento | Espaço Facial",
-    description: "Selecione sua unidade para agendar via WhatsApp.",
+const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://espacofacial.com").replace(/\/$/, "");
+
+export const metadata: Metadata = {
+    title: "Agendamento",
+    description: "Selecione sua unidade para agendar.",
+    alternates: { canonical: `${siteUrl}/agendamento` },
 };
 
 export default function AgendamentoPage() {

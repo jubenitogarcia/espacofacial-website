@@ -1,10 +1,14 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FloatingContact from "@/components/FloatingContact";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "Termos | Espaço Facial",
+const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://espacofacial.com").replace(/\/$/, "");
+
+export const metadata: Metadata = {
+  title: "Termos",
   description: "Termos de uso, privacidade e políticas.",
+  alternates: { canonical: `${siteUrl}/termos` },
 };
 
 export default function TermsPage() {

@@ -5,6 +5,21 @@ import UnitFilter from "@/components/UnitFilter";
 import UnitCards from "@/components/UnitCards";
 import DoctorsGrid from "@/components/DoctorsGrid";
 import Image from "next/image";
+import type { Metadata } from "next";
+
+const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://espacofacial.com").replace(/\/$/, "");
+
+export const metadata: Metadata = {
+  title: "Espaço Facial",
+  description: "Harmonização facial e corporal. Selecione sua unidade e agende.",
+  alternates: { canonical: `${siteUrl}/` },
+  openGraph: {
+    title: "Espaço Facial",
+    description: "Harmonização facial e corporal. Selecione sua unidade e agende.",
+    url: `${siteUrl}/`,
+    type: "website",
+  },
+};
 
 export default function HomePage() {
   return (
