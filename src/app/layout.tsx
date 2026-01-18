@@ -19,9 +19,15 @@ export const metadata: Metadata = {
     siteName: "Espaço Facial",
     locale: "pt_BR",
     type: "website",
+    images: [
+      {
+        url: "/icon.svg",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
+    images: ["/icon.svg"],
   },
   icons: {
     icon: "/icon.svg",
