@@ -62,6 +62,10 @@ Data: 2026-01-18
 5. **Smoke tests automatizados**
    - Fix: script que valida status/redirects de rotas críticas.
 
+6. **Dependências (vulnerabilidades transitivas)**
+   - Fix: `overrides` em `package.json` para atualizar dependências transitivas vulneráveis (ex.: `glob` do lint e `undici` do `wrangler/miniflare`) sem mexer em `next`/OpenNext.
+   - Status: `npm audit` ficou apenas com vulnerabilidades **low** vindas da árvore AWS SDK usada pelo OpenNext; a correção exigiria upgrades/downgrades com potencial breaking change, então foi deixado como follow-up.
+
 ## P2 — Evoluções
 - Melhorar conteúdo real por unidade (endereço, mapa, horários, equipe) via CMS.
 - Revisão de performance com Lighthouse real (LCP/INP/CLS) e images/font strategy.
