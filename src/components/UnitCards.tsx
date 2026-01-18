@@ -10,8 +10,8 @@ export default function UnitCards() {
           <p>{u.addressLine || "Endereço a preencher"}</p>
           <div className="pillRow">
             <Link className="pill" href={`/unidades/${u.slug}`}>Ver unidade</Link>
-            {u.instagram ? <a className="pill" href={u.instagram} target="_blank" rel="noreferrer">Instagram</a> : null}
-            {u.facebook ? <a className="pill" href={u.facebook} target="_blank" rel="noreferrer">Facebook</a> : null}
+            {u.instagram ? <a className="pill" href={u.instagram} target="_blank" rel="noopener noreferrer">Instagram</a> : null}
+            {u.facebook ? <a className="pill" href={u.facebook} target="_blank" rel="noopener noreferrer">Facebook</a> : null}
           </div>
         </div>
       ))}

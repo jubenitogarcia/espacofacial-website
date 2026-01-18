@@ -10,7 +10,7 @@ export default function AgendeCta() {
 
     if (href) {
         return (
-            <a className="cta" href={href} target="_blank" rel="noreferrer">
+            <a className="cta" href={href} target="_blank" rel="noopener noreferrer">
                 AGENDE
             </a>
         );

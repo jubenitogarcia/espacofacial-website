@@ -31,8 +31,8 @@ export default function HomePage() {
         <section id="unidades">
           <h2 className="sectionTitle">Nossas Unidades</h2>
           <p className="sectionSub">
-            Há +6 anos no mercado, e +30 unidades por todo Brasil! Nosso crescimento meteórico reforça o óbvio:
-            somos o melhor em auto-cuidado e bem-estar!
+            Selecione uma unidade para ver informações e agendar.
+            {/* TODO: substituir este texto por copy oficial (sem números/claims não confirmados). */}
           </p>
           <UnitCards />
         </section>
@@ -40,8 +40,8 @@ export default function HomePage() {
         <section id="agende" style={{ marginTop: 50 }}>
           <h2 className="sectionTitle">Nossos Doutores</h2>
           <p className="sectionSub">
-            Conheça nossos doutores altamente qualificados em harmonização facial e corporal e a qualidade de seus procedimentos!
-            Selecione e agende o seu momento de auto-cuidado e bem-estar com o seu especialista!
+            Conheça nossos profissionais e agende na unidade selecionada.
+            {/* TODO: adicionar especialidades/CRMs e descrições reais por profissional. */}
           </p>
           <DoctorsGrid />
         </section>

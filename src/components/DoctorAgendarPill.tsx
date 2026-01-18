@@ -8,7 +8,7 @@ export default function DoctorAgendarPill({ doctorName }: { doctorName: string }
     if (!href) return null;
 
     return (
-        <a className="pill" href={href} target="_blank" rel="noreferrer">
+        <a className="pill" href={href} target="_blank" rel="noopener noreferrer">
             AGENDAR
         </a>
     );

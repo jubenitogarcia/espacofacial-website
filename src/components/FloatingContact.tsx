@@ -8,7 +8,7 @@ export default function FloatingContact() {
   if (!href) return null;
 
   return (
-    <a className="fab" href={href} target="_blank" rel="noreferrer" aria-label="Agendar no WhatsApp">
+    <a className="fab" href={href} target="_blank" rel="noopener noreferrer" aria-label="Agendar">
       💬 <span>Agendar</span>
     </a>
   );

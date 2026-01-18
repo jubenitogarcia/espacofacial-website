@@ -20,13 +20,13 @@ export default function UnitPage({ params }: { params: { slug: string } }) {
         <p style={{ color: "#6b6b6b", marginTop: 0 }}>{unit.addressLine || "Endereço a preencher"}</p>
 
         <div className="pillRow">
-          {whatsHref ? <a className="pill" href={whatsHref} target="_blank" rel="noreferrer">Agendar no WhatsApp</a> : null}
-          {unit.contactUrl ? <a className="pill" href={unit.contactUrl} target="_blank" rel="noreferrer">Contatar Recepção</a> : null}
+          {whatsHref ? <a className="pill" href={whatsHref} target="_blank" rel="noopener noreferrer">Agendar</a> : null}
+          {unit.contactUrl ? <a className="pill" href={unit.contactUrl} target="_blank" rel="noopener noreferrer">Contato</a> : null}
           {unit.phone ? <a className="pill" href={unit.phone}>Telefone</a> : null}
           {unit.email ? <a className="pill" href={unit.email}>E-mail</a> : null}
-          {unit.maps ? <a className="pill" href={unit.maps} target="_blank" rel="noreferrer">Google Maps</a> : null}
-          {unit.instagram ? <a className="pill" href={unit.instagram} target="_blank" rel="noreferrer">Instagram</a> : null}
-          {unit.facebook ? <a className="pill" href={unit.facebook} target="_blank" rel="noreferrer">Facebook</a> : null}
+          {unit.maps ? <a className="pill" href={unit.maps} target="_blank" rel="noopener noreferrer">Google Maps</a> : null}
+          {unit.instagram ? <a className="pill" href={unit.instagram} target="_blank" rel="noopener noreferrer">Instagram</a> : null}
+          {unit.facebook ? <a className="pill" href={unit.facebook} target="_blank" rel="noopener noreferrer">Facebook</a> : null}
         </div>
 
         <div style={{ marginTop: 26 }} className="card">
