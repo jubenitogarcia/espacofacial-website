@@ -5,6 +5,14 @@ compatibility_flags = ["nodejs_compat"]
 
 workers_dev = true
 
+routes = [
+	{ pattern = "espacofacial.com/*", zone_name = "espacofacial.com" },
+	{ pattern = "www.espacofacial.com/*", zone_name = "espacofacial.com" },
+]
+
+[vars]
+NEXT_PUBLIC_SITE_URL = "https://espacofacial.com"
+
 [assets]
 directory = ".open-next/assets"
 binding = "ASSETS"

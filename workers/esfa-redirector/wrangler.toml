@@ -1,7 +1,9 @@
 name = "esfa-redirects"
 main = "worker.ts"
 compatibility_date = "2026-01-11"
-workers_dev = true
+workers_dev = false
 
-# Quando você adicionar a Zone esfa.co no Cloudflare, troque para workers_dev=false
-# e configure routes/custom domains no dashboard.
+routes = [
+	{ pattern = "esfa.co/*", zone_name = "esfa.co" },
+	{ pattern = "www.esfa.co/*", zone_name = "esfa.co" },
+]
