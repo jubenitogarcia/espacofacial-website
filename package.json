@@ -15,6 +15,7 @@
     "deploy:esfa": "wrangler deploy -c workers/esfa-redirector/wrangler.toml"
   },
   "dependencies": {
+    "@svg-maps/brazil": "^2.0.0",
     "next": "14.2.35",
     "react": "18.3.1",
     "react-dom": "18.3.1"

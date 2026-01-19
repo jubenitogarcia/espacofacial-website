@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useCurrentUnit } from "@/hooks/useCurrentUnit";
 import { trackEvent } from "@/lib/analytics";
 
@@ -23,13 +22,5 @@ export default function AgendeCta() {
         );
     }
 
-    return (
-        <Link
-            className="cta"
-            href="/unidades"
-            onClick={() => trackEvent("cta_escolher_unidade_click", { placement: "header" })}
-        >
-            ESCOLHER UNIDADE
-        </Link>
-    );
+    return null;
 }

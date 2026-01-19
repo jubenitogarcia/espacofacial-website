@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AgendeCta from "@/components/AgendeCta";
+import UnitChooser from "@/components/UnitChooser";
 
 export default function Header() {
   return (
@@ -9,12 +10,14 @@ export default function Header() {
           <div className="navLeft">
             <Link className="brand" href="/">Espaço Facial</Link>
             <nav className="menu" aria-label="Menu principal">
-              <Link href="/#doutores">Sobre Nós</Link>
+              <Link href="/#doutores">Nossos Doutores</Link>
               <Link href="/#unidades">Unidades</Link>
-              <Link href="/#termos">Termos</Link>
             </nav>
           </div>
-          <AgendeCta />
+          <div className="headerActions">
+            <UnitChooser />
+            <AgendeCta />
+          </div>
         </div>
       </div>
     </header>

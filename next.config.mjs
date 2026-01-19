@@ -3,7 +3,13 @@ const nextConfig = {
   poweredByHeader: false,
   images: {
     // We'll serve images from /public for now.
-    remotePatterns: [],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "unavatar.io",
+        pathname: "/**",
+      },
+    ],
   },
   async headers() {
     return [

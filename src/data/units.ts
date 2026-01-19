@@ -249,7 +249,7 @@ export const units: Unit[] = [
   {
     "slug": "novo-hamburgo",
     "name": "Novo Hamburgo",
-    "addressLine": "",
+    "addressLine": "Av. Doutor Maurício Cardoso, 1126",
     "state": "RS",
     "lat": -29.688,
     "lng": -51.132,

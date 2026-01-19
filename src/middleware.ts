@@ -24,7 +24,6 @@ export function middleware(req: NextRequest) {
         const simpleRedirects: Record<string, string> = {
             "/sobre": "#doutores",
             "/unidades": "#unidades",
-            "/termos": "#termos",
             "/doutores": "#doutores",
             "/agendamento": "#unidades",
         };

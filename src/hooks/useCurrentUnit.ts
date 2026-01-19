@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import { units, type Unit } from "@/data/units";
 import { getStoredUnitSlug, setStoredUnitSlug } from "@/lib/unitSelection";
@@ -22,7 +22,19 @@ export function useCurrentUnit(): Unit | null {
 
     const unitFromPath = useMemo(() => findUnitBySlug(slugFromPath), [slugFromPath]);
 
-    const storedSlug = useMemo(() => getStoredUnitSlug(), []);
+    const [storedSlug, setStoredSlug] = useState<string | null>(() => getStoredUnitSlug());
+
+    useEffect(() => {
+        function onUnitChange(e: Event) {
+            const ce = e as CustomEvent<{ slug?: string }>;
+            const next = ce?.detail?.slug ?? getStoredUnitSlug();
+            setStoredSlug(next ?? null);
+        }
+
+        window.addEventListener("ef:unit-change", onUnitChange);
+        return () => window.removeEventListener("ef:unit-change", onUnitChange);
+    }, []);
+
     const unitFromStorage = useMemo(() => findUnitBySlug(storedSlug), [storedSlug]);
 
     const unit = unitFromPath ?? unitFromStorage;
