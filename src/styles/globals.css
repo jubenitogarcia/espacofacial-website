@@ -174,17 +174,16 @@ button:focus-visible {
 }
 
 .unitsMapLayout {
-  display: grid;
-  grid-template-columns: 1.3fr .9fr;
-  gap: 18px;
-  align-items: stretch;
+  position: relative;
 }
 
 .brMap {
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: #fff;
-  padding: 14px;
+  background: radial-gradient(circle at 30% 20%, rgba(0,0,0,.06), rgba(0,0,0,.02) 40%, rgba(0,0,0,0) 70%),
+    #f7f7f7;
+  padding: 18px;
+  position: relative;
 }
 
 .brMap svg {
@@ -199,44 +198,48 @@ button:focus-visible {
   color: var(--muted);
 }
 
-.unitsList {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: #fff;
-  padding: 14px;
+.brTooltip {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  margin-top: -10px;
+  width: min(320px, calc(100vw - 60px));
+  background: rgba(255,255,255,.96);
+  border: 1px solid rgba(0,0,0,.12);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 12px;
+  z-index: 5;
 }
 
-.unitsListTitle {
+.brTooltipTitle {
   font-weight: 900;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+  font-size: 13px;
 }
 
-.unitsListItems {
+.brTooltipList {
   display: grid;
-  gap: 10px;
-  max-height: 520px;
-  overflow: auto;
+  gap: 8px;
 }
 
-.unitsListItem {
-  display: block;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 10px 12px;
-  background: #fafafa;
+.brTooltipItem {
+  appearance: none;
+  border: 1px solid rgba(0,0,0,.10);
+  background: #fff;
+  border-radius: 12px;
+  padding: 9px 10px;
+  text-align: left;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 13px;
 }
 
-.unitsListItem:hover {
-  background: #f2f2f2;
+.brTooltipItem:hover {
+  background: #f3f3f3;
 }
 
-.unitsListName {
-  font-weight: 900;
-  font-size: 14px;
-}
-
-.unitsListAddr {
-  margin-top: 3px;
+.brTooltipNote {
+  margin-top: 10px;
   font-size: 12px;
   color: var(--muted);
 }
@@ -327,10 +330,6 @@ button:focus-visible {
 @media (max-width:900px) {
   .grid {
     grid-template-columns: repeat(2, 1fr)
-  }
-
-  .unitsMapLayout {
-    grid-template-columns: 1fr;
   }
 
   .hero {

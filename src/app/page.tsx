@@ -6,7 +6,6 @@ import UnitsMapSection from "@/components/UnitsMapSection";
 import DoctorsGrid from "@/components/DoctorsGrid";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { units } from "@/data/units";
 
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://espacofacial.com").replace(/\/$/, "");
 
@@ -53,38 +52,6 @@ export default function HomePage() {
             {/* TODO: substituir este texto por copy oficial. */}
           </p>
           <UnitsMapSection />
-
-          <div style={{ marginTop: 18 }} className="grid" aria-label="Detalhes das unidades">
-            {units.map((u) => (
-              <div key={u.slug} id={`unit-${u.slug}`} className="card pageSection">
-                <h3 style={{ marginTop: 0 }}>{u.name}</h3>
-                <p>{u.addressLine || "Endereço a preencher"}</p>
-
-                <div className="pillRow">
-                  {u.contactUrl ? (
-                    <a className="pill" href={u.contactUrl} target="_blank" rel="noopener noreferrer">
-                      Agendar
-                    </a>
-                  ) : null}
-                  {u.maps ? (
-                    <a className="pill" href={u.maps} target="_blank" rel="noopener noreferrer">
-                      Google Maps
-                    </a>
-                  ) : null}
-                  {u.instagram ? (
-                    <a className="pill" href={u.instagram} target="_blank" rel="noopener noreferrer">
-                      Instagram
-                    </a>
-                  ) : null}
-                  {u.facebook ? (
-                    <a className="pill" href={u.facebook} target="_blank" rel="noopener noreferrer">
-                      Facebook
-                    </a>
-                  ) : null}
-                </div>
-              </div>
-            ))}
-          </div>
         </section>
 
         <section id="doutores" className="pageSection" style={{ marginTop: 50 }}>

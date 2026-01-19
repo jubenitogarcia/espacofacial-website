@@ -38,7 +38,7 @@ export function middleware(req: NextRequest) {
         const unitMatch = pathname.match(/^\/unidades\/([^/]+)$/);
         if (unitMatch) {
             url.pathname = "/";
-            url.hash = `#unit-${unitMatch[1]}`;
+            url.hash = "#unidades";
             return NextResponse.redirect(url, 308);
         }
     }

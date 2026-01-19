@@ -2,6 +2,7 @@ export type Unit = {
   slug: string;
   name: string;
   addressLine?: string;
+  state?: string;
   lat?: number;
   lng?: number;
   instagram?: string;
@@ -18,6 +19,7 @@ export const units: Unit[] = [
     "slug": "barrashoppingsul",
     "name": "BarraShoppingSul",
     "addressLine": "Av. Diário de Notícias, 300",
+    "state": "RS",
     "lat": -30.0713,
     "lng": -51.2452,
     "instagram": "https://www.instagram.com/espacofacial_barrashoppingsul/",
@@ -32,6 +34,7 @@ export const units: Unit[] = [
     "slug": "americas-shopping",
     "name": "Américas Shopping",
     "addressLine": "",
+    "state": "RJ",
     "lat": -23.005,
     "lng": -43.392
   },
@@ -39,6 +42,7 @@ export const units: Unit[] = [
     "slug": "bangu-shopping",
     "name": "Bangu Shopping",
     "addressLine": "",
+    "state": "RJ",
     "lat": -22.875,
     "lng": -43.471
   },
@@ -46,6 +50,7 @@ export const units: Unit[] = [
     "slug": "barra-olimpica",
     "name": "Barra Olimpica",
     "addressLine": "",
+    "state": "RJ",
     "lat": -22.987,
     "lng": -43.391
   },
@@ -53,6 +58,7 @@ export const units: Unit[] = [
     "slug": "botafogo-praia-shopping",
     "name": "Botafogo Praia Shopping",
     "addressLine": "",
+    "state": "RJ",
     "lat": -22.951,
     "lng": -43.181
   },
@@ -60,6 +66,7 @@ export const units: Unit[] = [
     "slug": "campo-grande",
     "name": "Campo Grande",
     "addressLine": "",
+    "state": "RJ",
     "lat": -22.907,
     "lng": -43.568
   },
@@ -67,6 +74,7 @@ export const units: Unit[] = [
     "slug": "caxias-shopping",
     "name": "Caxias Shopping",
     "addressLine": "",
+    "state": "RJ",
     "lat": -22.785,
     "lng": -43.311
   },
@@ -74,6 +82,7 @@ export const units: Unit[] = [
     "slug": "copacabana",
     "name": "Copacabana",
     "addressLine": "",
+    "state": "RJ",
     "lat": -22.971,
     "lng": -43.185
   },
@@ -81,6 +90,7 @@ export const units: Unit[] = [
     "slug": "freguesia",
     "name": "Freguesia",
     "addressLine": "",
+    "state": "RJ",
     "lat": -22.941,
     "lng": -43.336
   },
@@ -88,6 +98,7 @@ export const units: Unit[] = [
     "slug": "galeria-344-tijuca",
     "name": "Galeria 344 - Tijuca",
     "addressLine": "",
+    "state": "RJ",
     "lat": -22.924,
     "lng": -43.234
   },
@@ -95,6 +106,7 @@ export const units: Unit[] = [
     "slug": "iguatemi-esplanada",
     "name": "Iguatemi Esplanada",
     "addressLine": "",
+    "state": "SP",
     "lat": -23.506,
     "lng": -47.458
   },
@@ -102,6 +114,7 @@ export const units: Unit[] = [
     "slug": "juiz-de-fora",
     "name": "Juiz de Fora",
     "addressLine": "",
+    "state": "MG",
     "lat": -21.759,
     "lng": -43.349
   },
@@ -109,6 +122,7 @@ export const units: Unit[] = [
     "slug": "largo-do-machado",
     "name": "Largo do Machado",
     "addressLine": "",
+    "state": "RJ",
     "lat": -22.933,
     "lng": -43.180
   },
@@ -116,6 +130,7 @@ export const units: Unit[] = [
     "slug": "leme",
     "name": "Leme",
     "addressLine": "",
+    "state": "RJ",
     "lat": -22.965,
     "lng": -43.164
   },
@@ -123,6 +138,7 @@ export const units: Unit[] = [
     "slug": "madureira-shopping",
     "name": "Madureira Shopping",
     "addressLine": "",
+    "state": "RJ",
     "lat": -22.875,
     "lng": -43.339
   },
@@ -130,6 +146,7 @@ export const units: Unit[] = [
     "slug": "meier",
     "name": "Meier",
     "addressLine": "",
+    "state": "RJ",
     "lat": -22.902,
     "lng": -43.283
   },
@@ -137,6 +154,7 @@ export const units: Unit[] = [
     "slug": "porto-alegre",
     "name": "Porto Alegre",
     "addressLine": "",
+    "state": "RS",
     "lat": -30.0346,
     "lng": -51.2177
   },
@@ -144,6 +162,7 @@ export const units: Unit[] = [
     "slug": "recreio-shopping",
     "name": "Recreio Shopping",
     "addressLine": "",
+    "state": "RJ",
     "lat": -23.001,
     "lng": -43.459
   },
@@ -151,6 +170,7 @@ export const units: Unit[] = [
     "slug": "sao-goncalo-shopping",
     "name": "São Gonçalo Shopping",
     "addressLine": "",
+    "state": "RJ",
     "lat": -22.826,
     "lng": -43.053
   },
@@ -158,6 +178,7 @@ export const units: Unit[] = [
     "slug": "shopping-brisamar",
     "name": "Shopping Brisamar",
     "addressLine": "",
+    "state": "SP",
     "lat": -23.965,
     "lng": -46.385
   },
@@ -165,6 +186,7 @@ export const units: Unit[] = [
     "slug": "shopping-downtown",
     "name": "Shopping Downtown",
     "addressLine": "",
+    "state": "RJ",
     "lat": -22.995,
     "lng": -43.361
   },
@@ -172,6 +194,7 @@ export const units: Unit[] = [
     "slug": "shopping-icarai",
     "name": "Shopping Icaraí",
     "addressLine": "",
+    "state": "RJ",
     "lat": -22.907,
     "lng": -43.106
   },
@@ -179,6 +202,7 @@ export const units: Unit[] = [
     "slug": "shopping-millenium",
     "name": "Shopping Millenium",
     "addressLine": "",
+    "state": "AM",
     "lat": -3.085,
     "lng": -60.024
   },
@@ -186,6 +210,7 @@ export const units: Unit[] = [
     "slug": "shopping-nova-america",
     "name": "Shopping Nova América",
     "addressLine": "",
+    "state": "RJ",
     "lat": -22.879,
     "lng": -43.268
   },
@@ -193,6 +218,7 @@ export const units: Unit[] = [
     "slug": "shopping-tacaruna",
     "name": "Shopping Tacaruna",
     "addressLine": "",
+    "state": "PE",
     "lat": -8.039,
     "lng": -34.873
   },
@@ -200,6 +226,7 @@ export const units: Unit[] = [
     "slug": "nilopolis-square-shopping",
     "name": "Nilópolis Square Shopping",
     "addressLine": "",
+    "state": "RJ",
     "lat": -22.805,
     "lng": -43.419
   },
@@ -207,6 +234,7 @@ export const units: Unit[] = [
     "slug": "norte-shopping",
     "name": "Norte Shopping",
     "addressLine": "",
+    "state": "RJ",
     "lat": -22.888,
     "lng": -43.289
   },
@@ -214,6 +242,7 @@ export const units: Unit[] = [
     "slug": "nova-iguacu",
     "name": "Nova Iguaçu",
     "addressLine": "",
+    "state": "RJ",
     "lat": -22.759,
     "lng": -43.451
   },
@@ -221,6 +250,7 @@ export const units: Unit[] = [
     "slug": "novo-hamburgo",
     "name": "Novo Hamburgo",
     "addressLine": "",
+    "state": "RS",
     "lat": -29.688,
     "lng": -51.132,
     "contactUrl": "/novohamburgo/faleconosco"
@@ -229,6 +259,7 @@ export const units: Unit[] = [
     "slug": "petropolis",
     "name": "Petrópolis",
     "addressLine": "",
+    "state": "RJ",
     "lat": -22.505,
     "lng": -43.179
   }
