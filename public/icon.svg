@@ -1,4 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#111111"/>
-  <text x="50%" y="54%" text-anchor="middle" dominant-baseline="middle" font-family="system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="220" font-weight="800" fill="#ffffff">EF</text>
+  <rect width="512" height="512" rx="96" fill="#ffffff"/>
+  <g fill="#111111" transform="translate(76 90) scale(0.744)">
+    <rect x="0" y="0" width="484" height="62" />
+    <rect x="0" y="184" width="484" height="63" />
+    <rect x="0" y="184" width="63" height="248" />
+    <rect x="196" y="370" width="288" height="62" />
+  </g>
 </svg>
