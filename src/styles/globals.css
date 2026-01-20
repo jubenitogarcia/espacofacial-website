@@ -193,8 +193,9 @@ button:focus-visible {
 }
 
 .brandMark {
-  width: 30.25px;
   height: 22px;
+  width: auto;
+  aspect-ratio: 200 / 140;
   flex: 0 0 auto;
   color: #5a5a5a;
   display: block;
@@ -986,6 +987,7 @@ video.heroMediaEl {
 
 .brand--footer .brandMark {
   color: #fff;
+  height: 26px;
 }
 
 .brand--footer .brandTextEspaco {
@@ -1128,7 +1130,6 @@ video.heroMediaEl {
 
   .brand--header .brandMark {
     height: 24px;
-    width: 33px;
   }
 
   .heroMedia {
