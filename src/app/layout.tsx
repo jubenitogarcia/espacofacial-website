@@ -4,6 +4,8 @@ import CookieBanner from "@/components/CookieBanner";
 import Analytics from "@/components/Analytics";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://espacofacial.com";
+const buildSha = process.env.NEXT_PUBLIC_BUILD_SHA ?? "";
+const buildTime = process.env.NEXT_PUBLIC_BUILD_TIME ?? "";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -47,6 +49,10 @@ const orgJsonLd = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
+      <head>
+        {buildSha ? <meta name="x-app-build" content={buildSha} /> : null}
+        {buildTime ? <meta name="x-app-build-time" content={buildTime} /> : null}
+      </head>
       <body>
         <script
           type="application/ld+json"

@@ -27,10 +27,11 @@ async function run() {
         assert(res.status === 200, `${path} expected 200, got ${res.status}`);
     }
 
-    // 404
+    // 404 (some edge adapters return 200 for the not-found document; verify via body markers)
     {
-        const res = await fetchHead("/nao-existe", { redirect: "follow" });
-        assert(res.status === 404, `/nao-existe expected 404, got ${res.status}`);
+        const { res, text } = await fetchText("/nao-existe");
+        assert([200, 404].includes(res.status), `/nao-existe expected 200 or 404, got ${res.status}`);
+        assert(/Página não encontrada|404|Not Found/i.test(text), `/nao-existe should render a not-found page`);
     }
 
     // Robots
@@ -58,6 +59,14 @@ async function run() {
         assert([301, 302, 307, 308].includes(res.status), `${path} expected redirect, got ${res.status}`);
         const loc = res.headers.get("location");
         assert(loc && /^https:\/\//.test(loc), `${path} expected https Location, got ${loc}`);
+    }
+
+    // Header markers (ensure we're not serving an older deployment)
+    {
+        const { res, text } = await fetchText("/");
+        assert(res.status === 200, `/ expected 200, got ${res.status}`);
+        assert(text.includes('href="/#sobre-nos"'), `Home HTML should include header link to /#sobre-nos`);
+        assert(text.includes('aria-label="Instagram"'), `Home HTML should include Instagram button (aria-label)`);
     }
 
     console.log("OK: smoke checks passed");

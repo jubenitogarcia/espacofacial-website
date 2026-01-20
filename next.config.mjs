@@ -1,4 +1,7 @@
 /** @type {import('next').NextConfig} */
+const buildSha = process.env.NEXT_PUBLIC_BUILD_SHA || "";
+const buildTime = process.env.NEXT_PUBLIC_BUILD_TIME || "";
+
 const nextConfig = {
   poweredByHeader: false,
   images: {
@@ -16,6 +19,9 @@ const nextConfig = {
       {
         source: "/:path*",
         headers: [
+          // Helps validate which deployment is currently served (useful when debugging caching / stale deploys).
+          { key: "X-App-Build", value: buildSha || "unknown" },
+          { key: "X-App-Build-Time", value: buildTime || "" },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
