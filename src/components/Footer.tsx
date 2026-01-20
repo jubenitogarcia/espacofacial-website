@@ -1,10 +1,14 @@
+import Brand from "@/components/Brand";
+
 export default function Footer() {
   const year = new Date().getFullYear();
   return (
     <footer className="footer">
       <div className="container">
         <div className="footerInner">
-          <div className="footerBrand">Espaço Facial</div>
+          <div className="footerBrand">
+            <Brand className="brand--footer" showTagline />
+          </div>
 
           <div className="footerMeta">
             <div>Copyright © 2019-{year} - Espaço Facial. Todos Direitos Reservados.</div>

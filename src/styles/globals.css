@@ -184,8 +184,47 @@ button:focus-visible {
 }
 
 .brand {
-  font-weight: 800;
-  letter-spacing: .2px
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+  letter-spacing: .2px;
+  line-height: 1;
+}
+
+.brandMark {
+  width: 30px;
+  height: 22px;
+  flex: 0 0 auto;
+  color: #5a5a5a;
+}
+
+.brandText {
+  display: grid;
+  gap: 2px;
+}
+
+.brandTextLine {
+  display: inline-flex;
+  gap: 4px;
+  align-items: baseline;
+}
+
+.brandTextEspaco {
+  font-weight: 500;
+  color: #6b6b6b;
+}
+
+.brandTextFacial {
+  font-weight: 900;
+  color: var(--text);
+}
+
+.brandTagline {
+  font-size: 12px;
+  color: #6b6b6b;
+  letter-spacing: .12em;
+  text-transform: none;
 }
 
 .menu {
@@ -942,6 +981,22 @@ video.heroMediaEl {
   font-weight: 900;
   letter-spacing: .2px;
   color: #fff;
+}
+
+.brand--footer .brandMark {
+  color: #fff;
+}
+
+.brand--footer .brandTextEspaco {
+  color: rgba(255, 255, 255, .70);
+}
+
+.brand--footer .brandTextFacial {
+  color: #fff;
+}
+
+.brand--footer .brandTagline {
+  color: rgba(255, 255, 255, .62);
 }
 
 .footerMeta {
