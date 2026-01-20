@@ -1,6 +1,7 @@
 import Link from "next/link";
 import AgendeCta from "@/components/AgendeCta";
 import UnitChooser from "@/components/UnitChooser";
+import HeaderInstagram from "@/components/HeaderInstagram";
 
 export default function Header() {
   return (
@@ -12,10 +13,12 @@ export default function Header() {
             <nav className="menu" aria-label="Menu principal">
               <Link href="/#doutores">Nossos Doutores</Link>
               <Link href="/#unidades">Unidades</Link>
+              <Link href="/#sobre-nos">Sobre Nós</Link>
             </nav>
           </div>
           <div className="headerActions">
             <UnitChooser />
+            <HeaderInstagram />
             <AgendeCta />
           </div>
         </div>

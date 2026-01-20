@@ -12,6 +12,8 @@ export type Unit = {
   whatsappPhone?: string;
   email?: string;
   maps?: string;
+  placeId?: string;
+  gbpLocation?: string;
 };
 
 export const units: Unit[] = [
@@ -28,7 +30,9 @@ export const units: Unit[] = [
     "phone": "tel:+5551980882293",
     "whatsappPhone": "+5551980882293",
     "email": "mailto:barrashoppingsul@espacofacial.com.br?subject=A%2FC%20Espa%C3%A7o%20Facial%20-%20BarraShoppingSul",
-    "maps": "http://esfa.co/googlemaps/nh"
+    "maps": "https://maps.app.goo.gl/JXNdFq7ATCmcKHHv9",
+    "placeId": "ChIJZdhuMFx5GZURql2Gm6xa8LU",
+    "gbpLocation": "5938225121025805282"
   },
   {
     "slug": "americas-shopping",
@@ -253,7 +257,11 @@ export const units: Unit[] = [
     "state": "RS",
     "lat": -29.688,
     "lng": -51.132,
-    "contactUrl": "/novohamburgo/faleconosco"
+    "instagram": "https://www.instagram.com/espacofacial_novohamburgo/",
+    "contactUrl": "/novohamburgo/faleconosco",
+    "maps": "https://maps.app.goo.gl/3yMDftBGnALP13sU7",
+    "placeId": "ChIJhaCsZ9RDGZURe9I0bpIb-CM",
+    "gbpLocation": "7339519901965290091"
   },
   {
     "slug": "petropolis",

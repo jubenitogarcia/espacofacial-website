@@ -10,19 +10,39 @@ function findUnitBySlug(slug: string | null | undefined): Unit | null {
     return units.find((u) => u.slug === slug) ?? null;
 }
 
+function normalizeSlug(value: string): string {
+    return value.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function findUnitBySlugOrAlias(slug: string | null | undefined): Unit | null {
+    if (!slug) return null;
+    return (
+        units.find((u) => u.slug === slug) ??
+        units.find((u) => normalizeSlug(u.slug) === normalizeSlug(slug)) ??
+        null
+    );
+}
+
 export function useCurrentUnit(): Unit | null {
     const pathname = usePathname();
 
     const slugFromPath = useMemo(() => {
         if (!pathname) return null;
         const parts = pathname.split("/").filter(Boolean);
-        if (parts[0] !== "unidades") return null;
-        return parts[1] ?? null;
+        if (parts.length === 0) return null;
+        if (parts[0] === "unidades") return parts[1] ?? null;
+        return parts[0] ?? null;
     }, [pathname]);
 
-    const unitFromPath = useMemo(() => findUnitBySlug(slugFromPath), [slugFromPath]);
+    const unitFromPath = useMemo(() => findUnitBySlugOrAlias(slugFromPath), [slugFromPath]);
 
-    const [storedSlug, setStoredSlug] = useState<string | null>(() => getStoredUnitSlug());
+    const [storedSlug, setStoredSlug] = useState<string | null>(() => {
+        if (typeof window === "undefined") return null;
+        // Requirement: opening the site on `/` should show the placeholder
+        // (do not auto-select from persisted storage on first paint).
+        if (window.location?.pathname === "/") return null;
+        return getStoredUnitSlug();
+    });
 
     useEffect(() => {
         function onUnitChange(e: Event) {

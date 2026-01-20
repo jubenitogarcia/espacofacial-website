@@ -236,6 +236,113 @@ video.heroMediaEl {
   background: linear-gradient(90deg, rgba(0, 0, 0, .45), rgba(0, 0, 0, .05))
 }
 
+/* Google Maps unit modal */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.62);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  z-index: 60;
+}
+
+.modalCard {
+  width: min(920px, 100%);
+  background: #0f0f10;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.40);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 16px 10px;
+}
+
+.modalTitle {
+  font-weight: 900;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.modalSubtitle {
+  margin-top: 4px;
+  opacity: 0.78;
+  font-size: 13px;
+}
+
+.modalClose {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.modalBody {
+  padding: 0 16px 16px;
+}
+
+.mapsFrame {
+  width: 100%;
+  height: 360px;
+  border: 0;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.modalActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 14px;
+  border-radius: 14px;
+  text-decoration: none;
+  font-weight: 800;
+}
+
+.btnPrimary {
+  background: #ffffff;
+  color: #111;
+}
+
+.btnGhost {
+  background: rgba(255, 255, 255, 0.10);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.modalNote {
+  margin-top: 10px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+@media (max-width: 640px) {
+  .mapsFrame {
+    height: 300px;
+  }
+}
+
 .sectionTitle {
   text-align: center;
   margin: 36px 0 8px;
@@ -248,6 +355,353 @@ video.heroMediaEl {
   max-width: 820px;
   color: var(--muted);
   line-height: 1.5
+}
+
+.aboutGrid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 16px;
+  margin-top: 18px;
+  align-items: start;
+}
+
+.aboutEmpty {
+  margin-top: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, .06);
+  padding: 16px;
+  color: var(--muted);
+  font-weight: 700;
+  text-align: center;
+}
+
+.aboutMapCard,
+.aboutPhotosCard {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, .06);
+}
+
+.aboutMapHeader,
+.aboutPhotosHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.aboutPlaceTitle {
+  font-weight: 900;
+  font-size: 15px;
+}
+
+.aboutPlaceSub {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.aboutBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, .12);
+  background: #fff;
+  font-weight: 900;
+  font-size: 12px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .06);
+}
+
+.aboutBtn:hover {
+  background: #f3f3f3;
+}
+
+.aboutHeaderActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.aboutBtnPrimary,
+.aboutBtnGhost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 12px;
+  text-decoration: none;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .06);
+  border: 1px solid rgba(0, 0, 0, .12);
+}
+
+.aboutBtnPrimary {
+  background: #111;
+  color: #fff;
+  border-color: rgba(0, 0, 0, .25);
+}
+
+.aboutBtnPrimary:hover {
+  background: #000;
+}
+
+.aboutBtnGhost {
+  background: #fff;
+  color: #111;
+}
+
+.aboutBtnGhost:hover {
+  background: #f3f3f3;
+}
+
+.aboutMapFrame {
+  width: 100%;
+  height: 340px;
+  border: 0;
+  display: block;
+  background: #f6f6f6;
+}
+
+.aboutRatingRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+}
+
+.aboutRatingText {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.aboutMuted {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.aboutStars {
+  display: inline-flex;
+  gap: 3px;
+  line-height: 1;
+}
+
+.aboutStars .star {
+  font-size: 16px;
+}
+
+.aboutStars .star.full {
+  color: #f5b301;
+}
+
+.aboutStars .star.empty {
+  color: rgba(0, 0, 0, .20);
+}
+
+.aboutStars .star.half {
+  color: #f5b301;
+  opacity: 0.55;
+}
+
+.aboutReviews {
+  display: grid;
+  gap: 10px;
+  padding: 0 14px 14px;
+}
+
+.aboutReviewsSection {
+  border-top: 1px solid var(--border);
+}
+
+.aboutControls {
+  padding: 12px 14px 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.aboutControlsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.aboutPills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.aboutPill {
+  appearance: none;
+  border: 1px solid rgba(0, 0, 0, .12);
+  background: #fff;
+  border-radius: 999px;
+  padding: 8px 10px;
+  font-weight: 900;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.aboutPill:hover {
+  background: #f3f3f3;
+}
+
+.aboutPill.active {
+  background: #111;
+  color: #fff;
+  border-color: rgba(0, 0, 0, .25);
+}
+
+.aboutToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #222;
+}
+
+.aboutSelect {
+  border: 1px solid rgba(0, 0, 0, .12);
+  background: #fff;
+  border-radius: 12px;
+  padding: 8px 10px;
+  font-weight: 900;
+  font-size: 12px;
+}
+
+.aboutInput {
+  border: 1px solid rgba(0, 0, 0, .12);
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-weight: 800;
+  font-size: 13px;
+  width: 100%;
+}
+
+.aboutReviewsScroll {
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.aboutLoadMore {
+  padding: 10px 14px 14px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.aboutLoadMoreBtn {
+  margin-left: 8px;
+  appearance: none;
+  border: 1px solid rgba(0, 0, 0, .12);
+  background: #fff;
+  border-radius: 999px;
+  padding: 7px 10px;
+  font-weight: 900;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.aboutLoadMoreBtn:hover {
+  background: #f3f3f3;
+}
+
+.aboutReview {
+  border: 1px solid rgba(0, 0, 0, .08);
+  background: #fbfbfb;
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.aboutReviewTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.aboutReviewAuthor {
+  font-weight: 900;
+  font-size: 13px;
+}
+
+.aboutReviewMeta {
+  display: inline-flex;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.aboutReviewText {
+  margin-top: 8px;
+  color: #202020;
+  font-size: 13px;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.aboutPhotosTitle {
+  font-weight: 900;
+  font-size: 15px;
+}
+
+.aboutPhotosGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  padding: 14px;
+}
+
+.aboutPhotosScroll {
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.aboutPhoto {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, .08);
+  background: #f0f0f0;
+}
+
+.aboutHint {
+  padding: 0 14px 14px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+@media (max-width: 880px) {
+  .aboutGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .aboutMapFrame {
+    height: 320px;
+  }
 }
 
 .grid {
@@ -502,11 +956,18 @@ video.heroMediaEl {
   line-height: 1.45;
 }
 
-.fab {
+.fabDock {
   position: fixed;
   right: 18px;
   bottom: 22px;
   z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.fab {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -516,6 +977,20 @@ video.heroMediaEl {
   background: rgba(0, 0, 0, .85);
   color: #fff;
   box-shadow: var(--shadow);
+}
+
+.fabInsta {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .15);
+  background: rgba(0, 0, 0, .85);
+  color: #fff;
+  box-shadow: var(--shadow);
+}
+
+.fabInsta:hover {
+  background: rgba(0, 0, 0, .78);
 }
 
 .cookieBanner {

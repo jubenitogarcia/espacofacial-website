@@ -56,9 +56,38 @@ function decodePemToPkcs8(pem: string): ArrayBuffer {
 function loadServiceAccountFromEnv(): ServiceAccountJson {
     const jsonRaw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
     if (jsonRaw) {
-        const parsed = JSON.parse(jsonRaw) as ServiceAccountJson;
-        if (!parsed.client_email || !parsed.private_key) throw new Error("Invalid GOOGLE_SERVICE_ACCOUNT_JSON");
-        return parsed;
+        try {
+            const parsed = JSON.parse(jsonRaw) as ServiceAccountJson;
+            if (!parsed.client_email || !parsed.private_key) {
+                throw new Error("Invalid GOOGLE_SERVICE_ACCOUNT_JSON");
+            }
+            return parsed;
+        } catch (err) {
+            // Wrangler secrets are sometimes pasted with literal newlines inside
+            // the quoted `private_key` field, which makes the JSON invalid.
+            // As a fallback, extract the fields with a tolerant regex-based parse.
+            const clientEmailMatch = jsonRaw.match(/"client_email"\s*:\s*"([^"]+)"/);
+            const tokenUriMatch = jsonRaw.match(/"token_uri"\s*:\s*"([^"]+)"/);
+            const privateKeyMatch = jsonRaw.match(/"private_key"\s*:\s*"([\s\S]*?)"\s*,\s*"/);
+
+            const client_email = clientEmailMatch?.[1];
+            const private_key = privateKeyMatch?.[1];
+            const token_uri = tokenUriMatch?.[1];
+
+            if (client_email && private_key) {
+                return { client_email, private_key, token_uri };
+            }
+
+            const len = jsonRaw.length;
+            const hasClientEmail = /"client_email"\s*:/.test(jsonRaw);
+            const hasPrivateKey = /"private_key"\s*:/.test(jsonRaw);
+            const hasTokenUri = /"token_uri"\s*:/.test(jsonRaw);
+
+            const baseMessage = err instanceof Error ? err.message : "Invalid GOOGLE_SERVICE_ACCOUNT_JSON";
+            throw new Error(
+                `${baseMessage} (len=${len}, has_client_email=${hasClientEmail}, has_private_key=${hasPrivateKey}, has_token_uri=${hasTokenUri})`,
+            );
+        }
     }
 
     const client_email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;

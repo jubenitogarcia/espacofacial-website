@@ -4,6 +4,7 @@ import FloatingContact from "@/components/FloatingContact";
 import UnitsMapSection from "@/components/UnitsMapSection";
 import UnitDoctorsGrid from "@/components/UnitDoctorsGrid";
 import HeroMedia from "@/components/HeroMedia";
+import AboutUsSection from "@/components/AboutUsSection";
 import type { Metadata } from "next";
 
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://espacofacial.com").replace(/\/$/, "");
@@ -33,6 +34,8 @@ export default function HomePage() {
       </section>
 
       <main className="container">
+        <AboutUsSection />
+
         <section id="doutores" className="pageSection" style={{ marginTop: 50 }}>
           <h2 className="sectionTitle">Nossos Doutores</h2>
           <p className="sectionSub">

@@ -46,17 +46,8 @@ function projectLatLngToBrazilSvg(lat: number, lng: number): ProjectedPoint {
     };
 }
 
-const CENTRAL_SITE_URL = "https://espacofacial.com.br";
-const WHATSAPP_DESTINATIONS_BY_SLUG: Record<string, string> = {
-    barrashoppingsul: "https://esfa.co/bss/faleconosco",
-    "novo-hamburgo": "https://esfa.co/nh/faleconosco",
-};
-
 function getUnitDestination(unit: (typeof units)[number]): string {
-    const whatsappDest = WHATSAPP_DESTINATIONS_BY_SLUG[unit.slug];
-    if (whatsappDest) return whatsappDest;
-
-    return CENTRAL_SITE_URL;
+    return `/${unit.slug}`;
 }
 
 function computeStatePoint(stateUnits: (typeof units)[number][]): { x: number; y: number } {
@@ -402,7 +393,7 @@ export default function UnitsMapSection() {
                                                 onClick={() => {
                                                     const dest = getUnitDestination(u);
                                                     trackEvent("unit_map_click", { unitSlug: u.slug, placement: "state_tooltip", destination: dest });
-                                                    window.location.href = dest;
+                                                    window.location.assign(dest);
                                                 }}
                                             >
                                                 {u.name}
@@ -441,7 +432,7 @@ export default function UnitsMapSection() {
                                                     onClick={() => {
                                                         const dest = getUnitDestination(u);
                                                         trackEvent("unit_map_click", { unitSlug: u.slug, placement: "state_list", destination: dest });
-                                                        window.location.href = dest;
+                                                        window.location.assign(dest);
                                                     }}
                                                 >
                                                     {u.name}

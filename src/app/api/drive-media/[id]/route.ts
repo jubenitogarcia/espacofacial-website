@@ -1,7 +1,5 @@
 import { driveFetchFileMedia } from "@/lib/googleDrive";
 
-export const runtime = "edge";
-
 export async function GET(
     req: Request,
     { params }: { params: { id: string } },

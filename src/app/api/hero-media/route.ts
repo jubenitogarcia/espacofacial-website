@@ -1,7 +1,5 @@
 import { driveListFolderFiles } from "@/lib/googleDrive";
 
-export const runtime = "edge";
-
 type HeroMediaItem = {
     type: "image" | "video";
     src: string;

@@ -1,6 +1,6 @@
 const DESTINATIONS: Record<string, string> = {
-    bss: "https://api.whatsapp.com/message/MT7UGL6U6KYWA1?autoload=1&app_absent=0",
-    nh: "https://api.whatsapp.com/message/5ZD2K6FMTDVSC1?autoload=1&app_absent=0",
+    bss: "https://api.whatsapp.com/send?phone=5551980882293&text=Quero%20agendar%20um%20hor%C3%A1rio%20na%20Espa%C3%A7o%20Facial%21%20%F0%9F%93%85",
+    nh: "https://api.whatsapp.com/send?phone=5551995811008&text=Quero%20agendar%20um%20hor%C3%A1rio%20na%20Espa%C3%A7o%20Facial%21%20%F0%9F%93%85",
 };
 
 const UNIT_TO_SIGLA: Record<string, keyof typeof DESTINATIONS> = {

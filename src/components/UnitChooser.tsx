@@ -31,7 +31,7 @@ export default function UnitChooser() {
         return () => document.removeEventListener("click", onDocClick);
     }, []);
 
-    const label = unit?.name ? unit.name : "Selecione Unidade";
+    const label = unit?.name ? unit.name : "Selecione a unidade";
 
     return (
         <div className="unitChooser" ref={wrapRef}>
