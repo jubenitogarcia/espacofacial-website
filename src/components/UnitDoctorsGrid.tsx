@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useCurrentUnit } from "@/hooks/useCurrentUnit";
-import { trackEvent } from "@/lib/analytics";
+import { trackDoctorInstagramClick, trackDoctorWhatsappClick } from "@/lib/leadTracking";
 
 type TeamMember = {
     name: string;
@@ -115,6 +115,7 @@ export default function UnitDoctorsGrid() {
                 const href = d.instagramUrl;
                 const selectedSigla = unitSiglaFromSlug(unit?.slug);
                 const selectedCode = selectedSigla === "bss" ? "BSS" : selectedSigla === "nh" ? "NH" : null;
+                const waHref = handle && selectedSigla ? whatsappUrl(selectedSigla, handle) : null;
 
                 return (
                     <div
@@ -122,7 +123,7 @@ export default function UnitDoctorsGrid() {
                         className="card"
                         onClick={() => {
                             if (!href) return;
-                            trackEvent("doctor_instagram_click", {
+                            trackDoctorInstagramClick({
                                 unitSlug: unit?.slug ?? null,
                                 doctorName: fullName,
                                 instagramUrl: href,
@@ -153,7 +154,7 @@ export default function UnitDoctorsGrid() {
                                         rel="noreferrer"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            trackEvent("doctor_instagram_click", {
+                                            trackDoctorInstagramClick({
                                                 unitSlug: unit?.slug ?? null,
                                                 doctorName: fullName,
                                                 instagramUrl: href,
@@ -166,19 +167,19 @@ export default function UnitDoctorsGrid() {
                                     </a>
                                 ) : null}
 
-                                {handle && selectedSigla && selectedCode ? (
+                                {waHref && selectedSigla && selectedCode ? (
                                     <a
                                         className="iconBtn"
-                                        href={whatsappUrl(selectedSigla, handle)}
+                                        href={waHref}
                                         target="_blank"
                                         rel="noreferrer"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            trackEvent("doctor_whatsapp_click", {
+                                            trackDoctorWhatsappClick({
                                                 unitSlug: unit?.slug ?? null,
                                                 doctorName: fullName,
                                                 unitSigla: selectedSigla,
-                                                whatsappUrl: whatsappUrl(selectedSigla, handle),
+                                                whatsappUrl: waHref,
                                             });
                                         }}
                                         aria-label={`WhatsApp ${selectedCode}`}

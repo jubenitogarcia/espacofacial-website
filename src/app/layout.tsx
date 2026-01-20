@@ -1,7 +1,9 @@
 import "@/styles/globals.css";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import CookieBanner from "@/components/CookieBanner";
 import Analytics from "@/components/Analytics";
+import CampaignAttribution from "@/components/CampaignAttribution";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://espacofacial.com";
 const buildSha = process.env.NEXT_PUBLIC_BUILD_SHA ?? "";
@@ -9,6 +11,10 @@ const buildTime = process.env.NEXT_PUBLIC_BUILD_TIME ?? "";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
+  robots: {
+    index: false,
+    follow: false,
+  },
   title: {
     default: "Espaço Facial",
     template: "%s | Espaço Facial",
@@ -54,6 +60,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {buildTime ? <meta name="x-app-build-time" content={buildTime} /> : null}
       </head>
       <body>
+        <Suspense fallback={null}>
+          <CampaignAttribution />
+        </Suspense>
         <script
           type="application/ld+json"
           // eslint-disable-next-line react/no-danger

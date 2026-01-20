@@ -1,5 +1,6 @@
 import Link from "next/link";
 import BrandMark from "@/components/BrandMark";
+import BrandLogo from "@/components/BrandLogo";
 
 type Props = {
     href?: string;
@@ -16,16 +17,18 @@ export default function Brand({
 }: Props) {
     return (
         <Link className={`brand ${className}`.trim()} href={href} aria-label="Espaço Facial - Página inicial">
-            <BrandMark className="brandMark" />
-            {variant === "mark" ? null : (
-                <span className="brandText" data-variant={variant}>
-                    <span className="brandTextLine">
-                        <span className="brandTextEspaco">Espaço</span>
-                        <span className="brandTextFacial">Facial</span>
-                    </span>
-                    {showTagline ? <span className="brandTagline">Harmonização facial</span> : null}
-                </span>
-            )}
+            {variant === "mark" ? <BrandMark className="brandMark" /> : null}
+
+            {variant === "full" ? <BrandLogo className="brandLogo" /> : null}
+
+            {variant === "auto" ? (
+                <>
+                    <BrandMark className="brandMark brandMarkAuto" />
+                    <BrandLogo className="brandLogo brandLogoAuto" />
+                </>
+            ) : null}
+
+            {showTagline ? <span className="srOnly">Harmonização facial</span> : null}
         </Link>
     );
 }

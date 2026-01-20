@@ -22,6 +22,11 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   return {
     title,
     description,
+    robots: {
+      index: false,
+      follow: false,
+      nocache: true,
+    },
     alternates: { canonical },
     openGraph: {
       title: `${doc.name} | Espaço Facial`,

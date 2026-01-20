@@ -192,12 +192,27 @@ button:focus-visible {
   line-height: 1;
 }
 
+.brandLogo {
+  height: 26px;
+  width: auto;
+  display: block;
+  max-width: 260px;
+}
+
 .brandMark {
   height: 22px;
   width: auto;
   aspect-ratio: 484 / 432;
   flex: 0 0 auto;
   color: #5a5a5a;
+  display: block;
+}
+
+.brandMarkAuto {
+  display: none;
+}
+
+.brandLogoAuto {
   display: block;
 }
 
@@ -990,6 +1005,16 @@ video.heroMediaEl {
   height: 26px;
 }
 
+.brand--footer .brandLogo {
+  height: 36px;
+  max-width: min(520px, 100%);
+  color: #fff;
+}
+
+.brand--footer .brandLogo path {
+  fill: currentColor;
+}
+
 .brand--footer .brandTextEspaco {
   color: rgba(255, 255, 255, .70);
 }
@@ -1130,6 +1155,14 @@ video.heroMediaEl {
 
   .brand--header .brandMark {
     height: 24px;
+  }
+
+  .brandLogoAuto {
+    display: none;
+  }
+
+  .brandMarkAuto {
+    display: block;
   }
 
   .heroMedia {

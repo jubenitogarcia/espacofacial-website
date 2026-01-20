@@ -1,7 +1,7 @@
 "use client";
 
 import { useCurrentUnit } from "@/hooks/useCurrentUnit";
-import { trackEvent } from "@/lib/analytics";
+import { trackAgendarClick, trackCtaInstagramClick } from "@/lib/leadTracking";
 
 function instagramIcon() {
   return (
@@ -30,7 +30,7 @@ export default function FloatingContact() {
           rel="noopener noreferrer"
           aria-label="Instagram"
           title="Instagram"
-          onClick={() => trackEvent("cta_instagram_click", { placement: "floating", unitSlug: unit?.slug ?? null })}
+          onClick={() => trackCtaInstagramClick({ placement: "floating", unitSlug: unit?.slug ?? null, instagramUrl: instagram })}
         >
           {instagramIcon()}
         </a>
@@ -42,7 +42,7 @@ export default function FloatingContact() {
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Agendar"
-        onClick={() => trackEvent("cta_agendar_click", { placement: "floating", unitSlug: unit?.slug ?? null })}
+        onClick={() => trackAgendarClick({ placement: "floating", unitSlug: unit?.slug ?? null, whatsappUrl: href })}
       >
         💬 <span>Agendar</span>
       </a>

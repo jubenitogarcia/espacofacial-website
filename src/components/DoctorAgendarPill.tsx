@@ -1,7 +1,7 @@
 "use client";
 
 import { useCurrentUnit } from "@/hooks/useCurrentUnit";
-import { trackEvent } from "@/lib/analytics";
+import { trackAgendarClick } from "@/lib/leadTracking";
 
 export default function DoctorAgendarPill({ doctorName }: { doctorName: string }) {
     const unit = useCurrentUnit();
@@ -15,10 +15,11 @@ export default function DoctorAgendarPill({ doctorName }: { doctorName: string }
             target="_blank"
             rel="noopener noreferrer"
             onClick={() =>
-                trackEvent("cta_agendar_click", {
+                trackAgendarClick({
                     placement: "doctor",
                     doctorName,
                     unitSlug: unit?.slug ?? null,
+                    whatsappUrl: href,
                 })
             }
         >

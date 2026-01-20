@@ -5,6 +5,7 @@ import { useCurrentUnit } from "@/hooks/useCurrentUnit";
 import type { Unit } from "@/data/units";
 import Image from "next/image";
 import { trackEvent } from "@/lib/analytics";
+import { trackAgendarClick } from "@/lib/leadTracking";
 
 type PlaceDetailsPayload = {
     available: boolean;
@@ -477,7 +478,13 @@ export default function AboutUsSection() {
                                         href={agendarUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        onClick={() => trackEvent("cta_agendar_click", { placement: "about", unitSlug: unit?.slug ?? null })}
+                                        onClick={() =>
+                                            trackAgendarClick({
+                                                placement: "about",
+                                                unitSlug: unit?.slug ?? null,
+                                                whatsappUrl: agendarUrl,
+                                            })
+                                        }
                                     >
                                         Agendar
                                     </a>

@@ -12,6 +12,10 @@ const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://espacofacial.com")
 export const metadata: Metadata = {
   title: "Espaço Facial",
   description: "Harmonização facial e corporal. Selecione sua unidade e agende.",
+  robots: {
+    index: true,
+    follow: true,
+  },
   alternates: { canonical: `${siteUrl}/` },
   openGraph: {
     title: "Espaço Facial",

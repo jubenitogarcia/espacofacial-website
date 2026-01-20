@@ -1,5 +1,4 @@
 import type { MetadataRoute } from "next";
-import { doctors } from "@/data/doctors";
 
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://espacofacial.com").replace(/\/$/, "");
 
@@ -8,12 +7,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
     const staticRoutes: MetadataRoute.Sitemap = [
         { url: `${siteUrl}/`, lastModified: now },
+        { url: `${siteUrl}/novohamburgo`, lastModified: now },
+        { url: `${siteUrl}/barrashoppingsul`, lastModified: now },
     ];
 
-    const doctorRoutes: MetadataRoute.Sitemap = doctors.map((d) => ({
-        url: `${siteUrl}/doutores/${d.slug}`,
-        lastModified: now,
-    }));
-
-    return [...staticRoutes, ...doctorRoutes];
+    return staticRoutes;
 }

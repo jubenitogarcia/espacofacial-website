@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCurrentUnit } from "@/hooks/useCurrentUnit";
 import { units } from "@/data/units";
-import { trackEvent } from "@/lib/analytics";
+import { trackHeaderInstagramClick, trackHeaderInstagramOpen } from "@/lib/leadTracking";
 
 const ALLOWED_UNIT_SLUGS = ["barrashoppingsul", "novo-hamburgo"] as const;
 
@@ -55,13 +55,13 @@ export default function HeaderInstagram() {
                 type="button"
                 onClick={() => {
                     if (currentInstagram) {
-                        trackEvent("header_instagram_click", { unitSlug: unit?.slug ?? null, mode: "direct" });
+                        trackHeaderInstagramClick({ unitSlug: unit?.slug ?? null, mode: "direct" });
                         window.open(currentInstagram, "_blank", "noopener,noreferrer");
                         return;
                     }
 
                     setOpen((v) => !v);
-                    trackEvent("header_instagram_open", { unitSlug: unit?.slug ?? null, mode: "picker" });
+                    trackHeaderInstagramOpen({ unitSlug: unit?.slug ?? null, mode: "picker" });
                 }}
                 aria-haspopup="menu"
                 aria-expanded={open}
@@ -86,7 +86,7 @@ export default function HeaderInstagram() {
                                     e.preventDefault();
                                     return;
                                 }
-                                trackEvent("header_instagram_click", { unitSlug: u.slug, mode: "picker" });
+                                trackHeaderInstagramClick({ unitSlug: u.slug, mode: "picker" });
                                 setOpen(false);
                             }}
                             style={{ display: "block" }}

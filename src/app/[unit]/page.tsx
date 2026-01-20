@@ -24,32 +24,68 @@ function resolveUnitFromParam(param: string) {
     return units.find((u) => normalizeSlug(u.slug) === normalizedParam) ?? null;
 }
 
+function canonicalUnitPath(unitSlug: string): string {
+    // Canonicalize Novo Hamburgo without hyphen as requested.
+    if (normalizeSlug(unitSlug) === "novohamburgo") return "novohamburgo";
+    return unitSlug;
+}
+
+function isIndexableUnitPath(path: string): boolean {
+    const normalized = normalizeSlug(path);
+    return normalized === "novohamburgo" || normalized === "barrashoppingsul";
+}
+
 export function generateMetadata({ params }: { params: { unit: string } }): Metadata {
     const unit = resolveUnitFromParam(params.unit);
     if (!unit) {
         return {
             title: "Espaço Facial",
+            robots: { index: false, follow: false },
             alternates: { canonical: `${siteUrl}/` },
         };
     }
 
+    const canonicalPath = canonicalUnitPath(unit.slug);
+    const canonicalUrl = `${siteUrl}/${canonicalPath}`;
+
     return {
         title: `Espaço Facial — ${unit.name}`,
         description: "Harmonização facial e corporal. Selecione sua unidade e agende.",
-        alternates: { canonical: `${siteUrl}/${params.unit}` },
+        robots: {
+            index: isIndexableUnitPath(canonicalPath),
+            follow: isIndexableUnitPath(canonicalPath),
+        },
+        alternates: { canonical: canonicalUrl },
         openGraph: {
             title: `Espaço Facial — ${unit.name}`,
             description: "Harmonização facial e corporal. Selecione sua unidade e agende.",
-            url: `${siteUrl}/${params.unit}`,
+            url: canonicalUrl,
             type: "website",
         },
     };
 }
 
-export default function UnitHomePage({ params }: { params: { unit: string } }) {
+export default function UnitHomePage({
+    params,
+    searchParams,
+}: {
+    params: { unit: string };
+    searchParams?: Record<string, string | string[] | undefined>;
+}) {
     const unit = resolveUnitFromParam(params.unit);
     if (!unit) {
         redirect("/");
+    }
+
+    const canonicalPath = canonicalUnitPath(unit.slug);
+    if (normalizeSlug(params.unit) !== normalizeSlug(canonicalPath)) {
+        const qs = new URLSearchParams();
+        for (const [key, raw] of Object.entries(searchParams ?? {})) {
+            if (typeof raw === "string") qs.set(key, raw);
+            else if (Array.isArray(raw)) raw.forEach((v) => typeof v === "string" && qs.append(key, v));
+        }
+        const suffix = qs.toString();
+        redirect(suffix ? `/${canonicalPath}?${suffix}` : `/${canonicalPath}`);
     }
 
     return (

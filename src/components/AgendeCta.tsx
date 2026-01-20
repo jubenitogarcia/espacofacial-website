@@ -1,7 +1,7 @@
 "use client";
 
 import { useCurrentUnit } from "@/hooks/useCurrentUnit";
-import { trackEvent } from "@/lib/analytics";
+import { trackAgendarClick } from "@/lib/leadTracking";
 
 export default function AgendeCta() {
     const unit = useCurrentUnit();
@@ -15,7 +15,7 @@ export default function AgendeCta() {
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => trackEvent("cta_agendar_click", { placement: "header", unitSlug: unit?.slug ?? null })}
+                onClick={() => trackAgendarClick({ placement: "header", unitSlug: unit?.slug ?? null, whatsappUrl: href })}
             >
                 AGENDE
             </a>
