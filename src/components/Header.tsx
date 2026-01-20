@@ -11,9 +11,9 @@ export default function Header() {
           <div className="navLeft">
             <Link className="brand" href="/">Espaço Facial</Link>
             <nav className="menu" aria-label="Menu principal">
+              <Link href="/#sobre-nos">Sobre Nós</Link>
               <Link href="/#doutores">Nossos Doutores</Link>
               <Link href="/#unidades">Unidades</Link>
-              <Link href="/#sobre-nos">Sobre Nós</Link>
             </nav>
           </div>
           <div className="headerActions">
