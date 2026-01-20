@@ -19,13 +19,13 @@ export default function Brand({
 }: Props) {
     return (
         <Link className={`brand ${className}`.trim()} href={href} aria-label="Espaço Facial - Página inicial">
-            {variant === "mark" ? <BrandMark className="brandMark" /> : null}
+            {variant === "mark" ? <BrandMark className="brandMark" tone={tone} /> : null}
 
             {variant === "full" ? <BrandLogo className="brandLogo" tone={tone} /> : null}
 
             {variant === "auto" ? (
                 <>
-                    <BrandMark className="brandMark brandMarkAuto" />
+                    <BrandMark className="brandMark brandMarkAuto" tone={tone} />
                     <BrandLogo className="brandLogo brandLogoAuto" tone={tone} />
                 </>
             ) : null}

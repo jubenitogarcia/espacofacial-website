@@ -1,9 +1,49 @@
+"use client";
+
+import { useMemo, useState } from "react";
+
 type Props = {
     className?: string;
     title?: string;
+    tone?: "dark" | "light";
 };
 
-export default function BrandMark({ className, title = "Espaço Facial" }: Props) {
+export default function BrandMark({ className, title = "Espaço Facial", tone = "dark" }: Props) {
+    const candidates = useMemo(() => {
+        if (tone === "light") {
+            return ["/mark-white.png", "/mark.png"] as const;
+        }
+
+        return ["/mark.png"] as const;
+    }, [tone]);
+
+    const [candidateIndex, setCandidateIndex] = useState(0);
+    const [useInlineSvg, setUseInlineSvg] = useState(false);
+
+    // Cache-busting for edge/CDN deployments (e.g. Cloudflare) that may keep an old asset cached.
+    const src = `${candidates[candidateIndex]}?v=20260120a`;
+    const shouldInvert = tone === "light" && !candidates[candidateIndex].includes("white");
+
+    if (!useInlineSvg) {
+        return (
+            <img
+                src={src}
+                alt={title}
+                className={className}
+                draggable={false}
+                decoding="async"
+                style={shouldInvert ? { filter: "invert(1)" } : undefined}
+                onError={() => {
+                    setCandidateIndex((current) => {
+                        if (current < candidates.length - 1) return current + 1;
+                        setUseInlineSvg(true);
+                        return current;
+                    });
+                }}
+            />
+        );
+    }
+
     return (
         <svg
             xmlns="http://www.w3.org/2000/svg"
