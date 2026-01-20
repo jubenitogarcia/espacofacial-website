@@ -193,10 +193,11 @@ button:focus-visible {
 }
 
 .brandMark {
-  width: 30px;
+  width: 30.25px;
   height: 22px;
   flex: 0 0 auto;
   color: #5a5a5a;
+  display: block;
 }
 
 .brandText {
@@ -1115,6 +1116,19 @@ video.heroMediaEl {
 
   .menu {
     display: none
+  }
+
+  .brand--header .brandText {
+    display: none;
+  }
+
+  .brand--header {
+    gap: 8px;
+  }
+
+  .brand--header .brandMark {
+    height: 24px;
+    width: 33px;
   }
 
   .heroMedia {

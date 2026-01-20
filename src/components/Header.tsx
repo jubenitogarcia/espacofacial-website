@@ -10,7 +10,7 @@ export default function Header() {
       <div className="container">
         <div className="nav">
           <div className="navLeft">
-            <Brand />
+            <Brand className="brand--header" />
             <nav className="menu" aria-label="Menu principal">
               <Link href="/#sobre-nos">Sobre Nós</Link>
               <Link href="/#doutores">Nossos Doutores</Link>
