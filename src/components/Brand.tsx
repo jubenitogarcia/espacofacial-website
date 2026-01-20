@@ -7,6 +7,7 @@ type Props = {
     className?: string;
     showTagline?: boolean;
     variant?: "auto" | "full" | "mark";
+    tone?: "dark" | "light";
 };
 
 export default function Brand({
@@ -14,17 +15,18 @@ export default function Brand({
     className = "",
     showTagline = false,
     variant = "auto",
+    tone = "dark",
 }: Props) {
     return (
         <Link className={`brand ${className}`.trim()} href={href} aria-label="Espaço Facial - Página inicial">
             {variant === "mark" ? <BrandMark className="brandMark" /> : null}
 
-            {variant === "full" ? <BrandLogo className="brandLogo" /> : null}
+            {variant === "full" ? <BrandLogo className="brandLogo" tone={tone} /> : null}
 
             {variant === "auto" ? (
                 <>
                     <BrandMark className="brandMark brandMarkAuto" />
-                    <BrandLogo className="brandLogo brandLogoAuto" />
+                    <BrandLogo className="brandLogo brandLogoAuto" tone={tone} />
                 </>
             ) : null}
 

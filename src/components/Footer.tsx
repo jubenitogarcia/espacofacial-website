@@ -7,7 +7,7 @@ export default function Footer() {
       <div className="container">
         <div className="footerInner">
           <div className="footerBrand">
-            <Brand className="brand--footer" variant="full" showTagline />
+            <Brand className="brand--footer" variant="full" showTagline tone="light" />
           </div>
 
           <div className="footerMeta">
