@@ -7,7 +7,7 @@ export default function BrandLogo({ className, title = "Espaço Facial" }: Props
     return (
         <svg
             xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 1163 656"
+            viewBox="223.5 256.5 716.5 140"
             preserveAspectRatio="xMidYMid meet"
             role="img"
             aria-label={title}

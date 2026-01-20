@@ -212,6 +212,16 @@ button:focus-visible {
   display: none;
 }
 
+/* Header brand: increase logo size on desktop/tablet */
+.brand--header .brandLogo {
+  height: 44px;
+  max-width: 420px;
+}
+
+.brand--header .brandMark {
+  height: 32px;
+}
+
 .brandLogoAuto {
   display: block;
 }
@@ -1002,11 +1012,11 @@ video.heroMediaEl {
 
 .brand--footer .brandMark {
   color: #fff;
-  height: 26px;
+  height: 34px;
 }
 
 .brand--footer .brandLogo {
-  height: 36px;
+  height: 56px;
   max-width: min(520px, 100%);
   color: #fff;
 }
