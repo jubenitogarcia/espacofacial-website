@@ -24,6 +24,22 @@ Deploy do worker de redirects (domínio `esfa.co`):
 npm run deploy:esfa
 ```
 
+## Ver logs (produção)
+
+Tail do Worker principal:
+```bash
+npm run tail
+```
+
+Observações:
+- `--sampling-rate` precisa ser **entre 0 e 1** (ex.: `0.25`). `1` e `1.0` dão erro.
+- Se aparecer `Network connection lost`, normalmente é apenas a conexão do tail que caiu — rode novamente.
+
+Tail em JSON (útil para filtrar/processar):
+```bash
+npm run tail:json
+```
+
 Se o site “não atualizou” após deploy:
 - Faça um hard reload no navegador (ou teste em aba anônima).
 - Verifique no DevTools → Network → documento `/` se o header `cf-cache-status` está `HIT`.

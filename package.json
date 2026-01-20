@@ -10,6 +10,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "next lint",
     "smoke": "node scripts/smoke.mjs",
+    "tail": "wrangler tail espacofacial-site --format pretty --sampling-rate 0.25",
+    "tail:json": "wrangler tail espacofacial-site --format json",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "deploy:esfa": "wrangler deploy -c workers/esfa-redirector/wrangler.toml"
