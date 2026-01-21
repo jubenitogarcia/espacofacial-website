@@ -30,7 +30,7 @@
     "eslint": "8.57.0",
     "eslint-config-next": "14.2.35",
     "typescript": "5.5.4",
-    "wrangler": "^4.58.0"
+    "wrangler": "^4.59.3"
   },
   "overrides": {
     "@next/eslint-plugin-next": {
