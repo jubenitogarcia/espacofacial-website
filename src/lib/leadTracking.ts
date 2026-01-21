@@ -40,6 +40,24 @@ export function trackAgendarClick(params: {
     trackEvent("cta_agendar_click", payload);
 }
 
+export function trackBookingStart(params: {
+    placement: LeadPlacement;
+    unitSlug: string | null;
+    doctorName?: string;
+    bookingUrl?: string;
+}) {
+    const payload: AnalyticsEventParams = withCampaign({
+        placement: params.placement,
+        unitSlug: params.unitSlug,
+        destination: "booking",
+    });
+
+    if (params.doctorName) payload.doctorName = params.doctorName;
+    if (params.bookingUrl) payload.bookingUrl = params.bookingUrl;
+
+    trackEvent("cta_booking_start", payload);
+}
+
 export function trackDoctorWhatsappClick(params: {
     unitSlug: string | null;
     doctorName: string;

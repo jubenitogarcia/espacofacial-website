@@ -13,6 +13,21 @@ export function middleware(req: NextRequest) {
     const host = req.headers.get("host") ?? "";
     const url = req.nextUrl.clone();
 
+    if (!isPublicAsset(url.pathname)) {
+        const normalized = (url.pathname.replace(/\/+$/, "") || "/").toLowerCase();
+
+        // Legacy internal admin UI/API paths were removed; keep explicit 404s for safety.
+        if (normalized === "/equipe/agendamentos" || normalized.startsWith("/api/booking/admin/")) {
+            return new NextResponse("Not Found", {
+                status: 404,
+                headers: {
+                    "content-type": "text/plain; charset=utf-8",
+                    "cache-control": "no-store",
+                },
+            });
+        }
+    }
+
     // esfa.co short links -> main site routes
     if (!isPublicAsset(url.pathname) && (host === "esfa.co" || host === "www.esfa.co")) {
         const pathname = url.pathname.replace(/\/+$/, "") || "/";
@@ -149,7 +164,6 @@ export function middleware(req: NextRequest) {
             "/sobre": "#doutores",
             "/unidades": "#unidades",
             "/doutores": "#doutores",
-            "/agendamento": "#unidades",
         };
 
         if (simpleRedirects[pathname]) {

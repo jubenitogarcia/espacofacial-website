@@ -1,0 +1,150 @@
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+
+type D1PreparedStatement = {
+    bind: (...values: unknown[]) => D1PreparedStatement;
+    first: <T = unknown>() => Promise<T | null>;
+    all: <T = unknown>() => Promise<{ results: T[] }>;
+    run: () => Promise<{ success: boolean; error?: string } | unknown>;
+};
+
+type D1DatabaseLike = {
+    prepare: (query: string) => D1PreparedStatement;
+    exec: (query: string) => Promise<unknown>;
+};
+
+export type BookingStatus = "pending" | "confirmed" | "declined" | "expired" | "needs_approval";
+
+export type BookingRequestRow = {
+    id: string;
+    unit_slug: string;
+    doctor_slug: string;
+    service_id: string;
+    start_at_ms: number;
+    end_at_ms: number;
+    status: BookingStatus;
+    patient_name: string;
+    whatsapp: string;
+    notes: string | null;
+    created_at_ms: number;
+    confirm_by_ms: number;
+    decided_at_ms: number | null;
+    decided_by: string | null;
+    decision_note: string | null;
+    override_conflict: number;
+};
+
+type CloudflareEnv = {
+    BOOKING_DB?: D1DatabaseLike;
+};
+
+function getDbOrThrow(): D1DatabaseLike {
+    const { env } = getCloudflareContext();
+    const typedEnv = env as unknown as CloudflareEnv;
+    const db = typedEnv.BOOKING_DB;
+    if (!db) {
+        throw new Error("BOOKING_DB_not_configured");
+    }
+    return db;
+}
+
+let ensured = false;
+
+export async function getBookingDb(): Promise<D1DatabaseLike> {
+    const db = getDbOrThrow();
+    if (!ensured) {
+        await ensureSchema(db);
+        ensured = true;
+    }
+    return db;
+}
+
+async function ensureSchema(db: D1DatabaseLike) {
+    // Keep this idempotent so local preview works even before migrations.
+    // Avoid multi-statement `exec` for maximum compatibility across runtimes.
+    await db
+        .prepare(
+            `CREATE TABLE IF NOT EXISTS booking_requests (
+                id TEXT PRIMARY KEY,
+                unit_slug TEXT NOT NULL,
+                doctor_slug TEXT NOT NULL,
+                service_id TEXT NOT NULL,
+                start_at_ms INTEGER NOT NULL,
+                end_at_ms INTEGER NOT NULL,
+                status TEXT NOT NULL,
+                patient_name TEXT NOT NULL,
+                whatsapp TEXT NOT NULL,
+                notes TEXT,
+                created_at_ms INTEGER NOT NULL,
+                confirm_by_ms INTEGER NOT NULL,
+                decided_at_ms INTEGER,
+                decided_by TEXT,
+                decision_note TEXT,
+                override_conflict INTEGER NOT NULL DEFAULT 0
+            );`,
+        )
+        .run();
+
+    await db
+        .prepare(
+            "CREATE INDEX IF NOT EXISTS idx_booking_unit_doctor_start ON booking_requests(unit_slug, doctor_slug, start_at_ms);",
+        )
+        .run();
+
+    await db
+        .prepare(
+            "CREATE INDEX IF NOT EXISTS idx_booking_status_confirmby ON booking_requests(status, confirm_by_ms);",
+        )
+        .run();
+}
+
+export function nowMs(): number {
+    return Date.now();
+}
+
+export function addMinutes(ms: number, minutes: number): number {
+    return ms + minutes * 60_000;
+}
+
+export function clampText(value: string, max: number): string {
+    const trimmed = (value ?? "").trim();
+    if (trimmed.length <= max) return trimmed;
+    return trimmed.slice(0, max);
+}
+
+export function sanitizeOneLine(value: string): string {
+    return (value ?? "").replace(/\s+/g, " ").trim();
+}
+
+export function normalizePhone(raw: string): string {
+    const digits = (raw ?? "").replace(/\D/g, "");
+    // Expect at least country+area+number (e.g. 55 + 11 + 9xxxx xxxx => 12+ digits)
+    if (digits.length < 10) return "";
+    return "+" + digits;
+}
+
+export function slugify(value: string): string {
+    const v = (value ?? "").trim().toLowerCase();
+    if (!v) return "";
+    return v
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 80);
+}
+
+export function toSaoPauloIso(date: string, time: string): string {
+    // We intentionally avoid asking the user for timezone.
+    // Brazil is currently -03:00 (no DST). We store explicit offset.
+    const d = (date ?? "").trim();
+    const t = (time ?? "").trim();
+    return `${d}T${t}:00-03:00`;
+}
+
+export function isValidDateKey(date: string): boolean {
+    return /^\d{4}-\d{2}-\d{2}$/.test((date ?? "").trim());
+}
+
+export function isValidTimeKey(time: string): boolean {
+    return /^\d{2}:\d{2}$/.test((time ?? "").trim());
+}

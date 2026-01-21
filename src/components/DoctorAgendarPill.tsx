@@ -1,29 +1,20 @@
 "use client";
 
+import Link from "next/link";
 import { useCurrentUnit } from "@/hooks/useCurrentUnit";
-import { trackAgendarClick } from "@/lib/leadTracking";
+import { trackBookingStart } from "@/lib/leadTracking";
 
 export default function DoctorAgendarPill({ doctorName }: { doctorName: string }) {
     const unit = useCurrentUnit();
-    const href = unit?.contactUrl;
-    if (!href) return null;
+    const bookingHref = unit?.slug ? `/agendamento?unit=${encodeURIComponent(unit.slug)}` : "/agendamento";
 
     return (
-        <a
+        <Link
             className="pill"
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() =>
-                trackAgendarClick({
-                    placement: "doctor",
-                    doctorName,
-                    unitSlug: unit?.slug ?? null,
-                    whatsappUrl: href,
-                })
-            }
+            href={bookingHref}
+            onClick={() => trackBookingStart({ placement: "doctor", doctorName, unitSlug: unit?.slug ?? null, bookingUrl: bookingHref })}
         >
             AGENDAR
-        </a>
+        </Link>
     );
 }

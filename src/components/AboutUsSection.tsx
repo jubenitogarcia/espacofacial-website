@@ -1,11 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useCurrentUnit } from "@/hooks/useCurrentUnit";
 import type { Unit } from "@/data/units";
 import Image from "next/image";
 import { trackEvent } from "@/lib/analytics";
-import { trackAgendarClick } from "@/lib/leadTracking";
+import { trackBookingStart } from "@/lib/leadTracking";
 
 type PlaceDetailsPayload = {
     available: boolean;
@@ -191,6 +192,7 @@ export default function AboutUsSection() {
 
     const selectedPlaceId = (data?.placeId ?? unit?.placeId ?? null)?.toString().trim() || null;
     const agendarUrl = hasSelectedUnit ? unit?.contactUrl || null : null;
+    const bookingHref = hasSelectedUnit && unit?.slug ? `/agendamento?unit=${encodeURIComponent(unit.slug)}` : "/agendamento";
     const reviewUrl = hasSelectedUnit && selectedPlaceId ? `https://search.google.com/local/writereview?placeid=${encodeURIComponent(selectedPlaceId)}` : null;
 
     const gbpLocation = hasSelectedUnit ? (unit?.gbpLocation ?? "").trim() : "";
@@ -473,21 +475,19 @@ export default function AboutUsSection() {
 
                             <div className="aboutHeaderActions" aria-label="Ações">
                                 {agendarUrl ? (
-                                    <a
+                                    <Link
                                         className="aboutBtnPrimary"
-                                        href={agendarUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
+                                        href={bookingHref}
                                         onClick={() =>
-                                            trackAgendarClick({
+                                            trackBookingStart({
                                                 placement: "about",
                                                 unitSlug: unit?.slug ?? null,
-                                                whatsappUrl: agendarUrl,
+                                                bookingUrl: bookingHref,
                                             })
                                         }
                                     >
                                         Agendar
-                                    </a>
+                                    </Link>
                                 ) : null}
 
                                 {reviewUrl ? (

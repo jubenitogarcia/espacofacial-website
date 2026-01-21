@@ -1,7 +1,7 @@
 "use client";
 
 import { useCurrentUnit } from "@/hooks/useCurrentUnit";
-import { trackAgendarClick, trackCtaInstagramClick } from "@/lib/leadTracking";
+import { trackBookingStart, trackCtaInstagramClick } from "@/lib/leadTracking";
 
 function instagramIcon() {
   return (
@@ -18,7 +18,9 @@ export default function FloatingContact() {
   const unit = useCurrentUnit();
   const href = unit?.contactUrl;
   const instagram = unit?.instagram;
-  if (!href) return null;
+  const bookingHref = unit?.slug ? `/agendamento?unit=${encodeURIComponent(unit.slug)}` : "/agendamento";
+
+  if (!href && !instagram) return null;
 
   return (
     <div className="fabDock" aria-label="Ações rápidas">
@@ -38,11 +40,9 @@ export default function FloatingContact() {
 
       <a
         className="fab"
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
+        href={bookingHref}
         aria-label="Agendar"
-        onClick={() => trackAgendarClick({ placement: "floating", unitSlug: unit?.slug ?? null, whatsappUrl: href })}
+        onClick={() => trackBookingStart({ placement: "floating", unitSlug: unit?.slug ?? null, bookingUrl: bookingHref })}
       >
         💬 <span>Agendar</span>
       </a>

@@ -1,26 +1,21 @@
 "use client";
 
+import Link from "next/link";
 import { useCurrentUnit } from "@/hooks/useCurrentUnit";
-import { trackAgendarClick } from "@/lib/leadTracking";
+import { trackBookingStart } from "@/lib/leadTracking";
 
 export default function AgendeCta() {
     const unit = useCurrentUnit();
 
-    const href = unit?.contactUrl ?? null;
+    const bookingHref = unit?.slug ? `/agendamento?unit=${encodeURIComponent(unit.slug)}` : "/agendamento";
 
-    if (href) {
-        return (
-            <a
-                className="cta"
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => trackAgendarClick({ placement: "header", unitSlug: unit?.slug ?? null, whatsappUrl: href })}
-            >
-                AGENDE
-            </a>
-        );
-    }
-
-    return null;
+    return (
+        <Link
+            className="cta"
+            href={bookingHref}
+            onClick={() => trackBookingStart({ placement: "header", unitSlug: unit?.slug ?? null, bookingUrl: bookingHref })}
+        >
+            AGENDE
+        </Link>
+    );
 }

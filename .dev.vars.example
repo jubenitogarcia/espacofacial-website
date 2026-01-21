@@ -1,0 +1,8 @@
+# Copie para .dev.vars (não commitar) para usar em preview local via Wrangler/OpenNext
+
+# Opcional: links assinados para confirmar/recusar via WhatsApp/webhook (recomendado)
+BOOKING_DECISION_SECRET=
+
+# Opcional: webhook para automação (ex.: seu serviço que envia WhatsApp)
+BOOKING_WEBHOOK_URL=
+BOOKING_WEBHOOK_SECRET=

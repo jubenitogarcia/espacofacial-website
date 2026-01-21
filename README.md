@@ -19,6 +19,14 @@ Deploy do site (Next.js + App Router):
 npm run deploy
 ```
 
+## Agendamento (MVP) — Cloudflare D1
+
+O fluxo de agendamento em `/agendamento` persiste pedidos no **Cloudflare D1** via binding `BOOKING_DB`.
+
+Setup (produção/preview):
+- Veja o guia: `docs/booking/SETUP_CLOUDFLARE_D1.md`
+- Arquivo de exemplo para preview local: `.dev.vars.example`
+
 Deploy do worker de redirects (domínio `esfa.co`):
 ```bash
 npm run deploy:esfa
