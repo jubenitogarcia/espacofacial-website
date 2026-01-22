@@ -15,6 +15,7 @@ type TooltipState =
         uf: string;
         left: number;
         top: number;
+        side: "left" | "right";
     }
     | null;
 
@@ -195,6 +196,7 @@ export default function UnitsMapSection() {
     const [openState, setOpenState] = useState<TooltipState>(null);
     const [hoverUf, setHoverUf] = useState<string | null>(null);
     const hoverClearTimerRef = useRef<number | null>(null);
+    const tooltipHoverRef = useRef(false);
 
     const [pointsByUf, setPointsByUf] = useState<Record<string, ProjectedPoint>>({});
 
@@ -369,7 +371,8 @@ export default function UnitsMapSection() {
         const px = nx * svgRect.width + (svgRect.left - wrapRect.left);
         const py = ny * svgRect.height + (svgRect.top - wrapRect.top);
 
-        setOpenState({ uf, left: px, top: py });
+        const side: "left" | "right" = px < wrapRect.width * 0.58 ? "right" : "left";
+        setOpenState({ uf, left: px, top: py, side });
     }
 
     const activeGroup = openState ? stateGroups.find((g) => g.uf === openState.uf) ?? null : null;
@@ -405,10 +408,11 @@ export default function UnitsMapSection() {
                                         active={isPinActive}
                                         onEnter={() => openTooltipAt(g.uf, p.x, p.y)}
                                         onLeave={() => {
-                                            // allow moving into tooltip without immediate close
-                                            setTimeout(() => {
-                                                setOpenState((s) => (s && s.uf === g.uf ? s : s));
-                                            }, 0);
+                                            // close shortly after leaving the pin (unless the tooltip is hovered)
+                                            window.setTimeout(() => {
+                                                if (tooltipHoverRef.current) return;
+                                                setOpenState((s) => (s && s.uf === g.uf ? null : s));
+                                            }, 80);
                                         }}
                                         onToggle={() => {
                                             if (openState?.uf === g.uf) {
@@ -429,9 +433,15 @@ export default function UnitsMapSection() {
 
                         {openState && activeGroup ? (
                             <div
-                                className="brTooltip"
+                                className={`brTooltip brTooltip--${openState.side}`}
                                 style={{ left: openState.left, top: openState.top }}
-                                onMouseLeave={() => setOpenState(null)}
+                                onMouseEnter={() => {
+                                    tooltipHoverRef.current = true;
+                                }}
+                                onMouseLeave={() => {
+                                    tooltipHoverRef.current = false;
+                                    setOpenState(null);
+                                }}
                             >
                                 <div className="brTooltipTitleRow">
                                     <div className="brTooltipTitleMain">{activeTitle}</div>

@@ -84,6 +84,45 @@ function resolveGbpLocation(input: string): string {
     return `accounts/${accountId}/${raw}`;
 }
 
+function parseLocationId(input: string): string | null {
+    const raw = (input ?? "").trim();
+    if (!raw) return null;
+    if (raw.startsWith("accounts/")) return null;
+    if (raw.startsWith("locations/")) {
+        const id = raw.slice("locations/".length).trim();
+        return id || null;
+    }
+    if (/^\d+$/.test(raw)) return raw;
+    return null;
+}
+
+async function listAccountIds(accessToken: string): Promise<string[]> {
+    const res = await fetch("https://mybusiness.googleapis.com/v4/accounts", {
+        headers: { authorization: `Bearer ${accessToken}` },
+    });
+    if (!res.ok) return [];
+    const json = (await res.json()) as { accounts?: Array<{ name?: string }> };
+    const ids = (json.accounts ?? [])
+        .map((a) => (a?.name ?? "").trim())
+        .filter((name) => name.startsWith("accounts/"))
+        .map((name) => name.slice("accounts/".length))
+        .map((id) => id.trim())
+        .filter(Boolean);
+    return Array.from(new Set(ids)).slice(0, 20);
+}
+
+async function discoverLocationResourceName(accessToken: string, locationId: string): Promise<string> {
+    const accountIds = await listAccountIds(accessToken);
+    for (const accountId of accountIds) {
+        const candidate = `accounts/${accountId}/locations/${locationId}`;
+        const probe = await fetch(`https://mybusiness.googleapis.com/v4/${candidate}`, {
+            headers: { authorization: `Bearer ${accessToken}` },
+        });
+        if (probe.ok) return candidate;
+    }
+    throw new Error("location_not_found");
+}
+
 function parseStarRating(value: unknown): number | null {
     if (typeof value !== "string") return null;
     switch (value) {
@@ -129,46 +168,67 @@ export async function GET(req: Request) {
         return NextResponse.json({ available: false, error: "missing_location" }, { status: 400 });
     }
 
-    let location: string;
-    try {
-        location = resolveGbpLocation(locationParam);
-    } catch (e) {
-        const msg = e instanceof Error ? e.message : "exception";
-        const status = msg === "missing_gbp_account_id" ? 503 : 400;
-        return NextResponse.json({ available: false, error: msg }, { status, headers: { "x-gbp": "bad_location" } });
-    }
-
-    const cache = getCloudflareCache();
-    const cacheBucket = Math.floor(Date.now() / (1000 * 60 * 10)); // 10 minutes
-    const cacheKey = new Request(
-        `https://espacofacial.com/__cache/gbp/reviews?v=1&b=${cacheBucket}&location=${encodeURIComponent(location)}&pageToken=${encodeURIComponent(
-            pageToken,
-        )}&pageSize=${pageSize}`,
-    );
-
-    if (cache) {
-        const hit = await cache.match(cacheKey);
-        if (hit) {
-            const payload = await hit.json().catch(() => null);
-            if (payload) {
-                return NextResponse.json(payload, {
-                    status: 200,
-                    headers: { "cache-control": "public, max-age=60, s-maxage=600", "x-gbp": "cache" },
-                });
-            }
-        }
-    }
+    const locationId = parseLocationId(locationParam);
 
     try {
         const accessToken = await getAccessToken();
+
+        let location: string;
+        try {
+            location = resolveGbpLocation(locationParam);
+        } catch (e) {
+            const msg = e instanceof Error ? e.message : "exception";
+            if (msg === "missing_gbp_account_id" && locationId) {
+                location = await discoverLocationResourceName(accessToken, locationId);
+            } else {
+                const status = msg === "missing_gbp_account_id" ? 503 : 400;
+                return NextResponse.json({ available: false, error: msg }, { status, headers: { "x-gbp": "bad_location" } });
+            }
+        }
+
+        const cache = getCloudflareCache();
+        const cacheBucket = Math.floor(Date.now() / (1000 * 60 * 10)); // 10 minutes
+        const cacheKey = new Request(
+            `https://espacofacial.com/__cache/gbp/reviews?v=1&b=${cacheBucket}&location=${encodeURIComponent(location)}&pageToken=${encodeURIComponent(
+                pageToken,
+            )}&pageSize=${pageSize}`,
+        );
+
+        if (cache) {
+            const hit = await cache.match(cacheKey);
+            if (hit) {
+                const payload = await hit.json().catch(() => null);
+                if (payload) {
+                    return NextResponse.json(payload, {
+                        status: 200,
+                        headers: { "cache-control": "public, max-age=60, s-maxage=600", "x-gbp": "cache" },
+                    });
+                }
+            }
+        }
 
         const url = new URL(`https://mybusiness.googleapis.com/v4/${location}/reviews`);
         url.searchParams.set("pageSize", String(pageSize));
         if (pageToken) url.searchParams.set("pageToken", pageToken);
 
-        const res = await fetch(url.toString(), {
+        let res = await fetch(url.toString(), {
             headers: { authorization: `Bearer ${accessToken}` },
         });
+
+        if (!res.ok && res.status === 404 && locationId && !locationParam.startsWith("accounts/")) {
+            try {
+                const discovered = await discoverLocationResourceName(accessToken, locationId);
+                if (discovered && discovered !== location) {
+                    const retryUrl = new URL(`https://mybusiness.googleapis.com/v4/${discovered}/reviews`);
+                    retryUrl.searchParams.set("pageSize", String(pageSize));
+                    if (pageToken) retryUrl.searchParams.set("pageToken", pageToken);
+                    location = discovered;
+                    res = await fetch(retryUrl.toString(), { headers: { authorization: `Bearer ${accessToken}` } });
+                }
+            } catch {
+                // ignore discovery errors; fall through to upstream error handling
+            }
+        }
 
         if (!res.ok) {
             const upstreamBody = await res.text().catch(() => "");

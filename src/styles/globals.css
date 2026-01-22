@@ -1123,17 +1123,43 @@ video.heroMediaEl {
 
 .brTooltip {
   position: absolute;
-  transform: translate(-50%, -100%);
-  margin-top: -10px;
-  width: min(320px, calc(100vw - 60px));
-  max-height: min(380px, calc(100vh - 180px));
+  width: min(260px, calc(100vw - 60px));
+  max-height: min(300px, calc(100vh - 180px));
   background: rgba(255, 255, 255, .96);
   border: 1px solid rgba(0, 0, 0, .12);
-  border-radius: 16px;
+  border-radius: 14px;
   box-shadow: var(--shadow);
-  padding: 12px;
+  padding: 10px;
   z-index: 5;
   overflow: hidden;
+}
+
+.brTooltip--right {
+  transform: translate(14px, calc(-100% - 14px));
+}
+
+.brTooltip--left {
+  transform: translate(calc(-100% - 14px), calc(-100% - 14px));
+}
+
+.brTooltip::before {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: rgba(255, 255, 255, .96);
+  border-right: 1px solid rgba(0, 0, 0, .12);
+  border-bottom: 1px solid rgba(0, 0, 0, .12);
+  transform: rotate(45deg);
+  bottom: -6px;
+}
+
+.brTooltip--right::before {
+  left: 14px;
+}
+
+.brTooltip--left::before {
+  right: 14px;
 }
 
 .brTooltipTitleRow {
@@ -1141,24 +1167,24 @@ video.heroMediaEl {
   align-items: baseline;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .brTooltipTitleMain {
   font-weight: 900;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .brTooltipTitleSub {
   font-weight: 800;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--muted);
   white-space: nowrap;
 }
 
 .brTooltipList {
   display: grid;
-  gap: 8px;
+  gap: 6px;
   max-height: min(260px, calc(100vh - 260px));
   overflow-y: auto;
   padding-right: 4px;
@@ -1168,12 +1194,12 @@ video.heroMediaEl {
   appearance: none;
   border: 1px solid rgba(0, 0, 0, .10);
   background: #fff;
-  border-radius: 12px;
-  padding: 9px 10px;
+  border-radius: 10px;
+  padding: 8px 9px;
   text-align: left;
   cursor: pointer;
   font-weight: 800;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .brTooltipItem:hover {

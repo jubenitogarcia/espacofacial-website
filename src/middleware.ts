@@ -44,7 +44,7 @@ export function middleware(req: NextRequest) {
         }
     }
 
-    if (!isPublicAsset(url.pathname) && host.startsWith("www.")) {
+    if (!isPublicAsset(url.pathname) && !url.pathname.startsWith("/api/") && host.startsWith("www.")) {
         url.host = host.replace(/^www\./, "");
         return NextResponse.redirect(url, 308);
     }
