@@ -11,7 +11,7 @@ export default function AgendeCta() {
 
     return (
         <Link
-            className="cta"
+            className="cta cta--agende"
             href={bookingHref}
             onClick={() => trackBookingStart({ placement: "header", unitSlug: unit?.slug ?? null, bookingUrl: bookingHref })}
         >

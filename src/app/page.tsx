@@ -42,9 +42,6 @@ export default function HomePage() {
 
         <section id="doutores" className="pageSection" style={{ marginTop: 50 }}>
           <h2 className="sectionTitle">Nossos Doutores</h2>
-          <p className="sectionSub">
-            Selecione uma unidade no cabeçalho para ver a equipe.
-          </p>
           <UnitDoctorsGrid />
         </section>
 

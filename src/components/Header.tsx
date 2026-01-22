@@ -11,12 +11,14 @@ export default function Header() {
         <div className="nav">
           <div className="navLeft">
             <Brand className="brand--header" />
-            <nav className="menu" aria-label="Menu principal">
-              <Link href="/#sobre-nos">Sobre Nós</Link>
-              <Link href="/#doutores">Nossos Doutores</Link>
-              <Link href="/#unidades">Unidades</Link>
-            </nav>
           </div>
+
+          <nav className="menu menu--center" aria-label="Menu principal">
+            <Link href="/#sobre-nos">Sobre Nós</Link>
+            <Link href="/#doutores">Nossos Doutores</Link>
+            <Link href="/#unidades">Unidades</Link>
+          </nav>
+
           <div className="headerActions">
             <UnitChooser />
             <HeaderInstagram />

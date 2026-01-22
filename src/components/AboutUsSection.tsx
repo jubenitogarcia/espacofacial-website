@@ -466,165 +466,9 @@ export default function AboutUsSection() {
                 </div>
             ) : (
                 <div className="aboutGrid">
-                    <div className="aboutMapCard">
-                        <div className="aboutMapHeader">
-                            <div>
-                                <div className="aboutPlaceTitle">{title}</div>
-                                {address ? <div className="aboutPlaceSub">{address}</div> : null}
-                            </div>
-
-                            <div className="aboutHeaderActions" aria-label="Ações">
-                                {agendarUrl ? (
-                                    <Link
-                                        className="aboutBtnPrimary"
-                                        href={bookingHref}
-                                        onClick={() =>
-                                            trackBookingStart({
-                                                placement: "about",
-                                                unitSlug: unit?.slug ?? null,
-                                                bookingUrl: bookingHref,
-                                            })
-                                        }
-                                    >
-                                        Agendar
-                                    </Link>
-                                ) : null}
-
-                                {reviewUrl ? (
-                                    <a
-                                        className="aboutBtnGhost"
-                                        href={reviewUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        onClick={() => trackEvent("cta_review_click", { placement: "about", unitSlug: unit?.slug ?? null, placeId: selectedPlaceId })}
-                                    >
-                                        Fazer review
-                                    </a>
-                                ) : null}
-                            </div>
-                        </div>
-
-                        <iframe
-                            className="aboutMapFrame"
-                            title="Google Maps"
-                            src={embedUrl}
-                            loading="lazy"
-                            referrerPolicy="no-referrer-when-downgrade"
-                        />
-
-                        <div className="aboutRatingRow">
-                            {loading ? (
-                                <div className="aboutMuted">Carregando avaliações…</div>
-                            ) : !hasSelectedUnit ? (
-                                <div className="aboutMuted">Selecione uma unidade para ver avaliações e fotos.</div>
-                            ) : data?.available ? (
-                                <>
-                                    <Stars rating={rating} />
-                                    <div className="aboutRatingText">
-                                        <strong>{clampRating(rating).toFixed(1)}</strong>
-                                        {typeof total === "number" ? <span className="aboutMuted">({total} avaliações)</span> : null}
-                                    </div>
-                                </>
-                            ) : (
-                                <div className="aboutMuted">Avaliações indisponíveis no momento.</div>
-                            )}
-                        </div>
-
-                        {hasSelectedUnit && (data?.available || loading) ? (
-                            <div className="aboutReviewsSection" aria-label="Avaliações">
-                                <div className="aboutControls">
-                                    <div className="aboutPills" aria-label="Filtro por nota">
-                                        <button
-                                            type="button"
-                                            className={ratingFilter === "all" ? "aboutPill active" : "aboutPill"}
-                                            onClick={() => setRatingFilter("all")}
-                                        >
-                                            Todas
-                                        </button>
-                                        {[5, 4, 3, 2, 1].map((n) => (
-                                            <button
-                                                key={n}
-                                                type="button"
-                                                className={ratingFilter === n ? "aboutPill active" : "aboutPill"}
-                                                onClick={() => setRatingFilter(n)}
-                                            >
-                                                {n}★
-                                            </button>
-                                        ))}
-                                    </div>
-
-                                    <div className="aboutControlsRow">
-                                        <label className="aboutToggle">
-                                            <input
-                                                type="checkbox"
-                                                checked={onlyWithText}
-                                                onChange={(e) => setOnlyWithText(e.target.checked)}
-                                            />
-                                            Apenas com comentário
-                                        </label>
-
-                                        <select
-                                            className="aboutSelect"
-                                            value={sort}
-                                            onChange={(e) => setSort(e.target.value as ReviewSort)}
-                                            aria-label="Ordenação"
-                                        >
-                                            <option value="newest">Mais recentes</option>
-                                            <option value="highest">Maior nota</option>
-                                            <option value="lowest">Menor nota</option>
-                                        </select>
-                                    </div>
-
-                                    <input
-                                        className="aboutInput"
-                                        value={search}
-                                        onChange={(e) => setSearch(e.target.value)}
-                                        placeholder="Buscar nas avaliações…"
-                                        aria-label="Buscar avaliações"
-                                    />
-                                </div>
-
-                                {loading ? (
-                                    <div className="aboutMuted" style={{ padding: "0 14px 14px" }}>
-                                        Carregando avaliações…
-                                    </div>
-                                ) : reviews.length ? (
-                                    <div className="aboutReviewsScroll" ref={reviewsScrollRef}>
-                                        <div className="aboutReviews">
-                                            {displayedReviews.map((r, idx) => (
-                                                <div key={`${r.authorName}-${r.time ?? "t"}-${idx}`} className="aboutReview">
-                                                    <div className="aboutReviewTop">
-                                                        <div className="aboutReviewAuthor">{r.authorName || "Avaliação"}</div>
-                                                        <div className="aboutReviewMeta">
-                                                            {typeof r.rating === "number" ? <span>{r.rating.toFixed(1)}★</span> : null}
-                                                            {r.relativeTimeDescription ? <span>{r.relativeTimeDescription}</span> : null}
-                                                        </div>
-                                                    </div>
-                                                    {r.text ? <div className="aboutReviewText">{r.text}</div> : null}
-                                                </div>
-                                            ))}
-                                        </div>
-                                        {displayedReviews.length < reviews.length ? (
-                                            <div className="aboutLoadMore">
-                                                Mostrando {displayedReviews.length} de {reviews.length}.{" "}
-                                                <button type="button" className="aboutLoadMoreBtn" onClick={loadMoreReviews}>
-                                                    + Avaliações
-                                                </button>
-                                            </div>
-                                        ) : null}
-                                    </div>
-                                ) : (
-                                    <div className="aboutMuted" style={{ padding: "0 14px 14px" }}>
-                                        Nenhuma avaliação encontrada com esses filtros.
-                                    </div>
-                                )}
-                            </div>
-                        ) : null}
-                    </div>
-
                     <div className="aboutPhotosCard">
                         <div className="aboutPhotosHeader">
-                            <div className="aboutPhotosTitle">Fotos</div>
+                            <div aria-hidden="true" />
                             <div className="aboutMuted">
                                 {useGbp
                                     ? gbpPhotos.length
@@ -707,6 +551,172 @@ export default function AboutUsSection() {
                         {hasSelectedUnit ? (
                             <div className="aboutHint">Se não aparecer para alguma unidade, selecione outra unidade no cabeçalho.</div>
                         ) : null}
+                    </div>
+
+                    <div className="aboutSplit">
+                        <div className="aboutMapCard">
+                            <div className="aboutMapHeader">
+                                <div>
+                                    <div className="aboutPlaceTitle">{title}</div>
+                                    {address ? <div className="aboutPlaceSub">{address}</div> : null}
+                                </div>
+
+                                <div className="aboutHeaderActions" aria-label="Ações">
+                                    {agendarUrl ? (
+                                        <Link
+                                            className="aboutBtnPrimary"
+                                            href={bookingHref}
+                                            onClick={() =>
+                                                trackBookingStart({
+                                                    placement: "about",
+                                                    unitSlug: unit?.slug ?? null,
+                                                    bookingUrl: bookingHref,
+                                                })
+                                            }
+                                        >
+                                            Agendar
+                                        </Link>
+                                    ) : null}
+
+                                    {reviewUrl ? (
+                                        <a
+                                            className="aboutBtnGhost"
+                                            href={reviewUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            onClick={() =>
+                                                trackEvent("cta_review_click", {
+                                                    placement: "about",
+                                                    unitSlug: unit?.slug ?? null,
+                                                    placeId: selectedPlaceId,
+                                                })
+                                            }
+                                        >
+                                            Fazer review
+                                        </a>
+                                    ) : null}
+                                </div>
+                            </div>
+
+                            <iframe
+                                className="aboutMapFrame"
+                                title="Google Maps"
+                                src={embedUrl}
+                                loading="lazy"
+                                referrerPolicy="no-referrer-when-downgrade"
+                            />
+
+                            <div className="aboutRatingRow">
+                                {loading ? (
+                                    <div className="aboutMuted">Carregando avaliações…</div>
+                                ) : !hasSelectedUnit ? (
+                                    <div className="aboutMuted">Selecione uma unidade para ver avaliações e fotos.</div>
+                                ) : data?.available ? (
+                                    <>
+                                        <Stars rating={rating} />
+                                        <div className="aboutRatingText">
+                                            <strong>{clampRating(rating).toFixed(1)}</strong>
+                                            {typeof total === "number" ? <span className="aboutMuted">({total} avaliações)</span> : null}
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="aboutMuted">Avaliações indisponíveis no momento.</div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="aboutReviewsCard">
+                            {hasSelectedUnit && (data?.available || loading) ? (
+                                <div className="aboutReviewsSection" aria-label="Avaliações">
+                                    <div className="aboutControls">
+                                        <div className="aboutPills" aria-label="Filtro por nota">
+                                            <button
+                                                type="button"
+                                                className={ratingFilter === "all" ? "aboutPill active" : "aboutPill"}
+                                                onClick={() => setRatingFilter("all")}
+                                            >
+                                                Todas
+                                            </button>
+                                            {[5, 4, 3, 2, 1].map((n) => (
+                                                <button
+                                                    key={n}
+                                                    type="button"
+                                                    className={ratingFilter === n ? "aboutPill active" : "aboutPill"}
+                                                    onClick={() => setRatingFilter(n)}
+                                                >
+                                                    {n}★
+                                                </button>
+                                            ))}
+                                        </div>
+
+                                        <div className="aboutControlsRow">
+                                            <label className="aboutToggle">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={onlyWithText}
+                                                    onChange={(e) => setOnlyWithText(e.target.checked)}
+                                                />
+                                                Apenas com comentário
+                                            </label>
+
+                                            <select
+                                                className="aboutSelect"
+                                                value={sort}
+                                                onChange={(e) => setSort(e.target.value as ReviewSort)}
+                                                aria-label="Ordenação"
+                                            >
+                                                <option value="newest">Mais recentes</option>
+                                                <option value="highest">Maior nota</option>
+                                                <option value="lowest">Menor nota</option>
+                                            </select>
+                                        </div>
+
+                                        <input
+                                            className="aboutInput"
+                                            value={search}
+                                            onChange={(e) => setSearch(e.target.value)}
+                                            placeholder="Buscar nas avaliações…"
+                                            aria-label="Buscar avaliações"
+                                        />
+                                    </div>
+
+                                    {loading ? (
+                                        <div className="aboutMuted" style={{ padding: "0 14px 14px" }}>
+                                            Carregando avaliações…
+                                        </div>
+                                    ) : reviews.length ? (
+                                        <div className="aboutReviewsScroll" ref={reviewsScrollRef}>
+                                            <div className="aboutReviews">
+                                                {displayedReviews.map((r, idx) => (
+                                                    <div key={`${r.authorName}-${r.time ?? "t"}-${idx}`} className="aboutReview">
+                                                        <div className="aboutReviewTop">
+                                                            <div className="aboutReviewAuthor">{r.authorName || "Avaliação"}</div>
+                                                            <div className="aboutReviewMeta">
+                                                                {typeof r.rating === "number" ? <span>{r.rating.toFixed(1)}★</span> : null}
+                                                                {r.relativeTimeDescription ? <span>{r.relativeTimeDescription}</span> : null}
+                                                            </div>
+                                                        </div>
+                                                        {r.text ? <div className="aboutReviewText">{r.text}</div> : null}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            {displayedReviews.length < reviews.length ? (
+                                                <div className="aboutLoadMore">
+                                                    Mostrando {displayedReviews.length} de {reviews.length}.{" "}
+                                                    <button type="button" className="aboutLoadMoreBtn" onClick={loadMoreReviews}>
+                                                        + Avaliações
+                                                    </button>
+                                                </div>
+                                            ) : null}
+                                        </div>
+                                    ) : (
+                                        <div className="aboutMuted" style={{ padding: "0 14px 14px" }}>
+                                            Nenhuma avaliação encontrada com esses filtros.
+                                        </div>
+                                    )}
+                                </div>
+                            ) : null}
+                        </div>
                     </div>
                 </div>
             )}

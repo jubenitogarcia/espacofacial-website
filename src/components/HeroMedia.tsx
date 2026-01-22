@@ -70,6 +70,10 @@ export default function HeroMedia() {
         goTo((index + 1) % items.length);
     }, [goTo, index, items.length]);
 
+    const goPrev = useCallback(() => {
+        goTo((index - 1 + items.length) % items.length);
+    }, [goTo, index, items.length]);
+
     useEffect(() => {
         if (prevIndex === null) return;
         const t = window.setTimeout(() => setPrevIndex(null), 650);
@@ -157,6 +161,17 @@ export default function HeroMedia() {
 
     return (
         <div className="heroMedia" style={style}>
+            {items.length > 1 ? (
+                <>
+                    <button type="button" className="heroArrow heroArrow--left" aria-label="Anterior" onClick={goPrev}>
+                        <span aria-hidden="true">‹</span>
+                    </button>
+                    <button type="button" className="heroArrow heroArrow--right" aria-label="Próximo" onClick={goNext}>
+                        <span aria-hidden="true">›</span>
+                    </button>
+                </>
+            ) : null}
+
             {renderLayer(item, { layerKey: `active:${item.src}`, kind: "active" })}
             {prevIndex !== null && items[prevIndex] ? renderLayer(items[prevIndex]!, { layerKey: `prev:${items[prevIndex]!.src}:${prevIndex}`, kind: "prev" }) : null}
 

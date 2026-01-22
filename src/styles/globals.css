@@ -108,7 +108,8 @@ button:focus-visible {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 0
+  padding: 14px 0;
+  position: relative;
 }
 
 .headerActions {
@@ -261,13 +262,38 @@ button:focus-visible {
   color: #2a2a2a
 }
 
+.menu--center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
 .cta {
   padding: 10px 14px;
   border-radius: 999px;
   background: var(--brand);
   color: #fff;
   font-weight: 800;
-  font-size: 13px
+  font-size: 13px;
+  transition: background 160ms ease, transform 160ms ease;
+  cursor: pointer;
+}
+
+.cta:hover {
+  transform: translateY(-1px);
+}
+
+.cta--agende {
+  padding: 12px 22px;
+  background: #16a34a;
+  box-shadow: 0 10px 26px rgba(22, 163, 74, .22);
+  letter-spacing: .06em;
+}
+
+.cta--agende:hover {
+  background: #111;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, .18);
 }
 
 .hero {
@@ -357,6 +383,43 @@ video.heroMediaEl {
   background: rgba(255, 255, 255, 0.25);
   cursor: pointer;
   padding: 0;
+}
+
+.heroArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 180ms ease, background 180ms ease;
+}
+
+.heroArrow:hover {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.heroMedia:hover .heroArrow,
+.heroArrow:focus-visible {
+  opacity: 1;
+}
+
+.heroArrow--left {
+  left: 14px;
+}
+
+.heroArrow--right {
+  right: 14px;
 }
 
 .heroDot--active {
@@ -487,9 +550,15 @@ video.heroMediaEl {
 
 .aboutGrid {
   display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
   gap: 16px;
   margin-top: 18px;
+  align-items: start;
+}
+
+.aboutSplit {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 16px;
   align-items: start;
 }
 
@@ -506,7 +575,8 @@ video.heroMediaEl {
 }
 
 .aboutMapCard,
-.aboutPhotosCard {
+.aboutPhotosCard,
+.aboutReviewsCard {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: #fff;
@@ -650,7 +720,7 @@ video.heroMediaEl {
 }
 
 .aboutReviewsSection {
-  border-top: 1px solid var(--border);
+  border-top: 0;
 }
 
 .aboutControls {
@@ -823,7 +893,7 @@ video.heroMediaEl {
 }
 
 @media (max-width: 880px) {
-  .aboutGrid {
+  .aboutSplit {
     grid-template-columns: 1fr;
   }
 
