@@ -178,10 +178,13 @@ export async function GET(req: Request) {
                 status: res.status,
                 upstream: upstreamBody ? upstreamBody.slice(0, 2000) : null,
             };
-            if (cache) void cache.put(cacheKey, new Response(JSON.stringify(payload), { headers: { "content-type": "application/json" } }));
             return NextResponse.json(payload, {
                 status: 502,
-                headers: { "x-gbp": "reviews_failed", "x-gbp-upstream-status": String(res.status) },
+                headers: {
+                    "cache-control": "no-store",
+                    "x-gbp": "reviews_failed",
+                    "x-gbp-upstream-status": String(res.status),
+                },
             });
         }
 

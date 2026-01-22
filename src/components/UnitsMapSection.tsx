@@ -141,12 +141,11 @@ function Pin({
     // Balloon marker similar to the provided reference (simplified, original SVG).
     const w = 86;
     const h = 112;
-    const left = x - w / 2;
-    const top = y - h;
+    const cls = active ? "brPin brPin--active" : "brPin";
 
     return (
         <g
-            transform={`translate(${left} ${top})`}
+            transform={`translate(${x} ${y})`}
             onMouseEnter={onEnter}
             onMouseLeave={onLeave}
             onClick={onToggle}
@@ -154,32 +153,36 @@ function Pin({
             role="button"
             aria-label="Ver unidades"
         >
-            <path
-                d="M43 0C19.3 0 0 19.3 0 43c0 27.6 28.4 52.1 37.9 60.1 3 2.5 7.3 2.5 10.3 0C57.6 95.1 86 70.6 86 43 86 19.3 66.7 0 43 0z"
-                fill={active ? "rgba(17,17,17,0.92)" : "rgba(255,255,255,0.92)"}
-                stroke={active ? "rgba(255,255,255,0.30)" : "rgba(0,0,0,0.20)"}
-                strokeWidth="2"
-                style={{ transition: "fill 160ms ease, stroke 160ms ease" }}
-            />
-            <circle cx="43" cy="40" r="24" fill={active ? "#ffffff" : "#111111"} style={{ transition: "fill 160ms ease" }} />
+            <g transform={`translate(${-w / 2} ${-h})`}>
+                <g className={cls}>
+                    <path
+                        d="M43 0C19.3 0 0 19.3 0 43c0 27.6 28.4 52.1 37.9 60.1 3 2.5 7.3 2.5 10.3 0C57.6 95.1 86 70.6 86 43 86 19.3 66.7 0 43 0z"
+                        fill={active ? "rgba(17,17,17,0.92)" : "rgba(255,255,255,0.92)"}
+                        stroke={active ? "rgba(255,255,255,0.30)" : "rgba(0,0,0,0.20)"}
+                        strokeWidth="2"
+                        style={{ transition: "fill 160ms ease, stroke 160ms ease" }}
+                    />
+                    <circle cx="43" cy="40" r="24" fill={active ? "#ffffff" : "#111111"} style={{ transition: "fill 160ms ease" }} />
 
-            {(() => {
-                const targetWidth = 24;
-                const scale = targetWidth / 484;
-                const targetHeight = 432 * scale;
-                const left = 43 - targetWidth / 2;
-                const top = 40 - targetHeight / 2;
-                const fill = active ? "#111111" : "#ffffff";
+                    {(() => {
+                        const targetWidth = 24;
+                        const scale = targetWidth / 484;
+                        const targetHeight = 432 * scale;
+                        const left = 43 - targetWidth / 2;
+                        const top = 40 - targetHeight / 2;
+                        const fill = active ? "#111111" : "#ffffff";
 
-                return (
-                    <g transform={`translate(${left} ${top}) scale(${scale})`} fill={fill} aria-hidden="true">
-                        <rect x="0" y="0" width="484" height="62" />
-                        <rect x="0" y="184" width="484" height="63" />
-                        <rect x="0" y="184" width="63" height="248" />
-                        <rect x="196" y="370" width="288" height="62" />
-                    </g>
-                );
-            })()}
+                        return (
+                            <g transform={`translate(${left} ${top}) scale(${scale})`} fill={fill} aria-hidden="true">
+                                <rect x="0" y="0" width="484" height="62" />
+                                <rect x="0" y="184" width="484" height="63" />
+                                <rect x="0" y="184" width="63" height="248" />
+                                <rect x="196" y="370" width="288" height="62" />
+                            </g>
+                        );
+                    })()}
+                </g>
+            </g>
         </g>
     );
 }
@@ -191,8 +194,36 @@ export default function UnitsMapSection() {
 
     const [openState, setOpenState] = useState<TooltipState>(null);
     const [hoverUf, setHoverUf] = useState<string | null>(null);
+    const hoverClearTimerRef = useRef<number | null>(null);
 
     const [pointsByUf, setPointsByUf] = useState<Record<string, ProjectedPoint>>({});
+
+    function setHoverUfDebounced(next: string | null) {
+        if (hoverClearTimerRef.current) {
+            window.clearTimeout(hoverClearTimerRef.current);
+            hoverClearTimerRef.current = null;
+        }
+        setHoverUf(next);
+    }
+
+    function clearHoverUfSoon() {
+        if (hoverClearTimerRef.current) {
+            window.clearTimeout(hoverClearTimerRef.current);
+        }
+        hoverClearTimerRef.current = window.setTimeout(() => {
+            hoverClearTimerRef.current = null;
+            setHoverUf(null);
+        }, 140);
+    }
+
+    useEffect(() => {
+        return () => {
+            if (hoverClearTimerRef.current) {
+                window.clearTimeout(hoverClearTimerRef.current);
+                hoverClearTimerRef.current = null;
+            }
+        };
+    }, []);
 
     const stateGroups = useMemo(() => {
         const map = new Map<string, (typeof units)[number][]>();
@@ -437,8 +468,8 @@ export default function UnitsMapSection() {
                                 <div key={g.uf} className="unitsStateBlock">
                                     <div
                                         className="unitsStateHeader"
-                                        onMouseEnter={() => setHoverUf(g.uf)}
-                                        onMouseLeave={() => setHoverUf(null)}
+                                        onMouseEnter={() => setHoverUfDebounced(g.uf)}
+                                        onMouseLeave={() => clearHoverUfSoon()}
                                     >
                                         <span className="unitsStateHeaderMain">{STATE_NAME_BY_UF[g.uf] ?? g.uf}</span>
                                         <span className="unitsStateHeaderSub">{formatUnitCount(g.units.length)}</span>
@@ -451,8 +482,8 @@ export default function UnitsMapSection() {
                                                 <button
                                                     key={u.slug}
                                                     className="unitsStateUnit"
-                                                    onMouseEnter={() => setHoverUf(g.uf)}
-                                                    onMouseLeave={() => setHoverUf(null)}
+                                                    onMouseEnter={() => setHoverUfDebounced(g.uf)}
+                                                    onMouseLeave={() => clearHoverUfSoon()}
                                                     onClick={() => {
                                                         const dest = getUnitDestination(u);
                                                         trackEvent("unit_map_click", { unitSlug: u.slug, placement: "state_list", destination: dest });

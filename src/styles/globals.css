@@ -1102,6 +1102,19 @@ video.heroMediaEl {
   min-height: 0;
 }
 
+/* Map pins: smaller baseline + smooth scale on active */
+.brPin {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  transform: scale(.78);
+  transition: transform 160ms ease;
+  will-change: transform;
+}
+
+.brPin--active {
+  transform: scale(.92);
+}
+
 .brMapHint {
   margin-top: 10px;
   font-size: 12px;
