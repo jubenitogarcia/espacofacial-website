@@ -156,24 +156,30 @@ function Pin({
         >
             <path
                 d="M43 0C19.3 0 0 19.3 0 43c0 27.6 28.4 52.1 37.9 60.1 3 2.5 7.3 2.5 10.3 0C57.6 95.1 86 70.6 86 43 86 19.3 66.7 0 43 0z"
-                fill="rgba(255,255,255,0.92)"
-                stroke="rgba(0,0,0,0.20)"
+                fill={active ? "rgba(17,17,17,0.92)" : "rgba(255,255,255,0.92)"}
+                stroke={active ? "rgba(255,255,255,0.30)" : "rgba(0,0,0,0.20)"}
                 strokeWidth="2"
+                style={{ transition: "fill 160ms ease, stroke 160ms ease" }}
             />
-            <circle cx="43" cy="40" r="24" fill={active ? "#16a34a" : "#111111"} />
-            {active ? <circle cx="43" cy="40" r="28" fill="none" stroke="rgba(22,163,74,0.55)" strokeWidth="3" /> : null}
-            <text
-                x="43"
-                y="44"
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fontFamily="system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
-                fontSize="18"
-                fontWeight="900"
-                fill="#ffffff"
-            >
-                EF
-            </text>
+            <circle cx="43" cy="40" r="24" fill={active ? "#ffffff" : "#111111"} style={{ transition: "fill 160ms ease" }} />
+
+            {(() => {
+                const targetWidth = 24;
+                const scale = targetWidth / 484;
+                const targetHeight = 432 * scale;
+                const left = 43 - targetWidth / 2;
+                const top = 40 - targetHeight / 2;
+                const fill = active ? "#111111" : "#ffffff";
+
+                return (
+                    <g transform={`translate(${left} ${top}) scale(${scale})`} fill={fill} aria-hidden="true">
+                        <rect x="0" y="0" width="484" height="62" />
+                        <rect x="0" y="184" width="484" height="63" />
+                        <rect x="0" y="184" width="63" height="248" />
+                        <rect x="196" y="370" width="288" height="62" />
+                    </g>
+                );
+            })()}
         </g>
     );
 }
@@ -345,24 +351,16 @@ export default function UnitsMapSection() {
                 <div className="unitsMapLeft">
                     <div className="brMap" aria-label="Mapa do Brasil com unidades" ref={wrapRef}>
                         <svg ref={svgRef} viewBox={brazilMap.viewBox} role="img" aria-label="Brasil">
-                            <g>
-                                {brazilMap.locations.map((loc: { id: string; path: string }) => {
-                                    const hoverId = hoverUf ? UF_TO_SVG_ID[hoverUf] ?? null : null;
-                                    const isActive = Boolean(hoverId && hoverId === loc.id);
-                                    const dimOthers = Boolean(hoverId && !isActive);
-
-                                    return (
-                                        <path
-                                            key={loc.id}
-                                            d={loc.path}
-                                            fill={isActive ? "#16a34a" : "#111111"}
-                                            opacity={dimOthers ? 0.40 : 0.85}
-                                            ref={(el) => {
-                                                statePathRefs.current[loc.id] = el;
-                                            }}
-                                        />
-                                    );
-                                })}
+                            <g fill="#111111" opacity="0.85">
+                                {brazilMap.locations.map((loc: { id: string; path: string }) => (
+                                    <path
+                                        key={loc.id}
+                                        d={loc.path}
+                                        ref={(el) => {
+                                            statePathRefs.current[loc.id] = el;
+                                        }}
+                                    />
+                                ))}
                             </g>
 
                             {stateGroups.map((g) => {
@@ -437,18 +435,14 @@ export default function UnitsMapSection() {
                         <div className="unitsStatesList">
                             {stateGroups.map((g) => (
                                 <div key={g.uf} className="unitsStateBlock">
-                                    <button
+                                    <div
                                         className="unitsStateHeader"
                                         onMouseEnter={() => setHoverUf(g.uf)}
                                         onMouseLeave={() => setHoverUf(null)}
-                                        onClick={() => {
-                                            const p = pointsByUf[g.uf] ?? g.point;
-                                            openTooltipAt(g.uf, p.x, p.y);
-                                        }}
                                     >
                                         <span className="unitsStateHeaderMain">{STATE_NAME_BY_UF[g.uf] ?? g.uf}</span>
                                         <span className="unitsStateHeaderSub">{formatUnitCount(g.units.length)}</span>
-                                    </button>
+                                    </div>
                                     <div className="unitsStateUnits">
                                         {g.units
                                             .slice()

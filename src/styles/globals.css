@@ -645,7 +645,7 @@ video.heroMediaEl {
 .aboutPhotoItem {
   width: 100%;
   height: auto;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 24 / 9;
   display: block;
 }
 
@@ -1209,7 +1209,7 @@ video.heroMediaEl {
   appearance: none;
   border: 0;
   background: transparent;
-  cursor: pointer;
+  cursor: default;
   width: 100%;
   display: flex;
   align-items: baseline;
@@ -1221,7 +1221,7 @@ video.heroMediaEl {
 }
 
 .unitsStateHeader:hover {
-  background: rgba(0, 0, 0, .05);
+  background: transparent;
 }
 
 .unitsStateHeaderMain {

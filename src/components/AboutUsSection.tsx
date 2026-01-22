@@ -39,6 +39,15 @@ type GbpReviewsPayload = {
 
 type ReviewSort = "newest" | "highest" | "lowest";
 
+function shouldFallbackFromGbp(error: string | null | undefined): boolean {
+    const e = (error ?? "").trim();
+    if (!e) return false;
+    if (e.startsWith("missing_gbp_")) return true;
+    if (e === "oauth_refresh_failed") return true;
+    if (e === "missing_access_token") return true;
+    return false;
+}
+
 function buildDefaultQuery(): string {
     return "Espaço Facial";
 }
@@ -302,9 +311,14 @@ export default function AboutUsSection() {
                     });
                     setGbpPhotosNextToken((json.nextPageToken ?? null) || null);
                 } else {
-                    setGbpForceFallback(true);
-                    setGbpPhotos([]);
-                    setGbpPhotosNextToken(null);
+                    if (shouldFallbackFromGbp(json?.error)) {
+                        setGbpForceFallback(true);
+                        setGbpPhotos([]);
+                        setGbpPhotosNextToken(null);
+                    } else {
+                        // transient failure: keep existing photos and don't permanently disable GBP
+                        setGbpPhotosNextToken(null);
+                    }
                 }
             } catch {
                 setGbpPhotosNextToken(null);
@@ -340,9 +354,14 @@ export default function AboutUsSection() {
                     });
                     setGbpReviewsNextToken((json.nextPageToken ?? null) || null);
                 } else {
-                    setGbpForceFallback(true);
-                    setGbpReviews([]);
-                    setGbpReviewsNextToken(null);
+                    if (shouldFallbackFromGbp(json?.error)) {
+                        setGbpForceFallback(true);
+                        setGbpReviews([]);
+                        setGbpReviewsNextToken(null);
+                    } else {
+                        // transient failure: keep existing reviews and don't permanently disable GBP
+                        setGbpReviewsNextToken(null);
+                    }
                 }
             } catch {
                 setGbpReviewsNextToken(null);
