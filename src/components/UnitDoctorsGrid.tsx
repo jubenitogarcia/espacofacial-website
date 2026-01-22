@@ -95,7 +95,7 @@ export default function UnitDoctorsGrid() {
     }, [members, unitLabel]);
 
     if (!unitLabel) {
-        return <div className="card">Selecione a unidade (BarraShoppingSul ou Novo Hamburgo) para ver os doutores.</div>;
+        return <p className="sectionSub">Selecione a unidade (BarraShoppingSul ou Novo Hamburgo) para ver os doutores.</p>;
     }
 
     if (filtered === null) {

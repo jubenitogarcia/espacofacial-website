@@ -460,11 +460,7 @@ export default function AboutUsSection() {
                     : "Selecione uma unidade para conhecer mais sobre ela."}
             </p>
 
-            {!hasSelectedUnit ? (
-                <div className="aboutEmpty" role="note" aria-label="Selecione uma unidade">
-                    Selecione uma unidade no cabeçalho para ver mapa, avaliações e fotos.
-                </div>
-            ) : (
+            {!hasSelectedUnit ? null : (
                 <div className="aboutGrid">
                     <div className="aboutPhotosCard">
                         <div className="aboutPhotosHeader">
