@@ -75,10 +75,15 @@ export async function GET(req: Request) {
     const unitSlug = parseUnitSlug(url.searchParams.get("unit"));
     const doctorSlug = parseDoctorSlug(url.searchParams.get("doctor"));
     const serviceId = (url.searchParams.get("service") ?? "").trim();
+    const durationMinutesRaw = Number((url.searchParams.get("durationMinutes") ?? "").trim() || NaN);
     const date = (url.searchParams.get("date") ?? "").trim();
 
     if (!unitSlug || !doctorSlug || !serviceId || !date) {
         return json({ ok: false, error: "missing_params" }, { status: 400 });
+    }
+
+    if (unitSlug !== "barrashoppingsul" && unitSlug !== "novo-hamburgo") {
+        return json({ ok: false, error: "invalid_unit" }, { status: 400 });
     }
 
     if (!isValidDateKey(date)) {
@@ -90,7 +95,13 @@ export async function GET(req: Request) {
         return json({ ok: false, error: "invalid_service" }, { status: 400 });
     }
 
-    const durationMinutes = service.durationMinutes;
+    if (!Number.isFinite(durationMinutesRaw)) {
+        return json({ ok: false, error: "missing_duration" }, { status: 400 });
+    }
+    const durationMinutes = Math.round(durationMinutesRaw);
+    if (durationMinutes <= 0 || durationMinutes > 180 || durationMinutes % 15 !== 0) {
+        return json({ ok: false, error: "invalid_duration" }, { status: 400 });
+    }
     const daySlots = buildDaySlots(durationMinutes);
 
     const db = await getBookingDb();

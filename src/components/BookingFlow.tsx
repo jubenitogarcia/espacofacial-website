@@ -28,7 +28,7 @@ type SlotsPayload = {
 };
 
 type RequestResponse =
-    | { ok: true; id: string; status: string; confirmByMs: number; startAtMs: number; endAtMs: number; unitSlug: string; doctorSlug: string; doctorName: string; service: { id: string; name: string; durationMinutes: number } }
+    | { ok: true; id: string; status: string; confirmByMs: number; startAtMs: number; endAtMs: number; unitSlug: string; doctorSlug: string; doctorName: string; service: { id: string; name: string } }
     | { ok: false; error: string; message?: string };
 
 type BookingStatus = {
@@ -43,7 +43,8 @@ type BookingStatus = {
     patient_name: string;
     whatsapp: string;
     notes: string | null;
-    service?: { id: string; name: string; durationMinutes: number } | null;
+    durationMinutes?: number;
+    service?: { id: string; name: string } | null;
 };
 
 type StatusResponse = { ok: true; booking: BookingStatus } | { ok: false; error: string };
@@ -113,6 +114,10 @@ export default function BookingFlow() {
     const [doctor, setDoctor] = useState<{ slug: string; name: string; handle: string | null } | null>(null);
     const [service, setService] = useState<Service | null>(null);
 
+    const [includeAvaliacao, setIncludeAvaliacao] = useState(true);
+    const [includeProcedimento, setIncludeProcedimento] = useState(false);
+    const [includeRevisao, setIncludeRevisao] = useState(false);
+
     const [dateKey, setDateKey] = useState<string | null>(null);
     const [timeKey, setTimeKey] = useState<string | null>(null);
 
@@ -130,6 +135,13 @@ export default function BookingFlow() {
     const [submitted, setSubmitted] = useState<{ id: string; status: string; confirmByMs: number } | null>(null);
     const [status, setStatus] = useState<BookingStatus | null>(null);
 
+    const allowedUnitSlugs = useMemo(() => new Set(["barrashoppingsul", "novo-hamburgo"]), []);
+    const allowedUnits = useMemo(() => units.filter((u) => allowedUnitSlugs.has(u.slug)), [allowedUnitSlugs]);
+
+    const durationMinutes = useMemo(() => {
+        return (includeAvaliacao ? 30 : 0) + (includeProcedimento ? 30 : 0) + (includeRevisao ? 15 : 0);
+    }, [includeAvaliacao, includeProcedimento, includeRevisao]);
+
     // default unit
     useEffect(() => {
         if (unitSlug) return;
@@ -137,14 +149,19 @@ export default function BookingFlow() {
         const fromQuery = (searchParams?.get("unit") ?? "").trim();
         if (fromQuery) {
             const resolved = findUnit(fromQuery);
-            if (resolved?.slug) {
+            if (resolved?.slug && allowedUnitSlugs.has(resolved.slug)) {
                 setUnitSlug(resolved.slug);
                 return;
             }
         }
 
-        if (currentUnit?.slug) setUnitSlug(currentUnit.slug);
-    }, [currentUnit?.slug, searchParams, unitSlug]);
+        if (currentUnit?.slug && allowedUnitSlugs.has(currentUnit.slug)) {
+            setUnitSlug(currentUnit.slug);
+            return;
+        }
+
+        setUnitSlug(allowedUnits[0]?.slug ?? null);
+    }, [allowedUnitSlugs, allowedUnits, currentUnit?.slug, searchParams, unitSlug]);
 
     // Load doctors (injectors) from Google Sheet.
     useEffect(() => {
@@ -199,7 +216,7 @@ export default function BookingFlow() {
             setSlots(null);
             setSlotsError(null);
 
-            if (!unitSlug || !doctor?.slug || !service?.id || !dateKey) return;
+            if (!unitSlug || !doctor?.slug || !service?.id || !dateKey || durationMinutes <= 0) return;
 
             setSlotsLoading(true);
             try {
@@ -207,6 +224,7 @@ export default function BookingFlow() {
                 url.searchParams.set("unit", unitSlug);
                 url.searchParams.set("doctor", doctor.slug);
                 url.searchParams.set("service", service.id);
+                url.searchParams.set("durationMinutes", String(durationMinutes));
                 url.searchParams.set("date", dateKey);
 
                 const res = await fetch(url.toString(), { cache: "no-store" });
@@ -227,13 +245,17 @@ export default function BookingFlow() {
         }
 
         loadSlots();
-    }, [unitSlug, doctor?.slug, service?.id, dateKey]);
+    }, [unitSlug, doctor?.slug, service?.id, durationMinutes, dateKey]);
 
     async function submit() {
         setSubmitError(null);
 
         if (!unitSlug || !doctor || !service || !dateKey || !timeKey) {
             setSubmitError("Selecione unidade, doutor, serviço, data e horário.");
+            return;
+        }
+        if (durationMinutes <= 0) {
+            setSubmitError("Selecione ao menos um tipo de atendimento (tempo).");
             return;
         }
         if (!patientName.trim()) {
@@ -255,6 +277,12 @@ export default function BookingFlow() {
                     doctorSlug: doctor.slug,
                     doctorName: doctor.name,
                     serviceId: service.id,
+                    durationMinutes,
+                    includes: {
+                        avaliacao: includeAvaliacao,
+                        procedimento: includeProcedimento,
+                        revisao: includeRevisao,
+                    },
                     date: dateKey,
                     time: timeKey,
                     patientName,
@@ -313,7 +341,7 @@ export default function BookingFlow() {
         };
     }, [submitted]);
 
-    const canPick = !!unitSlug && !!doctor && !!service;
+    const canPick = !!unitSlug && !!doctor && !!service && durationMinutes > 0;
 
     const selectedSlot = useMemo(() => {
         if (!slots?.slots || !timeKey) return null;
@@ -326,7 +354,7 @@ export default function BookingFlow() {
         <div className="container" style={{ padding: "28px 0 60px" }}>
             <h1 style={{ margin: 0, fontSize: 34, letterSpacing: "-0.6px" }}>Agendamento</h1>
             <p style={{ marginTop: 10, color: "var(--muted)", maxWidth: 720 }}>
-                Escolha a unidade, o doutor, o serviço (com duração) e o horário. Você recebe a confirmação por WhatsApp em até 1 hora.
+                Escolha a unidade, o doutor, o serviço, o tempo do atendimento e o horário. Você recebe a confirmação por WhatsApp em até 1 hora.
             </p>
 
             {step !== "submitted" ? (
@@ -348,7 +376,7 @@ export default function BookingFlow() {
                                     style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #ddd" }}
                                 >
                                     <option value="">Selecione uma unidade</option>
-                                    {units
+                                    {allowedUnits
                                         .slice()
                                         .sort((a, b) => a.name.localeCompare(b.name))
                                         .map((u) => (
@@ -421,7 +449,7 @@ export default function BookingFlow() {
                     </div>
 
                     <div className="card" style={{ padding: 16 }}>
-                        <div style={{ fontWeight: 900 }}>3) Serviço (duração)</div>
+                        <div style={{ fontWeight: 900 }}>3) Serviço</div>
                         <div className="pillRow" style={{ marginTop: 10 }}>
                             {services.map((s) => {
                                 const active = service?.id === s.id;
@@ -444,10 +472,63 @@ export default function BookingFlow() {
                                             fontWeight: 800,
                                         }}
                                     >
-                                        {s.name} · {s.durationMinutes}min
+                                        {s.name}
                                     </button>
                                 );
                             })}
+                        </div>
+
+                        <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
+                            <div style={{ fontWeight: 900 }}>Tempo do atendimento</div>
+                            <div className="small" style={{ color: "var(--muted)" }}>
+                                Total: <span style={{ fontWeight: 900 }}>{durationMinutes} min</span>
+                            </div>
+                            <div style={{ display: "grid", gap: 8 }}>
+                                <label style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={includeAvaliacao}
+                                        onChange={(e) => {
+                                            setIncludeAvaliacao(e.target.checked);
+                                            setDateKey(null);
+                                            setTimeKey(null);
+                                            setStep("pick");
+                                        }}
+                                    />
+                                    <span style={{ fontWeight: 700 }}>Avaliação (+30)</span>
+                                </label>
+                                <label style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={includeProcedimento}
+                                        onChange={(e) => {
+                                            setIncludeProcedimento(e.target.checked);
+                                            setDateKey(null);
+                                            setTimeKey(null);
+                                            setStep("pick");
+                                        }}
+                                    />
+                                    <span style={{ fontWeight: 700 }}>Procedimento (+30)</span>
+                                </label>
+                                <label style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={includeRevisao}
+                                        onChange={(e) => {
+                                            setIncludeRevisao(e.target.checked);
+                                            setDateKey(null);
+                                            setTimeKey(null);
+                                            setStep("pick");
+                                        }}
+                                    />
+                                    <span style={{ fontWeight: 700 }}>Revisão (+15)</span>
+                                </label>
+                            </div>
+                            {durationMinutes <= 0 ? (
+                                <div className="small" style={{ color: "#b91c1c", fontWeight: 700 }}>
+                                    Selecione ao menos uma opção para calcular o tempo.
+                                </div>
+                            ) : null}
                         </div>
                     </div>
 
@@ -481,7 +562,7 @@ export default function BookingFlow() {
                                 );
                             })}
                         </div>
-                        {!canPick ? <div className="small" style={{ marginTop: 10 }}>Selecione unidade, doutor e serviço para liberar as datas.</div> : null}
+                        {!canPick ? <div className="small" style={{ marginTop: 10 }}>Selecione unidade, doutor, serviço e tempo para liberar as datas.</div> : null}
                     </div>
 
                     <div className="card" style={{ padding: 16 }}>
@@ -543,7 +624,7 @@ export default function BookingFlow() {
                         <div className="card" style={{ padding: 16 }}>
                             <div style={{ fontWeight: 900 }}>6) Seus dados</div>
                             <div className="small" style={{ marginTop: 8 }}>
-                                {service.name} ({service.durationMinutes}min) · {formatDatePtBr(dateKey)} às {timeKey}
+                                {service.name} ({durationMinutes}min) · {formatDatePtBr(dateKey)} às {timeKey}
                             </div>
 
                             <div style={{ display: "grid", gap: 10, marginTop: 12 }}>
@@ -658,6 +739,9 @@ export default function BookingFlow() {
                                 setStep("pick");
                                 setDoctor(null);
                                 setService(null);
+                                setIncludeAvaliacao(true);
+                                setIncludeProcedimento(false);
+                                setIncludeRevisao(false);
                                 setDateKey(null);
                                 setTimeKey(null);
                                 setPatientName("");

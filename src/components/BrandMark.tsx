@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 
 type Props = {
     className?: string;
@@ -26,12 +27,14 @@ export default function BrandMark({ className, title = "Espaço Facial", tone = 
 
     if (!useInlineSvg) {
         return (
-            <img
+            <Image
                 src={src}
                 alt={title}
                 className={className}
+                width={484}
+                height={432}
+                sizes="64px"
                 draggable={false}
-                decoding="async"
                 style={shouldInvert ? { filter: "invert(1)" } : undefined}
                 onError={() => {
                     setCandidateIndex((current) => {
@@ -40,6 +43,7 @@ export default function BrandMark({ className, title = "Espaço Facial", tone = 
                         return current;
                     });
                 }}
+                unoptimized
             />
         );
     }

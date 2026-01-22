@@ -10,6 +10,8 @@ type Payload = {
     doctorSlug?: string;
     doctorName?: string;
     serviceId?: string;
+    durationMinutes?: number;
+    includes?: { avaliacao?: boolean; procedimento?: boolean; revisao?: boolean };
     date?: string; // YYYY-MM-DD
     time?: string; // HH:MM
     patientName?: string;
@@ -85,6 +87,7 @@ export async function POST(request: Request) {
     const doctorSlugRaw = sanitizeOneLine(body.doctorSlug ?? "");
     const doctorName = sanitizeOneLine(body.doctorName ?? "");
     const serviceId = sanitizeOneLine(body.serviceId ?? "");
+    const durationMinutesRaw = typeof body.durationMinutes === "number" ? body.durationMinutes : Number(body.durationMinutes ?? NaN);
     const date = sanitizeOneLine(body.date ?? "");
     const time = sanitizeOneLine(body.time ?? "");
 
@@ -96,6 +99,10 @@ export async function POST(request: Request) {
 
     if (!unitSlug || !doctorSlugRaw || !serviceId || !date || !time) {
         return json({ ok: false, error: "missing_fields" }, { status: 400 });
+    }
+
+    if (unitSlug !== "barrashoppingsul" && unitSlug !== "novo-hamburgo") {
+        return json({ ok: false, error: "invalid_unit" }, { status: 400 });
     }
 
     if (!isValidDateKey(date) || !isValidTimeKey(time)) {
@@ -115,6 +122,14 @@ export async function POST(request: Request) {
         return json({ ok: false, error: "invalid_service" }, { status: 400 });
     }
 
+    if (!Number.isFinite(durationMinutesRaw)) {
+        return json({ ok: false, error: "missing_duration" }, { status: 400 });
+    }
+    const durationMinutes = Math.round(durationMinutesRaw);
+    if (durationMinutes <= 0 || durationMinutes > 180 || durationMinutes % 15 !== 0) {
+        return json({ ok: false, error: "invalid_duration" }, { status: 400 });
+    }
+
     const doctorSlug = doctorSlugRaw || (doctorName ? slugify(doctorName) : "");
     if (!doctorSlug) {
         return json({ ok: false, error: "invalid_doctor" }, { status: 400 });
@@ -126,7 +141,7 @@ export async function POST(request: Request) {
         return json({ ok: false, error: "invalid_start" }, { status: 400 });
     }
 
-    const endAtMs = addMinutes(startAtMs, service.durationMinutes);
+    const endAtMs = addMinutes(startAtMs, durationMinutes);
     const createdAtMs = nowMs();
     const confirmByMs = addMinutes(createdAtMs, 60); // must be confirmed within 1h
 
@@ -199,7 +214,9 @@ export async function POST(request: Request) {
             unitSlug,
             doctorSlug,
             doctorName: safeDoctorName,
-            service: { id: service.id, name: service.name, durationMinutes: service.durationMinutes },
+            durationMinutes,
+            includes: body.includes ?? null,
+            service: { id: service.id, name: service.name },
             startAtMs,
             endAtMs,
             confirmByMs,
@@ -244,7 +261,8 @@ export async function POST(request: Request) {
             unitSlug,
             doctorSlug,
             doctorName: safeDoctorName,
-            service: { id: service.id, name: service.name, durationMinutes: service.durationMinutes },
+            durationMinutes,
+            service: { id: service.id, name: service.name },
             startAtMs,
             endAtMs,
             decisionLinks,

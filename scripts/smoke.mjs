@@ -21,10 +21,41 @@ function assert(condition, message) {
 async function run() {
     console.log(`Smoke base URL: ${baseUrl}`);
 
+    const isLocal = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(baseUrl);
+
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(now.getDate() + 1);
+    const yyyy = String(tomorrow.getFullYear());
+    const mm = String(tomorrow.getMonth() + 1).padStart(2, "0");
+    const dd = String(tomorrow.getDate()).padStart(2, "0");
+    const tomorrowKey = `${yyyy}-${mm}-${dd}`;
+
     // Core pages
-    for (const path of ["/", "/unidades", "/doutores", "/sobre", "/termos"]) {
+    for (const path of ["/", "/unidades", "/doutores", "/sobre", "/termos", "/agendamento"]) {
         const res = await fetchHead(path, { redirect: "follow" });
         assert(res.status === 200, `${path} expected 200, got ${res.status}`);
+    }
+
+    // Booking APIs (read-only)
+    {
+        const { res, text } = await fetchText("/api/booking/services");
+        assert(res.status === 200, `/api/booking/services expected 200, got ${res.status}`);
+        assert(/\"ok\"\s*:\s*true/.test(text), `/api/booking/services should return ok:true`);
+    }
+    {
+        const unit = "barrashoppingsul";
+        const doctor = "smoke";
+        const service = "harmonizacao";
+        const durationMinutes = 30;
+        const url = `/api/booking/slots?unit=${encodeURIComponent(unit)}&doctor=${encodeURIComponent(doctor)}&service=${encodeURIComponent(service)}&durationMinutes=${durationMinutes}&date=${encodeURIComponent(tomorrowKey)}`;
+        const { res, text } = await fetchText(url);
+        if (isLocal && res.status >= 500) {
+            console.warn(`WARN: skipping booking slots check on localhost (got ${res.status})`);
+        } else {
+            assert(res.status === 200, `${url} expected 200, got ${res.status}`);
+            assert(/\"ok\"\s*:\s*true/.test(text), `${url} should return ok:true`);
+        }
     }
 
     // 404 (some edge adapters return 200 for the not-found document; verify via body markers)

@@ -67,13 +67,15 @@ export async function GET(req: Request) {
     if (!row) return json({ ok: false, error: "not_found" }, { status: 404 });
 
     const service = getServiceById((row.service_id ?? "").toString());
+    const durationMinutes = Math.max(0, Math.round((Number(row.end_at_ms) - Number(row.start_at_ms)) / 60_000));
 
     return json(
         {
             ok: true,
             booking: {
                 ...row,
-                service: service ? { id: service.id, name: service.name, durationMinutes: service.durationMinutes } : null,
+                durationMinutes,
+                service: service ? { id: service.id, name: service.name } : null,
             },
         },
         { status: 200 },

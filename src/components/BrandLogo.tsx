@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 
 type Props = {
     className?: string;
@@ -26,16 +27,19 @@ export default function BrandLogo({ className, title = "Espaço Facial", tone = 
     const shouldInvert = tone === "light" && !candidates[candidateIndex].includes("white");
 
     return (
-        <img
+        <Image
             src={src}
             alt={title}
             className={className}
+            width={420}
+            height={44}
+            sizes="(max-width: 768px) 260px, 420px"
             draggable={false}
-            decoding="async"
             style={shouldInvert ? { filter: "invert(1)" } : undefined}
             onError={() => {
                 setCandidateIndex((current) => (current < candidates.length - 1 ? current + 1 : current));
             }}
+            unoptimized
         />
     );
 }
