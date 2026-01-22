@@ -477,6 +477,13 @@ export default function AboutUsSection() {
         [maybeLoadMorePhotos, stopPhotosAutoScroll],
     );
 
+    const scrollPhotosBy = useCallback((direction: "left" | "right") => {
+        const el = photosScrollRef.current;
+        if (!el) return;
+        const amount = Math.max(240, Math.floor(el.clientWidth * 0.85));
+        el.scrollBy({ left: direction === "right" ? amount : -amount, behavior: "smooth" });
+    }, []);
+
     useEffect(() => {
         return () => stopPhotosAutoScroll();
     }, [stopPhotosAutoScroll]);
@@ -508,6 +515,24 @@ export default function AboutUsSection() {
                                         onMouseEnter={() => startPhotosAutoScroll("right")}
                                         onMouseLeave={stopPhotosAutoScroll}
                                     />
+
+                                    <button
+                                        type="button"
+                                        className="aboutPhotosArrow aboutPhotosArrow--left"
+                                        aria-label="Fotos anteriores"
+                                        onClick={() => scrollPhotosBy("left")}
+                                    >
+                                        <span aria-hidden="true">‹</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="aboutPhotosArrow aboutPhotosArrow--right"
+                                        aria-label="Próximas fotos"
+                                        onClick={() => scrollPhotosBy("right")}
+                                    >
+                                        <span aria-hidden="true">›</span>
+                                    </button>
+
                                     <div className="aboutPhotosScroller" ref={photosScrollRef}>
                                         {gbpPhotos.map((p) => {
                                             const photo = (
@@ -563,6 +588,24 @@ export default function AboutUsSection() {
                                     onMouseEnter={() => startPhotosAutoScroll("right")}
                                     onMouseLeave={stopPhotosAutoScroll}
                                 />
+
+                                <button
+                                    type="button"
+                                    className="aboutPhotosArrow aboutPhotosArrow--left"
+                                    aria-label="Fotos anteriores"
+                                    onClick={() => scrollPhotosBy("left")}
+                                >
+                                    <span aria-hidden="true">‹</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    className="aboutPhotosArrow aboutPhotosArrow--right"
+                                    aria-label="Próximas fotos"
+                                    onClick={() => scrollPhotosBy("right")}
+                                >
+                                    <span aria-hidden="true">›</span>
+                                </button>
+
                                 <div className="aboutPhotosScroller" ref={photosScrollRef}>
                                     {photos.map((p) => (
                                         <Image

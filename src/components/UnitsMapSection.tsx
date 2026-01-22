@@ -123,7 +123,21 @@ function formatUnitCount(count: number) {
     return `+${count} ${label}`;
 }
 
-function Pin({ x, y, onEnter, onLeave, onToggle }: { x: number; y: number; onEnter: () => void; onLeave: () => void; onToggle: () => void }) {
+function Pin({
+    x,
+    y,
+    active,
+    onEnter,
+    onLeave,
+    onToggle,
+}: {
+    x: number;
+    y: number;
+    active: boolean;
+    onEnter: () => void;
+    onLeave: () => void;
+    onToggle: () => void;
+}) {
     // Balloon marker similar to the provided reference (simplified, original SVG).
     const w = 86;
     const h = 112;
@@ -146,7 +160,8 @@ function Pin({ x, y, onEnter, onLeave, onToggle }: { x: number; y: number; onEnt
                 stroke="rgba(0,0,0,0.20)"
                 strokeWidth="2"
             />
-            <circle cx="43" cy="40" r="24" fill="#111111" />
+            <circle cx="43" cy="40" r="24" fill={active ? "#16a34a" : "#111111"} />
+            {active ? <circle cx="43" cy="40" r="28" fill="none" stroke="rgba(22,163,74,0.55)" strokeWidth="3" /> : null}
             <text
                 x="43"
                 y="44"
@@ -169,6 +184,7 @@ export default function UnitsMapSection() {
     const statePathRefs = useRef<Record<string, SVGPathElement | null>>({});
 
     const [openState, setOpenState] = useState<TooltipState>(null);
+    const [hoverUf, setHoverUf] = useState<string | null>(null);
 
     const [pointsByUf, setPointsByUf] = useState<Record<string, ProjectedPoint>>({});
 
@@ -329,25 +345,35 @@ export default function UnitsMapSection() {
                 <div className="unitsMapLeft">
                     <div className="brMap" aria-label="Mapa do Brasil com unidades" ref={wrapRef}>
                         <svg ref={svgRef} viewBox={brazilMap.viewBox} role="img" aria-label="Brasil">
-                            <g fill="#111111" opacity="0.85">
-                                {brazilMap.locations.map((loc: { id: string; path: string }) => (
-                                    <path
-                                        key={loc.id}
-                                        d={loc.path}
-                                        ref={(el) => {
-                                            statePathRefs.current[loc.id] = el;
-                                        }}
-                                    />
-                                ))}
+                            <g>
+                                {brazilMap.locations.map((loc: { id: string; path: string }) => {
+                                    const hoverId = hoverUf ? UF_TO_SVG_ID[hoverUf] ?? null : null;
+                                    const isActive = Boolean(hoverId && hoverId === loc.id);
+                                    const dimOthers = Boolean(hoverId && !isActive);
+
+                                    return (
+                                        <path
+                                            key={loc.id}
+                                            d={loc.path}
+                                            fill={isActive ? "#16a34a" : "#111111"}
+                                            opacity={dimOthers ? 0.40 : 0.85}
+                                            ref={(el) => {
+                                                statePathRefs.current[loc.id] = el;
+                                            }}
+                                        />
+                                    );
+                                })}
                             </g>
 
                             {stateGroups.map((g) => {
                                 const p = pointsByUf[g.uf] ?? g.point;
+                                const isPinActive = g.uf === hoverUf || g.uf === openState?.uf;
                                 return (
                                     <Pin
                                         key={g.uf}
                                         x={p.x}
                                         y={p.y}
+                                        active={isPinActive}
                                         onEnter={() => openTooltipAt(g.uf, p.x, p.y)}
                                         onLeave={() => {
                                             // allow moving into tooltip without immediate close
@@ -413,6 +439,8 @@ export default function UnitsMapSection() {
                                 <div key={g.uf} className="unitsStateBlock">
                                     <button
                                         className="unitsStateHeader"
+                                        onMouseEnter={() => setHoverUf(g.uf)}
+                                        onMouseLeave={() => setHoverUf(null)}
                                         onClick={() => {
                                             const p = pointsByUf[g.uf] ?? g.point;
                                             openTooltipAt(g.uf, p.x, p.y);
@@ -429,6 +457,8 @@ export default function UnitsMapSection() {
                                                 <button
                                                     key={u.slug}
                                                     className="unitsStateUnit"
+                                                    onMouseEnter={() => setHoverUf(g.uf)}
+                                                    onMouseLeave={() => setHoverUf(null)}
                                                     onClick={() => {
                                                         const dest = getUnitDestination(u);
                                                         trackEvent("unit_map_click", { unitSlug: u.slug, placement: "state_list", destination: dest });

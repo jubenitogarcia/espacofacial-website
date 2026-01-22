@@ -407,6 +407,7 @@ video.heroMediaEl {
 }
 
 .heroArrow:hover {
+  opacity: 1;
   background: rgba(0, 0, 0, 0.35);
 }
 
@@ -644,8 +645,53 @@ video.heroMediaEl {
 .aboutPhotoItem {
   width: 100%;
   height: auto;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 16 / 10;
   display: block;
+}
+
+.aboutPhotosArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 180ms ease, background 180ms ease;
+}
+
+.aboutPhotosArrow:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.aboutPhotosArrow--left {
+  left: 14px;
+}
+
+.aboutPhotosArrow--right {
+  right: 14px;
+}
+
+.aboutPhotosEdge--left:hover~.aboutPhotosArrow--left {
+  opacity: 1;
+}
+
+.aboutPhotosEdge--right:hover~.aboutPhotosArrow--right {
+  opacity: 1;
+}
+
+.aboutPhotosArrow:focus-visible {
+  opacity: 1;
 }
 
 .aboutPhotosTail {
