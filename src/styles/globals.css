@@ -410,8 +410,31 @@ video.heroMediaEl {
   background: rgba(0, 0, 0, 0.35);
 }
 
-.heroMedia:hover .heroArrow,
 .heroArrow:focus-visible {
+  opacity: 1;
+}
+
+.heroHoverZone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  z-index: 2;
+}
+
+.heroHoverZone--left {
+  left: 0;
+}
+
+.heroHoverZone--right {
+  right: 0;
+}
+
+.heroHoverZone--left:hover~.heroArrow--left {
+  opacity: 1;
+}
+
+.heroHoverZone--right:hover~.heroArrow--right {
   opacity: 1;
 }
 
@@ -583,6 +606,93 @@ video.heroMediaEl {
   background: #fff;
   overflow: hidden;
   box-shadow: 0 10px 26px rgba(0, 0, 0, .06);
+}
+
+.aboutPhotosRow {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  background: transparent;
+}
+
+.aboutPhotosScrollerWrap {
+  position: relative;
+}
+
+.aboutPhotosScroller {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 8px 18px 12px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.aboutPhotoLink {
+  flex: 0 0 calc((100vw - 18px * 2 - 12px * 3) / 4);
+  max-width: 420px;
+  scroll-snap-align: start;
+  border-radius: 18px;
+  overflow: hidden;
+  display: block;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, .08);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, .06);
+}
+
+.aboutPhotoItem {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  display: block;
+}
+
+.aboutPhotosTail {
+  flex: 0 0 180px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0, 0, 0, .55);
+  font-weight: 800;
+  border-radius: 18px;
+  border: 1px dashed rgba(0, 0, 0, .16);
+  background: rgba(255, 255, 255, .8);
+  scroll-snap-align: start;
+}
+
+.aboutPhotosEdge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 110px;
+  z-index: 2;
+}
+
+.aboutPhotosEdge--left {
+  left: 0;
+}
+
+.aboutPhotosEdge--right {
+  right: 0;
+}
+
+.aboutPhotosHint {
+  padding: 0 18px;
+  color: rgba(0, 0, 0, .55);
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+@media (max-width: 880px) {
+  .aboutPhotoLink {
+    flex-basis: calc((100vw - 18px * 2 - 12px) / 2);
+    border-radius: 16px;
+  }
+
+  .aboutPhotosEdge {
+    width: 70px;
+  }
 }
 
 .aboutMapHeader,

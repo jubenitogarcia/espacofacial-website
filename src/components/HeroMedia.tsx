@@ -163,9 +163,11 @@ export default function HeroMedia() {
         <div className="heroMedia" style={style}>
             {items.length > 1 ? (
                 <>
+                    <div className="heroHoverZone heroHoverZone--left" aria-hidden="true" />
                     <button type="button" className="heroArrow heroArrow--left" aria-label="Anterior" onClick={goPrev}>
                         <span aria-hidden="true">‹</span>
                     </button>
+                    <div className="heroHoverZone heroHoverZone--right" aria-hidden="true" />
                     <button type="button" className="heroArrow heroArrow--right" aria-label="Próximo" onClick={goNext}>
                         <span aria-hidden="true">›</span>
                     </button>

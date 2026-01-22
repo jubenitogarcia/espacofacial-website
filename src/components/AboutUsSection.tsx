@@ -131,6 +131,8 @@ export default function AboutUsSection() {
     const photosScrollRef = useRef<HTMLDivElement | null>(null);
     const [visiblePhotosCount, setVisiblePhotosCount] = useState<number>(8);
 
+    const photosAutoScrollTimerRef = useRef<number | null>(null);
+
     const [gbpPhotos, setGbpPhotos] = useState<Array<{ name: string; thumbnailUrl: string; googleUrl: string | null }>>([]);
     const [gbpPhotosNextToken, setGbpPhotosNextToken] = useState<string | null>(null);
     const [gbpPhotosLoading, setGbpPhotosLoading] = useState<boolean>(false);
@@ -400,8 +402,8 @@ export default function AboutUsSection() {
         } else if (visiblePhotosCount >= allPhotos.length) {
             return;
         }
-        const nearBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 220;
-        if (nearBottom) loadMorePhotos();
+        const nearEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 260;
+        if (nearEnd) loadMorePhotos();
     }, [allPhotos.length, gbpPhotosLoading, gbpPhotosNextToken, loadMorePhotos, useGbp, visiblePhotosCount]);
 
     useEffect(() => {
@@ -440,16 +442,44 @@ export default function AboutUsSection() {
         const el = photosScrollRef.current;
         if (!el) return;
         if (useGbp) {
-            if (gbpPhotosNextToken && !gbpPhotosLoading && el.scrollHeight <= el.clientHeight + 20) {
+            if (gbpPhotosNextToken && !gbpPhotosLoading && el.scrollWidth <= el.clientWidth + 20) {
                 loadMorePhotos();
             }
             return;
         }
         if (visiblePhotosCount >= allPhotos.length) return;
-        if (el.scrollHeight <= el.clientHeight + 20) {
+        if (el.scrollWidth <= el.clientWidth + 20) {
             loadMorePhotos();
         }
     }, [allPhotos.length, gbpPhotosLoading, gbpPhotosNextToken, loadMorePhotos, useGbp, visiblePhotosCount]);
+
+    const stopPhotosAutoScroll = useCallback(() => {
+        if (photosAutoScrollTimerRef.current) {
+            window.clearInterval(photosAutoScrollTimerRef.current);
+            photosAutoScrollTimerRef.current = null;
+        }
+    }, []);
+
+    const startPhotosAutoScroll = useCallback(
+        (direction: "left" | "right") => {
+            stopPhotosAutoScroll();
+            const el = photosScrollRef.current;
+            if (!el) return;
+
+            photosAutoScrollTimerRef.current = window.setInterval(() => {
+                const node = photosScrollRef.current;
+                if (!node) return;
+                const delta = direction === "right" ? 12 : -12;
+                node.scrollBy({ left: delta, behavior: "auto" });
+                maybeLoadMorePhotos();
+            }, 16);
+        },
+        [maybeLoadMorePhotos, stopPhotosAutoScroll],
+    );
+
+    useEffect(() => {
+        return () => stopPhotosAutoScroll();
+    }, [stopPhotosAutoScroll]);
 
     return (
         <section id="sobre-nos" className="pageSection" style={{ marginTop: 50 }}>
@@ -457,96 +487,105 @@ export default function AboutUsSection() {
             <p className="sectionSub">
                 {hasSelectedUnit
                     ? "Conheça nossa unidade, veja avaliações e algumas fotos."
-                    : "Selecione uma unidade para conhecer mais sobre ela."}
+                    : "Selecione uma unidade para conhecer mais sobre nós."}
             </p>
 
             {!hasSelectedUnit ? null : (
                 <div className="aboutGrid">
-                    <div className="aboutPhotosCard">
-                        <div className="aboutPhotosHeader">
-                            <div aria-hidden="true" />
-                            <div className="aboutMuted">
-                                {useGbp
-                                    ? gbpPhotos.length
-                                        ? `Mostrando ${gbpPhotos.length}`
-                                        : ""
-                                    : allPhotos.length
-                                        ? `Mostrando ${photos.length} de ${allPhotos.length}`
-                                        : ""}
-                            </div>
-                        </div>
-
+                    <div className="aboutPhotosRow" aria-label="Fotos da unidade">
                         {useGbp ? (
                             gbpPhotos.length ? (
-                                <div className="aboutPhotosScroll" ref={photosScrollRef} aria-label="Fotos da unidade">
-                                    <div className="aboutPhotosGrid">
-                                        {gbpPhotos.map((p) => (
-                                            <Image
-                                                key={p.thumbnailUrl}
-                                                className="aboutPhoto"
-                                                src={p.thumbnailUrl}
-                                                alt="Foto da unidade"
-                                                width={450}
-                                                height={300}
-                                                sizes="(max-width: 880px) 100vw, 50vw"
-                                                unoptimized
-                                                style={{ objectFit: "cover" }}
-                                            />
-                                        ))}
+                                <div className="aboutPhotosScrollerWrap">
+                                    <div
+                                        className="aboutPhotosEdge aboutPhotosEdge--left"
+                                        aria-hidden="true"
+                                        onMouseEnter={() => startPhotosAutoScroll("left")}
+                                        onMouseLeave={stopPhotosAutoScroll}
+                                    />
+                                    <div
+                                        className="aboutPhotosEdge aboutPhotosEdge--right"
+                                        aria-hidden="true"
+                                        onMouseEnter={() => startPhotosAutoScroll("right")}
+                                        onMouseLeave={stopPhotosAutoScroll}
+                                    />
+                                    <div className="aboutPhotosScroller" ref={photosScrollRef}>
+                                        {gbpPhotos.map((p) => {
+                                            const photo = (
+                                                <Image
+                                                    key={p.thumbnailUrl}
+                                                    className="aboutPhotoItem"
+                                                    src={p.thumbnailUrl}
+                                                    alt="Foto da unidade"
+                                                    width={520}
+                                                    height={390}
+                                                    sizes="25vw"
+                                                    unoptimized
+                                                    style={{ objectFit: "cover" }}
+                                                />
+                                            );
+
+                                            return p.googleUrl ? (
+                                                <a
+                                                    key={p.thumbnailUrl}
+                                                    className="aboutPhotoLink"
+                                                    href={p.googleUrl}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                >
+                                                    {photo}
+                                                </a>
+                                            ) : (
+                                                <div key={p.thumbnailUrl} className="aboutPhotoLink" aria-hidden="true">
+                                                    {photo}
+                                                </div>
+                                            );
+                                        })}
+
+                                        {gbpPhotosNextToken ? (
+                                            <div className="aboutPhotosTail">{gbpPhotosLoading ? "Carregando…" : "Mais fotos →"}</div>
+                                        ) : null}
                                     </div>
-                                    {gbpPhotosNextToken ? (
-                                        <div className="aboutLoadMore">
-                                            {gbpPhotosLoading ? "Carregando mais…" : "Role para carregar mais"}{" "}
-                                            <button type="button" className="aboutLoadMoreBtn" onClick={loadMorePhotos}>
-                                                + Fotos
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div className="aboutLoadMore">Todas as fotos disponíveis foram exibidas.</div>
-                                    )}
                                 </div>
                             ) : (
                                 <div className="aboutMuted">{gbpPhotosLoading ? "Carregando fotos…" : "Fotos indisponíveis no momento."}</div>
                             )
                         ) : photos.length ? (
-                            <div className="aboutPhotosScroll" ref={photosScrollRef} aria-label="Fotos da unidade">
-                                <div className="aboutPhotosGrid">
+                            <div className="aboutPhotosScrollerWrap">
+                                <div
+                                    className="aboutPhotosEdge aboutPhotosEdge--left"
+                                    aria-hidden="true"
+                                    onMouseEnter={() => startPhotosAutoScroll("left")}
+                                    onMouseLeave={stopPhotosAutoScroll}
+                                />
+                                <div
+                                    className="aboutPhotosEdge aboutPhotosEdge--right"
+                                    aria-hidden="true"
+                                    onMouseEnter={() => startPhotosAutoScroll("right")}
+                                    onMouseLeave={stopPhotosAutoScroll}
+                                />
+                                <div className="aboutPhotosScroller" ref={photosScrollRef}>
                                     {photos.map((p) => (
                                         <Image
                                             key={p.photoReference}
-                                            className="aboutPhoto"
-                                            src={`/api/places/photo?ref=${encodeURIComponent(p.photoReference)}&maxwidth=900`}
+                                            className="aboutPhotoItem"
+                                            src={`/api/places/photo?ref=${encodeURIComponent(p.photoReference)}&maxwidth=1200`}
                                             alt="Foto da unidade"
-                                            width={450}
-                                            height={300}
-                                            sizes="(max-width: 880px) 100vw, 50vw"
+                                            width={520}
+                                            height={390}
+                                            sizes="25vw"
                                             unoptimized
                                             style={{ objectFit: "cover" }}
                                         />
                                     ))}
+
+                                    {photos.length < allPhotos.length ? <div className="aboutPhotosTail">Mais fotos →</div> : null}
                                 </div>
-                                {photos.length < allPhotos.length ? (
-                                    <div className="aboutLoadMore">
-                                        Mostrar mais{" "}
-                                        <button type="button" className="aboutLoadMoreBtn" onClick={loadMorePhotos}>
-                                            + Fotos
-                                        </button>
-                                    </div>
-                                ) : null}
                             </div>
                         ) : (
-                            <div className="aboutMuted">
-                                {loading
-                                    ? "Carregando fotos…"
-                                    : !hasSelectedUnit
-                                        ? "Selecione uma unidade para ver fotos."
-                                        : "Fotos indisponíveis no momento."}
-                            </div>
+                            <div className="aboutMuted">{loading ? "Carregando fotos…" : "Fotos indisponíveis no momento."}</div>
                         )}
 
-                        {hasSelectedUnit ? (
-                            <div className="aboutHint">Se não aparecer para alguma unidade, selecione outra unidade no cabeçalho.</div>
-                        ) : null}
+                        <div className="aboutPhotosHint">Passe o mouse no canto direito para ver mais fotos.</div>
                     </div>
 
                     <div className="aboutSplit">

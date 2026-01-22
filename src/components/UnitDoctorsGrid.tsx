@@ -95,104 +95,119 @@ export default function UnitDoctorsGrid() {
     }, [members, unitLabel]);
 
     if (!unitLabel) {
-        return <p className="sectionSub">Selecione a unidade (BarraShoppingSul ou Novo Hamburgo) para ver os doutores.</p>;
+        return <p className="sectionSub">Selecione a unidade para conhecer nossos doutores.</p>;
     }
 
+    const selectedUnitSubtitle = <p className="sectionSub">Conheça nossos doutores, veja seus perfis e procedimentos realizados.</p>;
+
     if (filtered === null) {
-        return <div className="card">Carregando equipe…</div>;
+        return (
+            <>
+                {selectedUnitSubtitle}
+                <div className="card">Carregando equipe…</div>
+            </>
+        );
     }
 
     if (filtered.length === 0) {
-        return <div className="card">Nenhum doutor encontrado para {unitLabel}.</div>;
+        return (
+            <>
+                {selectedUnitSubtitle}
+                <div className="card">Nenhum doutor encontrado para {unitLabel}.</div>
+            </>
+        );
     }
 
     return (
-        <div className="grid">
-            {filtered.map((d) => {
-                const fullName = d.name;
-                const nickname = d.nickname;
-                const handle = d.instagramHandle;
-                const href = d.instagramUrl;
-                const selectedSigla = unitSiglaFromSlug(unit?.slug);
-                const selectedCode = selectedSigla === "bss" ? "BSS" : selectedSigla === "nh" ? "NH" : null;
-                const waHref = handle && selectedSigla ? whatsappUrl(selectedSigla, handle) : null;
+        <>
+            {selectedUnitSubtitle}
+            <div className="grid">
+                {filtered.map((d) => {
+                    const fullName = d.name;
+                    const nickname = d.nickname;
+                    const handle = d.instagramHandle;
+                    const href = d.instagramUrl;
+                    const selectedSigla = unitSiglaFromSlug(unit?.slug);
+                    const selectedCode = selectedSigla === "bss" ? "BSS" : selectedSigla === "nh" ? "NH" : null;
+                    const waHref = handle && selectedSigla ? whatsappUrl(selectedSigla, handle) : null;
 
-                return (
-                    <div
-                        key={`${fullName}-${href ?? "noinsta"}`}
-                        className="card"
-                        onClick={() => {
-                            if (!href) return;
-                            trackDoctorInstagramClick({
-                                unitSlug: unit?.slug ?? null,
-                                doctorName: fullName,
-                                instagramUrl: href,
-                            });
-                            window.open(href, "_blank", "noopener,noreferrer");
-                        }}
-                        style={{ display: "block", cursor: href ? "pointer" : "default" }}
-                    >
-                        <div style={{ display: "flex", gap: 12, alignItems: "center", justifyContent: "space-between" }}>
-                            <div style={{ width: 56, height: 56, borderRadius: 14, overflow: "hidden", background: "white" }}>
-                                {handle ? (
-                                    <Image src={avatarUrl(handle, nickname ?? fullName)} alt={nickname ?? fullName} width={56} height={56} unoptimized />
-                                ) : null}
-                            </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                                <h3 style={{ margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{fullName}</h3>
-                                <p style={{ margin: 0, color: "var(--muted)", fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                    {nickname || unitLabel}
-                                </p>
-                            </div>
+                    return (
+                        <div
+                            key={`${fullName}-${href ?? "noinsta"}`}
+                            className="card"
+                            onClick={() => {
+                                if (!href) return;
+                                trackDoctorInstagramClick({
+                                    unitSlug: unit?.slug ?? null,
+                                    doctorName: fullName,
+                                    instagramUrl: href,
+                                });
+                                window.open(href, "_blank", "noopener,noreferrer");
+                            }}
+                            style={{ display: "block", cursor: href ? "pointer" : "default" }}
+                        >
+                            <div style={{ display: "flex", gap: 12, alignItems: "center", justifyContent: "space-between" }}>
+                                <div style={{ width: 56, height: 56, borderRadius: 14, overflow: "hidden", background: "white" }}>
+                                    {handle ? (
+                                        <Image src={avatarUrl(handle, nickname ?? fullName)} alt={nickname ?? fullName} width={56} height={56} unoptimized />
+                                    ) : null}
+                                </div>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                    <h3 style={{ margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{fullName}</h3>
+                                    <p style={{ margin: 0, color: "var(--muted)", fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                        {nickname || unitLabel}
+                                    </p>
+                                </div>
 
-                            <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-                                {href ? (
-                                    <a
-                                        className="iconBtn"
-                                        href={href}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            trackDoctorInstagramClick({
-                                                unitSlug: unit?.slug ?? null,
-                                                doctorName: fullName,
-                                                instagramUrl: href,
-                                            });
-                                        }}
-                                        aria-label="Instagram"
-                                        title="Instagram"
-                                    >
-                                        {instagramIcon()}
-                                    </a>
-                                ) : null}
+                                <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                                    {href ? (
+                                        <a
+                                            className="iconBtn"
+                                            href={href}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                trackDoctorInstagramClick({
+                                                    unitSlug: unit?.slug ?? null,
+                                                    doctorName: fullName,
+                                                    instagramUrl: href,
+                                                });
+                                            }}
+                                            aria-label="Instagram"
+                                            title="Instagram"
+                                        >
+                                            {instagramIcon()}
+                                        </a>
+                                    ) : null}
 
-                                {waHref && selectedSigla && selectedCode ? (
-                                    <a
-                                        className="iconBtn"
-                                        href={waHref}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            trackDoctorWhatsappClick({
-                                                unitSlug: unit?.slug ?? null,
-                                                doctorName: fullName,
-                                                unitSigla: selectedSigla,
-                                                whatsappUrl: waHref,
-                                            });
-                                        }}
-                                        aria-label={`WhatsApp ${selectedCode}`}
-                                        title={`WhatsApp ${selectedCode}`}
-                                    >
-                                        {whatsappIcon()}
-                                    </a>
-                                ) : null}
+                                    {waHref && selectedSigla && selectedCode ? (
+                                        <a
+                                            className="iconBtn"
+                                            href={waHref}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                trackDoctorWhatsappClick({
+                                                    unitSlug: unit?.slug ?? null,
+                                                    doctorName: fullName,
+                                                    unitSigla: selectedSigla,
+                                                    whatsappUrl: waHref,
+                                                });
+                                            }}
+                                            aria-label={`WhatsApp ${selectedCode}`}
+                                            title={`WhatsApp ${selectedCode}`}
+                                        >
+                                            {whatsappIcon()}
+                                        </a>
+                                    ) : null}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                );
-            })}
-        </div>
+                    );
+                })}
+            </div>
+        </>
     );
 }
