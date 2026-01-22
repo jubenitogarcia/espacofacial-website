@@ -46,7 +46,7 @@ async function run() {
     {
         const unit = "barrashoppingsul";
         const doctor = "smoke";
-        const service = "harmonizacao";
+        const service = "botox";
         const durationMinutes = 30;
         const url = `/api/booking/slots?unit=${encodeURIComponent(unit)}&doctor=${encodeURIComponent(doctor)}&service=${encodeURIComponent(service)}&durationMinutes=${durationMinutes}&date=${encodeURIComponent(tomorrowKey)}`;
         const { res, text } = await fetchText(url);

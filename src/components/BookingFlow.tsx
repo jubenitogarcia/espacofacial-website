@@ -120,6 +120,7 @@ export default function BookingFlow() {
 
     const [dateKey, setDateKey] = useState<string | null>(null);
     const [timeKey, setTimeKey] = useState<string | null>(null);
+    const [dateTouched, setDateTouched] = useState(false);
 
     const [slots, setSlots] = useState<SlotsPayload | null>(null);
     const [slotsLoading, setSlotsLoading] = useState(false);
@@ -343,6 +344,15 @@ export default function BookingFlow() {
 
     const canPick = !!unitSlug && !!doctor && !!service && durationMinutes > 0;
 
+    // Auto-select today's date once the required selections are ready.
+    useEffect(() => {
+        if (!canPick) return;
+        if (dateKey) return;
+        if (dateTouched) return;
+        if (!upcomingDays.length) return;
+        setDateKey(upcomingDays[0] ?? null);
+    }, [canPick, dateKey, dateTouched, upcomingDays]);
+
     const selectedSlot = useMemo(() => {
         if (!slots?.slots || !timeKey) return null;
         return slots.slots.find((s) => s.time === timeKey) ?? null;
@@ -370,6 +380,7 @@ export default function BookingFlow() {
                                         setDoctor(null);
                                         setService(null);
                                         setDateKey(null);
+                                        setDateTouched(false);
                                         setTimeKey(null);
                                         setStep("pick");
                                     }}
@@ -410,8 +421,13 @@ export default function BookingFlow() {
                                                 type="button"
                                                 className="card"
                                                 onClick={() => {
-                                                    setDoctor({ slug: d.slug, name: d.name, handle: d.handle });
+                                                    if (active) {
+                                                        setDoctor(null);
+                                                    } else {
+                                                        setDoctor({ slug: d.slug, name: d.name, handle: d.handle });
+                                                    }
                                                     setDateKey(null);
+                                                    setDateTouched(false);
                                                     setTimeKey(null);
                                                     setStep("pick");
                                                 }}
@@ -450,29 +466,40 @@ export default function BookingFlow() {
 
                     <div className="card" style={{ padding: 16 }}>
                         <div style={{ fontWeight: 900 }}>3) Serviço</div>
-                        <div className="pillRow" style={{ marginTop: 10 }}>
+                        <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 8 }}>
                             {services.map((s) => {
                                 const active = service?.id === s.id;
                                 return (
                                     <button
                                         key={s.id}
                                         type="button"
-                                        className="pill"
                                         onClick={() => {
-                                            setService(s);
+                                            if (active) {
+                                                setService(null);
+                                            } else {
+                                                setService(s);
+                                            }
                                             setDateKey(null);
+                                            setDateTouched(false);
                                             setTimeKey(null);
                                             setStep("pick");
                                         }}
                                         style={{
                                             cursor: "pointer",
-                                            border: active ? "1px solid #111" : "1px solid var(--border)",
-                                            background: active ? "#111" : "#fff",
-                                            color: active ? "#fff" : "#111",
-                                            fontWeight: 800,
+                                            textAlign: "left",
+                                            padding: "9px 10px",
+                                            borderRadius: 10,
+                                            border: active ? "2px solid #111" : "1px solid var(--border)",
+                                            background: "#fff",
+                                            color: "#111",
+                                            display: "grid",
+                                            gap: 2,
                                         }}
                                     >
-                                        {s.name}
+                                        <div style={{ fontWeight: 850, lineHeight: 1.15, fontSize: 13 }}>{s.name}</div>
+                                        {s.subtitle ? (
+                                            <div style={{ fontSize: 11.5, color: "var(--muted)", lineHeight: 1.2 }}>{s.subtitle}</div>
+                                        ) : null}
                                     </button>
                                 );
                             })}
@@ -491,6 +518,7 @@ export default function BookingFlow() {
                                         onChange={(e) => {
                                             setIncludeAvaliacao(e.target.checked);
                                             setDateKey(null);
+                                            setDateTouched(false);
                                             setTimeKey(null);
                                             setStep("pick");
                                         }}
@@ -504,6 +532,7 @@ export default function BookingFlow() {
                                         onChange={(e) => {
                                             setIncludeProcedimento(e.target.checked);
                                             setDateKey(null);
+                                            setDateTouched(false);
                                             setTimeKey(null);
                                             setStep("pick");
                                         }}
@@ -517,6 +546,7 @@ export default function BookingFlow() {
                                         onChange={(e) => {
                                             setIncludeRevisao(e.target.checked);
                                             setDateKey(null);
+                                            setDateTouched(false);
                                             setTimeKey(null);
                                             setStep("pick");
                                         }}
@@ -544,6 +574,14 @@ export default function BookingFlow() {
                                         className="pill"
                                         disabled={!canPick}
                                         onClick={() => {
+                                            setDateTouched(true);
+                                            if (active) {
+                                                setDateKey(null);
+                                                setTimeKey(null);
+                                                setStep("pick");
+                                                return;
+                                            }
+
                                             setDateKey(d);
                                             setTimeKey(null);
                                             setStep("pick");
@@ -594,6 +632,11 @@ export default function BookingFlow() {
                                                 type="button"
                                                 disabled={disabled}
                                                 onClick={() => {
+                                                    if (active) {
+                                                        setTimeKey(null);
+                                                        setStep("pick");
+                                                        return;
+                                                    }
                                                     setTimeKey(s.time);
                                                     setStep("details");
                                                 }}
@@ -743,6 +786,7 @@ export default function BookingFlow() {
                                 setIncludeProcedimento(false);
                                 setIncludeRevisao(false);
                                 setDateKey(null);
+                                setDateTouched(false);
                                 setTimeKey(null);
                                 setPatientName("");
                                 setWhatsapp("");

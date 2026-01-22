@@ -283,6 +283,40 @@ button:focus-visible {
   max-height: 560px;
   min-height: 320px;
   position: relative;
+  z-index: 1;
+}
+
+.heroMediaLayer {
+  position: absolute;
+  inset: 0;
+}
+
+.heroMediaLayer--fadeIn {
+  animation: heroFadeIn 650ms ease;
+}
+
+.heroMediaLayer--prev {
+  animation: heroFadeOut 650ms ease forwards;
+}
+
+@keyframes heroFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes heroFadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
 }
 
 .heroMediaEl {
@@ -299,7 +333,35 @@ video.heroMediaEl {
 .heroOverlay {
   position: absolute;
   inset: 0;
+  z-index: 2;
+  pointer-events: none;
   background: linear-gradient(90deg, rgba(0, 0, 0, .45), rgba(0, 0, 0, .05))
+}
+
+.heroMediaNav {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 14px;
+  z-index: 3;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.heroDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  padding: 0;
+}
+
+.heroDot--active {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(255, 255, 255, 0.95);
 }
 
 /* Google Maps unit modal */
