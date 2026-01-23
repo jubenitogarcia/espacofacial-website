@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { units } from "@/data/units";
 import { services, type Service } from "@/data/services";
 import { useCurrentUnit } from "@/hooks/useCurrentUnit";
+import { setStoredUnitSlug } from "@/lib/unitSelection";
 
 type TeamMember = {
     name: string;
@@ -109,7 +110,6 @@ export default function BookingFlow() {
 
     const [step, setStep] = useState<"pick" | "details" | "submitted">("pick");
 
-    const [unitSlug, setUnitSlug] = useState<string | null>(null);
     const [members, setMembers] = useState<TeamMember[] | null>(null);
     const [doctor, setDoctor] = useState<{ slug: string; name: string; handle: string | null } | null>(null);
     const [service, setService] = useState<Service | null>(null);
@@ -137,32 +137,43 @@ export default function BookingFlow() {
     const [status, setStatus] = useState<BookingStatus | null>(null);
 
     const allowedUnitSlugs = useMemo(() => new Set(["barrashoppingsul", "novo-hamburgo"]), []);
-    const allowedUnits = useMemo(() => units.filter((u) => allowedUnitSlugs.has(u.slug)), [allowedUnitSlugs]);
+
+    // Allow deep-linking to a unit via `?unit=` by syncing it into storage (and therefore header selection).
+    useEffect(() => {
+        const fromQuery = (searchParams?.get("unit") ?? "").trim();
+        if (!fromQuery) return;
+        const resolved = findUnit(fromQuery);
+        if (resolved?.slug && allowedUnitSlugs.has(resolved.slug)) setStoredUnitSlug(resolved.slug);
+    }, [allowedUnitSlugs, searchParams]);
+
+    const unitSlug = useMemo(() => {
+        const slug = currentUnit?.slug ?? null;
+        if (!slug) return null;
+        return allowedUnitSlugs.has(slug) ? slug : null;
+    }, [allowedUnitSlugs, currentUnit?.slug]);
 
     const durationMinutes = useMemo(() => {
         return (includeAvaliacao ? 30 : 0) + (includeProcedimento ? 30 : 0) + (includeRevisao ? 15 : 0);
     }, [includeAvaliacao, includeProcedimento, includeRevisao]);
 
-    // default unit
+    const lastUnitSlugRef = useRef<string | null>(null);
     useEffect(() => {
-        if (unitSlug) return;
+        const prev = lastUnitSlugRef.current;
+        if (prev === unitSlug) return;
+        lastUnitSlugRef.current = unitSlug;
 
-        const fromQuery = (searchParams?.get("unit") ?? "").trim();
-        if (fromQuery) {
-            const resolved = findUnit(fromQuery);
-            if (resolved?.slug && allowedUnitSlugs.has(resolved.slug)) {
-                setUnitSlug(resolved.slug);
-                return;
-            }
-        }
-
-        if (currentUnit?.slug && allowedUnitSlugs.has(currentUnit.slug)) {
-            setUnitSlug(currentUnit.slug);
-            return;
-        }
-
-        setUnitSlug(allowedUnits[0]?.slug ?? null);
-    }, [allowedUnitSlugs, allowedUnits, currentUnit?.slug, searchParams, unitSlug]);
+        setDoctor(null);
+        setService(null);
+        setIncludeAvaliacao(true);
+        setIncludeProcedimento(false);
+        setIncludeRevisao(false);
+        setDateKey(null);
+        setDateTouched(false);
+        setTimeKey(null);
+        setStep("pick");
+        setSlots(null);
+        setSlotsError(null);
+    }, [unitSlug]);
 
     // Load doctors (injectors) from Google Sheet.
     useEffect(() => {
@@ -251,8 +262,12 @@ export default function BookingFlow() {
     async function submit() {
         setSubmitError(null);
 
-        if (!unitSlug || !doctor || !service || !dateKey || !timeKey) {
-            setSubmitError("Selecione unidade, doutor, serviço, data e horário.");
+        if (!unitSlug) {
+            setSubmitError("Selecione a unidade no topo para agendar.");
+            return;
+        }
+        if (!doctor || !service || !dateKey || !timeKey) {
+            setSubmitError("Selecione doutor, serviço, data e horário.");
             return;
         }
         if (durationMinutes <= 0) {
@@ -364,8 +379,17 @@ export default function BookingFlow() {
         <div className="container" style={{ padding: "28px 0 60px" }}>
             <h1 style={{ margin: 0, fontSize: 34, letterSpacing: "-0.6px" }}>Agendamento</h1>
             <p style={{ marginTop: 10, color: "var(--muted)", maxWidth: 720 }}>
-                Escolha a unidade, o doutor, o serviço, o tempo do atendimento e o horário. Você recebe a confirmação por WhatsApp em até 1 hora.
+                Escolha o doutor, o serviço, o tempo do atendimento e o horário. Você recebe a confirmação por WhatsApp em até 1 hora.
             </p>
+            {unit ? (
+                <div className="small" style={{ marginTop: 8 }}>
+                    Unidade selecionada: <span style={{ fontWeight: 900 }}>{unit.name}</span>
+                </div>
+            ) : (
+                <div className="small" role="status" style={{ marginTop: 8, color: "#b91c1c", fontWeight: 700 }}>
+                    Selecione a unidade no topo para agendar.
+                </div>
+            )}
 
             {step !== "submitted" ? (
                 <div
@@ -378,43 +402,9 @@ export default function BookingFlow() {
                     }}
                 >
                     <div className="card" style={{ padding: 16 }}>
-                        <div style={{ display: "grid", gap: 10 }}>
-                            <div style={{ fontWeight: 900 }}>1) Unidade</div>
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 10 }}>
-                                <select
-                                    value={unitSlug ?? ""}
-                                    onChange={(e) => {
-                                        setUnitSlug(e.target.value || null);
-                                        setDoctor(null);
-                                        setService(null);
-                                        setDateKey(null);
-                                        setDateTouched(false);
-                                        setTimeKey(null);
-                                        setStep("pick");
-                                    }}
-                                    style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #ddd" }}
-                                >
-                                    <option value="">Selecione uma unidade</option>
-                                    {allowedUnits
-                                        .slice()
-                                        .sort((a, b) => a.name.localeCompare(b.name))
-                                        .map((u) => (
-                                            <option key={u.slug} value={u.slug}>
-                                                {u.name}
-                                            </option>
-                                        ))}
-                                </select>
-                                {unit?.addressLine ? (
-                                    <div className="small">{unit.addressLine}</div>
-                                ) : null}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="card" style={{ padding: 16 }}>
-                        <div style={{ fontWeight: 900 }}>2) Doutor</div>
+                        <div style={{ fontWeight: 900 }}>1) Doutor</div>
                         <div style={{ marginTop: 10 }}>
-                            {unitLabel ? null : <div className="small">Para ver doutores, selecione BarraShoppingSul ou Novo Hamburgo.</div>}
+                            {unitLabel ? null : <div className="small">Selecione BarraShoppingSul ou Novo Hamburgo no topo para ver doutores.</div>}
                             {doctorsForUnit === null ? (
                                 <div className="small">Carregando equipe…</div>
                             ) : doctorsForUnit.length === 0 ? (
@@ -473,7 +463,7 @@ export default function BookingFlow() {
                     </div>
 
                     <div className="card" style={{ padding: 16 }}>
-                        <div style={{ fontWeight: 900 }}>3) Serviço</div>
+                        <div style={{ fontWeight: 900 }}>2) Serviço</div>
                         <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 8 }}>
                             {services.map((s) => {
                                 const active = service?.id === s.id;
@@ -571,7 +561,7 @@ export default function BookingFlow() {
                     </div>
 
                     <div className="card" style={{ padding: 16 }}>
-                        <div style={{ fontWeight: 900 }}>4) Data</div>
+                        <div style={{ fontWeight: 900 }}>3) Data</div>
                         <div className="pillRow" style={{ marginTop: 10 }}>
                             {upcomingDays.map((d) => {
                                 const active = dateKey === d;
@@ -608,11 +598,15 @@ export default function BookingFlow() {
                                 );
                             })}
                         </div>
-                        {!canPick ? <div className="small" style={{ marginTop: 10 }}>Selecione unidade, doutor, serviço e tempo para liberar as datas.</div> : null}
+                        {!canPick ? (
+                            <div className="small" style={{ marginTop: 10 }}>
+                                {!unitSlug ? "Selecione a unidade no topo para liberar as datas." : "Selecione doutor, serviço e tempo para liberar as datas."}
+                            </div>
+                        ) : null}
                     </div>
 
                     <div className="card" style={{ padding: 16 }}>
-                        <div style={{ fontWeight: 900 }}>5) Horário</div>
+                        <div style={{ fontWeight: 900 }}>4) Horário</div>
                         <div style={{ marginTop: 10 }}>
                             {!dateKey ? (
                                 <div className="small">Escolha uma data para ver horários.</div>
@@ -673,7 +667,7 @@ export default function BookingFlow() {
 
                     {step === "details" && unitSlug && doctor && service && dateKey && timeKey ? (
                         <div className="card" style={{ padding: 16, gridColumn: "1 / -1" }}>
-                            <div style={{ fontWeight: 900 }}>6) Seus dados</div>
+                            <div style={{ fontWeight: 900 }}>5) Seus dados</div>
                             <div className="small" style={{ marginTop: 8 }}>
                                 {service.name} ({durationMinutes}min) · {formatDatePtBr(dateKey)} às {timeKey}
                             </div>
