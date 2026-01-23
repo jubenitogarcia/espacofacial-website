@@ -561,7 +561,7 @@ export default function AboutUsSection() {
                                                     src={p.thumbnailUrl}
                                                     alt="Foto da unidade"
                                                     width={520}
-                                                    height={390}
+                                                    height={488}
                                                     sizes="25vw"
                                                     unoptimized
                                                     style={{ objectFit: "cover" }}
@@ -633,7 +633,7 @@ export default function AboutUsSection() {
                                             src={`/api/places/photo?ref=${encodeURIComponent(p.photoReference)}&maxwidth=1200`}
                                             alt="Foto da unidade"
                                             width={520}
-                                            height={390}
+                                            height={488}
                                             sizes="25vw"
                                             unoptimized
                                             style={{ objectFit: "cover" }}

@@ -368,7 +368,15 @@ export default function BookingFlow() {
             </p>
 
             {step !== "submitted" ? (
-                <div style={{ display: "grid", gap: 14, marginTop: 18 }}>
+                <div
+                    style={{
+                        display: "grid",
+                        gap: 14,
+                        marginTop: 18,
+                        alignItems: "start",
+                        gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))",
+                    }}
+                >
                     <div className="card" style={{ padding: 16 }}>
                         <div style={{ display: "grid", gap: 10 }}>
                             <div style={{ fontWeight: 900 }}>1) Unidade</div>
@@ -664,7 +672,7 @@ export default function BookingFlow() {
                     </div>
 
                     {step === "details" && unitSlug && doctor && service && dateKey && timeKey ? (
-                        <div className="card" style={{ padding: 16 }}>
+                        <div className="card" style={{ padding: 16, gridColumn: "1 / -1" }}>
                             <div style={{ fontWeight: 900 }}>6) Seus dados</div>
                             <div className="small" style={{ marginTop: 8 }}>
                                 {service.name} ({durationMinutes}min) · {formatDatePtBr(dateKey)} às {timeKey}
@@ -738,7 +746,7 @@ export default function BookingFlow() {
                     ) : null}
                 </div>
             ) : (
-                <div className="card" style={{ marginTop: 18, padding: 18 }}>
+                <div className="card" style={{ marginTop: 18, padding: 18, gridColumn: "1 / -1" }}>
                     <div style={{ fontWeight: 900, fontSize: 18 }}>Pedido enviado</div>
                     {submitted ? (
                         <>

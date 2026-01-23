@@ -645,7 +645,7 @@ video.heroMediaEl {
 .aboutPhotoItem {
   width: 100%;
   height: auto;
-  aspect-ratio: 24 / 9;
+  aspect-ratio: 24 / 11.25;
   display: block;
 }
 
