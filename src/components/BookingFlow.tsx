@@ -94,6 +94,18 @@ function formatDatePtBr(dateKey: string): string {
     return `${pad2(d)}/${pad2(m)}/${y}`;
 }
 
+function parseLocalDateKey(dateKey: string): Date | null {
+    const [y, m, d] = dateKey.split("-").map((x) => Number(x));
+    if (!y || !m || !d) return null;
+    return new Date(y, m - 1, d);
+}
+
+function weekdayPtBrShort(dateKey: string): string {
+    const dt = parseLocalDateKey(dateKey);
+    if (!dt) return "";
+    return ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"][dt.getDay()] ?? "";
+}
+
 function formatTimeFromMs(ms: number): string {
     const dt = new Date(ms);
     return `${pad2(dt.getHours())}:${pad2(dt.getMinutes())}`;
@@ -267,7 +279,7 @@ export default function BookingFlow() {
             return;
         }
         if (!doctor || !service || !dateKey || !timeKey) {
-            setSubmitError("Selecione doutor, serviço, data e horário.");
+            setSubmitError("Selecione doutor, procedimento, data e horário.");
             return;
         }
         if (durationMinutes <= 0) {
@@ -379,7 +391,7 @@ export default function BookingFlow() {
         <div className="container" style={{ padding: "28px 0 60px" }}>
             <h1 style={{ margin: 0, fontSize: 34, letterSpacing: "-0.6px" }}>Agendamento</h1>
             <p style={{ marginTop: 10, color: "var(--muted)", maxWidth: 720 }}>
-                Escolha o doutor, o serviço, o tempo do atendimento e o horário. Você recebe a confirmação por WhatsApp em até 1 hora.
+                Escolha o doutor, o procedimento, os serviços e o horário. Você recebe a confirmação por WhatsApp em até 1 hora.
             </p>
             {unit ? (
                 <div className="small" style={{ marginTop: 8 }}>
@@ -398,7 +410,7 @@ export default function BookingFlow() {
                         gap: 14,
                         marginTop: 18,
                         alignItems: "start",
-                        gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))",
+                        gridTemplateColumns: "1fr",
                     }}
                 >
                     <div className="card" style={{ padding: 16 }}>
@@ -410,7 +422,16 @@ export default function BookingFlow() {
                             ) : doctorsForUnit.length === 0 ? (
                                 <div className="small">Nenhum doutor encontrado para esta unidade.</div>
                             ) : (
-                                <div className="grid" style={{ marginTop: 10 }}>
+                                <div
+                                    style={{
+                                        marginTop: 10,
+                                        display: "flex",
+                                        gap: 10,
+                                        overflowX: "auto",
+                                        paddingBottom: 6,
+                                        scrollSnapType: "x mandatory",
+                                    }}
+                                >
                                     {doctorsForUnit.map((d) => {
                                         const active = doctor?.slug === d.slug;
                                         return (
@@ -435,6 +456,9 @@ export default function BookingFlow() {
                                                     border: active ? "2px solid #111" : "1px solid var(--border)",
                                                     background: "white",
                                                     padding: 14,
+                                                    minWidth: 260,
+                                                    flex: "0 0 auto",
+                                                    scrollSnapAlign: "start",
                                                 }}
                                             >
                                                 <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
@@ -463,8 +487,8 @@ export default function BookingFlow() {
                     </div>
 
                     <div className="card" style={{ padding: 16 }}>
-                        <div style={{ fontWeight: 900 }}>2) Serviço</div>
-                        <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 8 }}>
+                        <div style={{ fontWeight: 900 }}>2) Procedimento</div>
+                        <div style={{ marginTop: 10, display: "flex", gap: 10, overflowX: "auto", paddingBottom: 6, scrollSnapType: "x mandatory" }}>
                             {services.map((s) => {
                                 const active = service?.id === s.id;
                                 return (
@@ -485,13 +509,16 @@ export default function BookingFlow() {
                                         style={{
                                             cursor: "pointer",
                                             textAlign: "left",
-                                            padding: "9px 10px",
-                                            borderRadius: 10,
+                                            padding: "10px 12px",
+                                            borderRadius: 12,
                                             border: active ? "2px solid #111" : "1px solid var(--border)",
                                             background: "#fff",
                                             color: "#111",
                                             display: "grid",
                                             gap: 2,
+                                            minWidth: 260,
+                                            flex: "0 0 auto",
+                                            scrollSnapAlign: "start",
                                         }}
                                     >
                                         <div style={{ fontWeight: 850, lineHeight: 1.15, fontSize: 13 }}>{s.name}</div>
@@ -502,55 +529,64 @@ export default function BookingFlow() {
                                 );
                             })}
                         </div>
+                    </div>
 
-                        <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
-                            <div style={{ fontWeight: 900 }}>Tempo do atendimento</div>
+                    <div className="card" style={{ padding: 16 }}>
+                        <div style={{ fontWeight: 900 }}>3) Serviços</div>
+                        <div style={{ marginTop: 10, display: "grid", gap: 10 }}>
                             <div className="small" style={{ color: "var(--muted)" }}>
                                 Total: <span style={{ fontWeight: 900 }}>{durationMinutes} min</span>
                             </div>
-                            <div style={{ display: "grid", gap: 8 }}>
-                                <label style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={includeAvaliacao}
-                                        onChange={(e) => {
-                                            setIncludeAvaliacao(e.target.checked);
+                            <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 6 }}>
+                                {[
+                                    {
+                                        key: "avaliacao" as const,
+                                        label: "Avaliação",
+                                        minutes: 30,
+                                        active: includeAvaliacao,
+                                        toggle: () => setIncludeAvaliacao((v) => !v),
+                                    },
+                                    {
+                                        key: "procedimento" as const,
+                                        label: "Procedimento",
+                                        minutes: 30,
+                                        active: includeProcedimento,
+                                        toggle: () => setIncludeProcedimento((v) => !v),
+                                    },
+                                    {
+                                        key: "revisao" as const,
+                                        label: "Revisão",
+                                        minutes: 15,
+                                        active: includeRevisao,
+                                        toggle: () => setIncludeRevisao((v) => !v),
+                                    },
+                                ].map((opt) => (
+                                    <button
+                                        key={opt.key}
+                                        type="button"
+                                        aria-pressed={opt.active}
+                                        onClick={() => {
+                                            opt.toggle();
                                             setDateKey(null);
                                             setDateTouched(false);
                                             setTimeKey(null);
                                             setStep("pick");
                                         }}
-                                    />
-                                    <span style={{ fontWeight: 700 }}>Avaliação (+30)</span>
-                                </label>
-                                <label style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={includeProcedimento}
-                                        onChange={(e) => {
-                                            setIncludeProcedimento(e.target.checked);
-                                            setDateKey(null);
-                                            setDateTouched(false);
-                                            setTimeKey(null);
-                                            setStep("pick");
+                                        style={{
+                                            padding: "10px 12px",
+                                            borderRadius: 999,
+                                            border: opt.active ? "1px solid #111" : "1px solid var(--border)",
+                                            background: opt.active ? "#111" : "#fff",
+                                            color: opt.active ? "#fff" : "#111",
+                                            fontWeight: 900,
+                                            cursor: "pointer",
+                                            whiteSpace: "nowrap",
+                                            flex: "0 0 auto",
                                         }}
-                                    />
-                                    <span style={{ fontWeight: 700 }}>Procedimento (+30)</span>
-                                </label>
-                                <label style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={includeRevisao}
-                                        onChange={(e) => {
-                                            setIncludeRevisao(e.target.checked);
-                                            setDateKey(null);
-                                            setDateTouched(false);
-                                            setTimeKey(null);
-                                            setStep("pick");
-                                        }}
-                                    />
-                                    <span style={{ fontWeight: 700 }}>Revisão (+15)</span>
-                                </label>
+                                    >
+                                        {opt.label} (+{opt.minutes})
+                                    </button>
+                                ))}
                             </div>
                             {durationMinutes <= 0 ? (
                                 <div className="small" style={{ color: "#b91c1c", fontWeight: 700 }}>
@@ -561,15 +597,17 @@ export default function BookingFlow() {
                     </div>
 
                     <div className="card" style={{ padding: 16 }}>
-                        <div style={{ fontWeight: 900 }}>3) Data</div>
-                        <div className="pillRow" style={{ marginTop: 10 }}>
+                        <div style={{ fontWeight: 900 }}>4) Data</div>
+                        <div className="small" style={{ marginTop: 8, color: "var(--muted)" }}>
+                            {upcomingDays.length ? `${formatDatePtBr(upcomingDays[0])} – ${formatDatePtBr(upcomingDays[upcomingDays.length - 1] ?? upcomingDays[0])}` : null}
+                        </div>
+                        <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", gap: 8 }}>
                             {upcomingDays.map((d) => {
                                 const active = dateKey === d;
                                 return (
                                     <button
                                         key={d}
                                         type="button"
-                                        className="pill"
                                         disabled={!canPick}
                                         onClick={() => {
                                             setDateTouched(true);
@@ -590,23 +628,33 @@ export default function BookingFlow() {
                                             border: active ? "1px solid #111" : "1px solid var(--border)",
                                             background: active ? "#111" : "#fff",
                                             color: active ? "#fff" : "#111",
-                                            fontWeight: 800,
+                                            fontWeight: 900,
+                                            borderRadius: 12,
+                                            padding: "10px 8px",
+                                            textAlign: "center",
+                                            display: "grid",
+                                            gap: 2,
                                         }}
                                     >
-                                        {formatDatePtBr(d)}
+                                        <div style={{ fontSize: 11, fontWeight: 800, opacity: active ? 0.9 : 0.75 }}>
+                                            {weekdayPtBrShort(d)}
+                                        </div>
+                                        <div style={{ fontSize: 14, fontWeight: 950, letterSpacing: "-0.2px" }}>
+                                            {parseLocalDateKey(d)?.getDate()}
+                                        </div>
                                     </button>
                                 );
                             })}
                         </div>
                         {!canPick ? (
                             <div className="small" style={{ marginTop: 10 }}>
-                                {!unitSlug ? "Selecione a unidade no topo para liberar as datas." : "Selecione doutor, serviço e tempo para liberar as datas."}
+                                {!unitSlug ? "Selecione a unidade no topo para liberar as datas." : "Selecione doutor, procedimento e serviços para liberar as datas."}
                             </div>
                         ) : null}
                     </div>
 
                     <div className="card" style={{ padding: 16 }}>
-                        <div style={{ fontWeight: 900 }}>4) Horário</div>
+                        <div style={{ fontWeight: 900 }}>5) Horário</div>
                         <div style={{ marginTop: 10 }}>
                             {!dateKey ? (
                                 <div className="small">Escolha uma data para ver horários.</div>
@@ -667,7 +715,7 @@ export default function BookingFlow() {
 
                     {step === "details" && unitSlug && doctor && service && dateKey && timeKey ? (
                         <div className="card" style={{ padding: 16, gridColumn: "1 / -1" }}>
-                            <div style={{ fontWeight: 900 }}>5) Seus dados</div>
+                            <div style={{ fontWeight: 900 }}>6) Seus dados</div>
                             <div className="small" style={{ marginTop: 8 }}>
                                 {service.name} ({durationMinutes}min) · {formatDatePtBr(dateKey)} às {timeKey}
                             </div>
