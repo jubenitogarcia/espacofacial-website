@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { units } from "@/data/units";
 
 export const dynamic = "force-dynamic";
 
@@ -11,118 +12,14 @@ function getCloudflareCache(): Cache | null {
     return cachesAny?.default ?? null;
 }
 
-type TokenCache = {
-    accessToken: string;
-    expiresAtMs: number;
-};
-
-let tokenCache: TokenCache | null = null;
-
-async function getAccessToken(): Promise<string> {
-    const clientId = (process.env.GOOGLE_GBP_CLIENT_ID ?? "").trim();
-    const clientSecret = (process.env.GOOGLE_GBP_CLIENT_SECRET ?? "").trim();
-    const refreshToken = (process.env.GOOGLE_GBP_REFRESH_TOKEN ?? "").trim();
-
-    if (!clientId || !clientSecret || !refreshToken) {
-        throw new Error("missing_gbp_oauth_config");
-    }
-
-    const now = Date.now();
-    if (tokenCache && tokenCache.expiresAtMs - 30_000 > now) {
-        return tokenCache.accessToken;
-    }
-
-    const body = new URLSearchParams();
-    body.set("client_id", clientId);
-    body.set("client_secret", clientSecret);
-    body.set("refresh_token", refreshToken);
-    body.set("grant_type", "refresh_token");
-
-    const res = await fetch("https://oauth2.googleapis.com/token", {
-        method: "POST",
-        headers: { "content-type": "application/x-www-form-urlencoded" },
-        body: body.toString(),
-    });
-
-    if (!res.ok) {
-        throw new Error("oauth_refresh_failed");
-    }
-
-    const json = (await res.json()) as { access_token?: string; expires_in?: number };
-    const accessToken = (json.access_token ?? "").trim();
-    const expiresIn = typeof json.expires_in === "number" ? json.expires_in : 300;
-
-    if (!accessToken) {
-        throw new Error("missing_access_token");
-    }
-
-    tokenCache = {
-        accessToken,
-        expiresAtMs: now + expiresIn * 1000,
+type PlaceDetailsResponse = {
+    status?: string;
+    result?: {
+        place_id?: string;
+        photos?: Array<{ photo_reference?: string }>;
     };
-
-    return accessToken;
-}
-
-function resolveGbpLocation(input: string): string {
-    const raw = (input ?? "").trim();
-    if (!raw) throw new Error("missing_location");
-
-    if (raw.startsWith("accounts/")) return raw;
-
-    const accountId = (process.env.GOOGLE_GBP_ACCOUNT_ID ?? "").trim();
-    if (!accountId) throw new Error("missing_gbp_account_id");
-
-    if (raw.startsWith("locations/")) {
-        return `accounts/${accountId}/${raw}`;
-    }
-
-    if (/^\d+$/.test(raw)) {
-        return `accounts/${accountId}/locations/${raw}`;
-    }
-
-    // Fallback: assume caller passed a valid relative resource name
-    return `accounts/${accountId}/${raw}`;
-}
-
-function parseLocationId(input: string): string | null {
-    const raw = (input ?? "").trim();
-    if (!raw) return null;
-    if (raw.startsWith("accounts/")) return null;
-    if (raw.startsWith("locations/")) {
-        const id = raw.slice("locations/".length).trim();
-        return id || null;
-    }
-    if (/^\d+$/.test(raw)) return raw;
-    return null;
-}
-
-async function listAccountIds(accessToken: string): Promise<string[]> {
-    const res = await fetch("https://mybusiness.googleapis.com/v4/accounts", {
-        headers: { authorization: `Bearer ${accessToken}` },
-    });
-    if (!res.ok) return [];
-    const json = (await res.json()) as { accounts?: Array<{ name?: string }> };
-    const ids = (json.accounts ?? [])
-        .map((a) => (a?.name ?? "").trim())
-        .filter((name) => name.startsWith("accounts/"))
-        .map((name) => name.slice("accounts/".length))
-        .map((id) => id.trim())
-        .filter(Boolean);
-    return Array.from(new Set(ids)).slice(0, 20);
-}
-
-async function discoverLocationResourceName(accessToken: string, locationId: string): Promise<string> {
-    const accountIds = await listAccountIds(accessToken);
-    for (const accountId of accountIds) {
-        const candidate = `accounts/${accountId}/locations/${locationId}`;
-        const probe = await fetch(`https://mybusiness.googleapis.com/v4/${candidate}`, {
-            headers: { authorization: `Bearer ${accessToken}` },
-        });
-        if (probe.ok) return candidate;
-    }
-    throw new Error("location_not_found");
-}
+    error_message?: string;
+};
 
 function parsePositiveInt(value: string | null, fallback: number): number {
     const n = Number(value);
@@ -134,8 +31,44 @@ function clamp(n: number, min: number, max: number): number {
     return Math.max(min, Math.min(max, n));
 }
 
+function isPlaceId(value: string): boolean {
+    const v = (value ?? "").trim();
+    if (!v) return false;
+    return v.startsWith("ChI") && v.length >= 15;
+}
+
+function resolvePlaceIdFromLocation(locationParam: string): string | null {
+    const raw = (locationParam ?? "").trim();
+    if (!raw) return null;
+    if (isPlaceId(raw)) return raw;
+
+    const unit = units.find((u) => (u.gbpLocation ?? "").trim() === raw);
+    const placeId = (unit?.placeId ?? "").trim();
+    return placeId || null;
+}
+
+function buildDetailsUrl(apiKey: string, placeId: string): string {
+    const url = new URL("https://maps.googleapis.com/maps/api/place/details/json");
+    url.searchParams.set("place_id", placeId);
+    url.searchParams.set("fields", "place_id,photos");
+    url.searchParams.set("language", "pt-BR");
+    url.searchParams.set("region", "BR");
+    url.searchParams.set("key", apiKey);
+    return url.toString();
+}
+
+function parseOffsetToken(token: string | null): number {
+    const t = (token ?? "").trim();
+    if (!t) return 0;
+    const n = Number(t);
+    if (!Number.isFinite(n)) return 0;
+    return Math.max(0, Math.floor(n));
+}
+
 export async function GET(req: Request) {
+    const apiKey = (process.env.GOOGLE_MAPS_API_KEY ?? "").trim();
     const { searchParams } = new URL(req.url);
+
     const locationParam = (searchParams.get("location") ?? "").trim();
     const pageToken = (searchParams.get("pageToken") ?? "").trim();
     const pageSize = clamp(parsePositiveInt(searchParams.get("pageSize"), 12), 1, 50);
@@ -144,103 +77,79 @@ export async function GET(req: Request) {
         return NextResponse.json({ available: false, error: "missing_location" }, { status: 400 });
     }
 
-    const locationId = parseLocationId(locationParam);
+    if (!apiKey) {
+        return NextResponse.json(
+            { available: false, error: "missing_gbp_places_api_key" },
+            { status: 503, headers: { "cache-control": "no-store", "x-gbp": "places_missing_key" } },
+        );
+    }
+
+    const placeId = resolvePlaceIdFromLocation(locationParam);
+    if (!placeId) {
+        return NextResponse.json(
+            { available: false, error: "missing_gbp_place_id" },
+            { status: 404, headers: { "cache-control": "no-store", "x-gbp": "places_no_place" } },
+        );
+    }
+
+    const cache = getCloudflareCache();
+    const cacheBucket = Math.floor(Date.now() / (1000 * 60 * 10)); // 10 minutes
+    const cacheKey = new Request(
+        `https://espacofacial.com/__cache/gbp/photos?v=2&src=places&b=${cacheBucket}&placeId=${encodeURIComponent(placeId)}&pageToken=${encodeURIComponent(
+            pageToken,
+        )}&pageSize=${pageSize}`,
+    );
+
+    if (cache) {
+        const hit = await cache.match(cacheKey);
+        if (hit) {
+            const payload = await hit.json().catch(() => null);
+            if (payload) {
+                return NextResponse.json(payload, {
+                    status: 200,
+                    headers: { "cache-control": "public, max-age=60, s-maxage=600", "x-gbp": "cache" },
+                });
+            }
+        }
+    }
 
     try {
-        const accessToken = await getAccessToken();
+        const detailsUrl = buildDetailsUrl(apiKey, placeId);
+        const res = await fetch(detailsUrl, { next: { revalidate: 60 * 60 } });
+        const json = (await res.json()) as PlaceDetailsResponse;
 
-        let location: string;
-        try {
-            location = resolveGbpLocation(locationParam);
-        } catch (e) {
-            const msg = e instanceof Error ? e.message : "exception";
-            if (msg === "missing_gbp_account_id" && locationId) {
-                location = await discoverLocationResourceName(accessToken, locationId);
-            } else {
-                const status = msg === "missing_gbp_account_id" ? 503 : 400;
-                return NextResponse.json({ available: false, error: msg }, { status, headers: { "x-gbp": "bad_location" } });
-            }
-        }
-
-        const cache = getCloudflareCache();
-        const cacheBucket = Math.floor(Date.now() / (1000 * 60 * 10)); // 10 minutes
-        const cacheKey = new Request(
-            `https://espacofacial.com/__cache/gbp/photos?v=1&b=${cacheBucket}&location=${encodeURIComponent(location)}&pageToken=${encodeURIComponent(
-                pageToken,
-            )}&pageSize=${pageSize}`,
-        );
-
-        if (cache) {
-            const hit = await cache.match(cacheKey);
-            if (hit) {
-                const payload = await hit.json().catch(() => null);
-                if (payload) {
-                    return NextResponse.json(payload, {
-                        status: 200,
-                        headers: { "cache-control": "public, max-age=60, s-maxage=600", "x-gbp": "cache" },
-                    });
-                }
-            }
-        }
-
-        const url = new URL(`https://mybusiness.googleapis.com/v4/${location}/media`);
-        url.searchParams.set("pageSize", String(pageSize));
-        if (pageToken) url.searchParams.set("pageToken", pageToken);
-
-        let res = await fetch(url.toString(), {
-            headers: { authorization: `Bearer ${accessToken}` },
-        });
-
-        if (!res.ok && res.status === 404 && locationId && !locationParam.startsWith("accounts/")) {
-            try {
-                const discovered = await discoverLocationResourceName(accessToken, locationId);
-                if (discovered && discovered !== location) {
-                    const retryUrl = new URL(`https://mybusiness.googleapis.com/v4/${discovered}/media`);
-                    retryUrl.searchParams.set("pageSize", String(pageSize));
-                    if (pageToken) retryUrl.searchParams.set("pageToken", pageToken);
-                    location = discovered;
-                    res = await fetch(retryUrl.toString(), { headers: { authorization: `Bearer ${accessToken}` } });
-                }
-            } catch {
-                // ignore discovery errors; fall through to upstream error handling
-            }
-        }
-
-        if (!res.ok) {
-            const upstreamBody = await res.text().catch(() => "");
+        if (!res.ok || (json.status && json.status !== "OK") || !json.result) {
             const payload = {
                 available: false,
-                error: "gbp_media_fetch_failed",
-                status: res.status,
-                upstream: upstreamBody ? upstreamBody.slice(0, 2000) : null,
+                error: "places_details_failed",
+                status: json.status ?? null,
+                httpStatus: res.status,
             };
             return NextResponse.json(payload, {
                 status: 502,
-                headers: {
-                    "cache-control": "no-store",
-                    "x-gbp": "media_failed",
-                    "x-gbp-upstream-status": String(res.status),
-                },
+                headers: { "cache-control": "no-store", "x-gbp": "places_upstream" },
             });
         }
 
-        const json = (await res.json()) as {
-            mediaItems?: Array<{ name?: string; thumbnailUrl?: string; googleUrl?: string }>;
-            nextPageToken?: string;
-        };
+        const allRefs = (json.result.photos ?? [])
+            .map((p) => (p?.photo_reference ?? "").trim())
+            .filter(Boolean);
 
-        const items = (json.mediaItems ?? [])
-            .filter((m) => typeof m?.thumbnailUrl === "string" && m.thumbnailUrl)
-            .map((m) => ({
-                name: m.name ?? "",
-                thumbnailUrl: m.thumbnailUrl as string,
-                googleUrl: typeof m.googleUrl === "string" ? m.googleUrl : null,
-            }));
+        const offset = parseOffsetToken(pageToken);
+        const slice = allRefs.slice(offset, offset + pageSize);
+        const nextOffset = offset + pageSize;
+        const nextPageToken = nextOffset < allRefs.length ? String(nextOffset) : null;
+
+        const items = slice.map((ref, i) => ({
+            name: `photo_${offset + i + 1}`,
+            thumbnailUrl: `/api/places/photo?ref=${encodeURIComponent(ref)}&maxwidth=900`,
+            googleUrl: null,
+        }));
 
         const payload = {
             available: true,
             items,
-            nextPageToken: (json.nextPageToken ?? "").trim() || null,
+            nextPageToken,
         };
 
         if (cache) void cache.put(cacheKey, new Response(JSON.stringify(payload), { headers: { "content-type": "application/json" } }));
@@ -249,9 +158,7 @@ export async function GET(req: Request) {
             status: 200,
             headers: { "cache-control": "public, max-age=60, s-maxage=600", "x-gbp": "ok" },
         });
-    } catch (e) {
-        const msg = e instanceof Error ? e.message : "exception";
-        const status = msg === "missing_gbp_oauth_config" ? 503 : 500;
-        return NextResponse.json({ available: false, error: msg }, { status, headers: { "x-gbp": "exception" } });
+    } catch {
+        return NextResponse.json({ available: false, error: "exception" }, { status: 500, headers: { "cache-control": "no-store" } });
     }
 }
