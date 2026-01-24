@@ -423,13 +423,23 @@ export default function BookingFlow() {
                                 <div className="small">Nenhum doutor encontrado para esta unidade.</div>
                             ) : (
                                 <div
+                                    onWheel={(e) => {
+                                        if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+                                        e.currentTarget.scrollLeft += e.deltaY;
+                                        e.preventDefault();
+                                    }}
                                     style={{
                                         marginTop: 10,
+                                        width: "100%",
+                                        maxWidth: "100%",
                                         display: "flex",
                                         gap: 10,
                                         overflowX: "auto",
                                         paddingBottom: 6,
                                         scrollSnapType: "x mandatory",
+                                        WebkitOverflowScrolling: "touch",
+                                        overscrollBehaviorX: "contain",
+                                        scrollbarWidth: "thin",
                                     }}
                                 >
                                     {doctorsForUnit.map((d) => {
@@ -488,7 +498,26 @@ export default function BookingFlow() {
 
                     <div className="card" style={{ padding: 16 }}>
                         <div style={{ fontWeight: 900 }}>2) Procedimento</div>
-                        <div style={{ marginTop: 10, display: "flex", gap: 10, overflowX: "auto", paddingBottom: 6, scrollSnapType: "x mandatory" }}>
+                        <div
+                            onWheel={(e) => {
+                                if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+                                e.currentTarget.scrollLeft += e.deltaY;
+                                e.preventDefault();
+                            }}
+                            style={{
+                                marginTop: 10,
+                                width: "100%",
+                                maxWidth: "100%",
+                                display: "flex",
+                                gap: 10,
+                                overflowX: "auto",
+                                paddingBottom: 6,
+                                scrollSnapType: "x mandatory",
+                                WebkitOverflowScrolling: "touch",
+                                overscrollBehaviorX: "contain",
+                                scrollbarWidth: "thin",
+                            }}
+                        >
                             {services.map((s) => {
                                 const active = service?.id === s.id;
                                 return (
