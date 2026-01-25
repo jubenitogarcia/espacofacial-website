@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type WheelEvent } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { units } from "@/data/units";
@@ -387,32 +387,32 @@ export default function BookingFlow() {
 
     const showSensitiveHint = true;
 
+    const handleHorizontalScroll = (event: WheelEvent<HTMLDivElement>) => {
+        if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+        event.currentTarget.scrollLeft += event.deltaY;
+        event.preventDefault();
+    };
+
     return (
-        <div className="container" style={{ padding: "28px 0 60px" }}>
-            <h1 style={{ margin: 0, fontSize: 34, letterSpacing: "-0.6px" }}>Agendamento</h1>
-            <p style={{ marginTop: 10, color: "var(--muted)", maxWidth: 720 }}>
-                Escolha o doutor, o procedimento, os serviços e o horário. Você recebe a confirmação por WhatsApp em até 1 hora.
-            </p>
-            {unit ? (
-                <div className="small" style={{ marginTop: 8 }}>
-                    Unidade selecionada: <span style={{ fontWeight: 900 }}>{unit.name}</span>
-                </div>
-            ) : (
-                <div className="small" role="status" style={{ marginTop: 8, color: "#b91c1c", fontWeight: 700 }}>
-                    Selecione a unidade no topo para agendar.
-                </div>
-            )}
+        <div className="bookingFlow">
+            <div className="bookingFlow__intro">
+                <h1>Agendamento</h1>
+                <p>
+                    Escolha o doutor, o procedimento, os serviços e o horário. Você recebe a confirmação por WhatsApp em até 1 hora.
+                </p>
+                {unit ? (
+                    <div className="small bookingFlow__unitStatus">
+                        Unidade selecionada: <span className="bookingFlow__unitName">{unit.name}</span>
+                    </div>
+                ) : (
+                    <div className="small bookingFlow__unitStatus bookingFlow__unitStatus--error" role="status">
+                        Selecione a unidade no topo para agendar.
+                    </div>
+                )}
+            </div>
 
             {step !== "submitted" ? (
-                <div
-                    style={{
-                        display: "grid",
-                        gap: 14,
-                        marginTop: 18,
-                        alignItems: "start",
-                        gridTemplateColumns: "1fr",
-                    }}
-                >
+                <div className="bookingFlow__grid">
                     <div className="card" style={{ padding: 16 }}>
                         <div style={{ fontWeight: 900 }}>1) Doutor</div>
                         <div style={{ marginTop: 10 }}>
@@ -422,26 +422,7 @@ export default function BookingFlow() {
                             ) : doctorsForUnit.length === 0 ? (
                                 <div className="small">Nenhum doutor encontrado para esta unidade.</div>
                             ) : (
-                                <div
-                                    onWheel={(e) => {
-                                        if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
-                                        e.currentTarget.scrollLeft += e.deltaY;
-                                        e.preventDefault();
-                                    }}
-                                    style={{
-                                        marginTop: 10,
-                                        width: "100%",
-                                        maxWidth: "100%",
-                                        display: "flex",
-                                        gap: 10,
-                                        overflowX: "auto",
-                                        paddingBottom: 6,
-                                        scrollSnapType: "x mandatory",
-                                        WebkitOverflowScrolling: "touch",
-                                        overscrollBehaviorX: "contain",
-                                        scrollbarWidth: "thin",
-                                    }}
-                                >
+                                <div className="bookingFlow__scrollWindow" onWheel={handleHorizontalScroll}>
                                     {doctorsForUnit.map((d) => {
                                         const active = doctor?.slug === d.slug;
                                         return (
@@ -498,26 +479,7 @@ export default function BookingFlow() {
 
                     <div className="card" style={{ padding: 16 }}>
                         <div style={{ fontWeight: 900 }}>2) Procedimento</div>
-                        <div
-                            onWheel={(e) => {
-                                if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
-                                e.currentTarget.scrollLeft += e.deltaY;
-                                e.preventDefault();
-                            }}
-                            style={{
-                                marginTop: 10,
-                                width: "100%",
-                                maxWidth: "100%",
-                                display: "flex",
-                                gap: 10,
-                                overflowX: "auto",
-                                paddingBottom: 6,
-                                scrollSnapType: "x mandatory",
-                                WebkitOverflowScrolling: "touch",
-                                overscrollBehaviorX: "contain",
-                                scrollbarWidth: "thin",
-                            }}
-                        >
+                        <div className="bookingFlow__scrollWindow" onWheel={handleHorizontalScroll}>
                             {services.map((s) => {
                                 const active = service?.id === s.id;
                                 return (
@@ -743,7 +705,7 @@ export default function BookingFlow() {
                     </div>
 
                     {step === "details" && unitSlug && doctor && service && dateKey && timeKey ? (
-                        <div className="card" style={{ padding: 16, gridColumn: "1 / -1" }}>
+                        <div className="card bookingFlow__cardFull" style={{ padding: 16 }}>
                             <div style={{ fontWeight: 900 }}>6) Seus dados</div>
                             <div className="small" style={{ marginTop: 8 }}>
                                 {service.name} ({durationMinutes}min) · {formatDatePtBr(dateKey)} às {timeKey}
@@ -817,67 +779,69 @@ export default function BookingFlow() {
                     ) : null}
                 </div>
             ) : (
-                <div className="card" style={{ marginTop: 18, padding: 18, gridColumn: "1 / -1" }}>
-                    <div style={{ fontWeight: 900, fontSize: 18 }}>Pedido enviado</div>
-                    {submitted ? (
-                        <>
-                            <div className="small" style={{ marginTop: 8 }}>
-                                Protocolo: <span style={{ fontWeight: 900 }}>{submitted.id}</span>
-                            </div>
-                            <div style={{ marginTop: 10 }}>
-                                Você receberá a confirmação por WhatsApp em até 1 hora. Prazo: <strong>{formatDeadline(submitted.confirmByMs)}</strong>.
-                            </div>
-                        </>
-                    ) : null}
+                <div className="bookingFlow__grid">
+                    <div className="card bookingFlow__cardFull" style={{ padding: 18 }}>
+                        <div style={{ fontWeight: 900, fontSize: 18 }}>Pedido enviado</div>
+                        {submitted ? (
+                            <>
+                                <div className="small" style={{ marginTop: 8 }}>
+                                    Protocolo: <span style={{ fontWeight: 900 }}>{submitted.id}</span>
+                                </div>
+                                <div style={{ marginTop: 10 }}>
+                                    Você receberá a confirmação por WhatsApp em até 1 hora. Prazo: <strong>{formatDeadline(submitted.confirmByMs)}</strong>.
+                                </div>
+                            </>
+                        ) : null}
 
-                    {status ? (
-                        <div style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid var(--border)" }}>
-                            <div style={{ fontWeight: 900 }}>Status</div>
-                            <div style={{ marginTop: 6 }}>
-                                {status.status === "confirmed" ? (
-                                    <span style={{ fontWeight: 900, color: "#16a34a" }}>Confirmado</span>
-                                ) : status.status === "declined" ? (
-                                    <span style={{ fontWeight: 900, color: "#b91c1c" }}>Não confirmado</span>
-                                ) : status.status === "expired" ? (
-                                    <span style={{ fontWeight: 900, color: "#b45309" }}>Expirado</span>
-                                ) : status.status === "needs_approval" ? (
-                                    <span style={{ fontWeight: 900, color: "#b45309" }}>Em análise</span>
-                                ) : (
-                                    <span style={{ fontWeight: 900 }}>Pendente</span>
-                                )}
+                        {status ? (
+                            <div style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid var(--border)" }}>
+                                <div style={{ fontWeight: 900 }}>Status</div>
+                                <div style={{ marginTop: 6 }}>
+                                    {status.status === "confirmed" ? (
+                                        <span style={{ fontWeight: 900, color: "#16a34a" }}>Confirmado</span>
+                                    ) : status.status === "declined" ? (
+                                        <span style={{ fontWeight: 900, color: "#b91c1c" }}>Não confirmado</span>
+                                    ) : status.status === "expired" ? (
+                                        <span style={{ fontWeight: 900, color: "#b45309" }}>Expirado</span>
+                                    ) : status.status === "needs_approval" ? (
+                                        <span style={{ fontWeight: 900, color: "#b45309" }}>Em análise</span>
+                                    ) : (
+                                        <span style={{ fontWeight: 900 }}>Pendente</span>
+                                    )}
+                                </div>
+                                <div className="small" style={{ marginTop: 6 }}>
+                                    Atualiza automaticamente.
+                                </div>
                             </div>
-                            <div className="small" style={{ marginTop: 6 }}>
-                                Atualiza automaticamente.
-                            </div>
+                        ) : null}
+
+                        <div style={{ marginTop: 16, display: "flex", gap: 10, flexWrap: "wrap" }}>
+                            <button
+                                type="button"
+                                className="pill"
+                                onClick={() => {
+                                    // restart
+                                    setStep("pick");
+                                    setDoctor(null);
+                                    setService(null);
+                                    setIncludeAvaliacao(true);
+                                    setIncludeProcedimento(false);
+                                    setIncludeRevisao(false);
+                                    setDateKey(null);
+                                    setDateTouched(false);
+                                    setTimeKey(null);
+                                    setPatientName("");
+                                    setWhatsapp("");
+                                    setNotes("");
+                                    setSlots(null);
+                                    setSubmitted(null);
+                                    setStatus(null);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                Fazer outro pedido
+                            </button>
                         </div>
-                    ) : null}
-
-                    <div style={{ marginTop: 16, display: "flex", gap: 10, flexWrap: "wrap" }}>
-                        <button
-                            type="button"
-                            className="pill"
-                            onClick={() => {
-                                // restart
-                                setStep("pick");
-                                setDoctor(null);
-                                setService(null);
-                                setIncludeAvaliacao(true);
-                                setIncludeProcedimento(false);
-                                setIncludeRevisao(false);
-                                setDateKey(null);
-                                setDateTouched(false);
-                                setTimeKey(null);
-                                setPatientName("");
-                                setWhatsapp("");
-                                setNotes("");
-                                setSlots(null);
-                                setSubmitted(null);
-                                setStatus(null);
-                            }}
-                            style={{ cursor: "pointer" }}
-                        >
-                            Fazer outro pedido
-                        </button>
                     </div>
                 </div>
             )}

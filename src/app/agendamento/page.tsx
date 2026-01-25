@@ -11,7 +11,7 @@ export default function AgendamentoPage() {
     return (
         <>
             <Header />
-            <main>
+            <main className="bookingPage">
                 <BookingFlow />
             </main>
             <Footer />

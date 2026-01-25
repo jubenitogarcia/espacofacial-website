@@ -228,6 +228,87 @@ button:focus-visible {
   display: block;
 }
 
+.bookingPage {
+  width: 100%;
+}
+
+.bookingFlow {
+  width: min(960px, 100% - 40px);
+  margin: 0 auto;
+  padding: clamp(24px, 3vw, 44px) 0 64px;
+}
+
+.bookingFlow__intro {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bookingFlow__intro h1 {
+  margin: 0;
+  font-size: 34px;
+  letter-spacing: -0.6px;
+}
+
+.bookingFlow__intro p {
+  margin: 0;
+  color: var(--muted);
+  max-width: 780px;
+}
+
+.bookingFlow__unitStatus {
+  margin-top: 8px;
+}
+
+.bookingFlow__unitStatus--error {
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+.bookingFlow__unitName {
+  font-weight: 900;
+}
+
+.bookingFlow__grid {
+  margin-top: 18px;
+  display: grid;
+  gap: 18px;
+}
+
+@media (min-width: 960px) {
+  .bookingFlow__grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+}
+
+.bookingFlow__cardFull {
+  grid-column: 1 / -1;
+}
+
+.bookingFlow__scrollWindow {
+  margin-top: 10px;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  gap: 10px;
+  overflow: auto;
+  padding-bottom: 8px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  max-height: 360px;
+}
+
+.bookingFlow__scrollWindow::-webkit-scrollbar {
+  height: 6px;
+}
+
+.bookingFlow__scrollWindow::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 999px;
+}
+
 .brandText {
   display: grid;
   gap: 2px;
