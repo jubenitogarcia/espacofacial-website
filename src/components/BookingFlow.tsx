@@ -493,7 +493,9 @@ export default function BookingFlow() {
         };
     }, [submitted]);
 
-    const canPick = !!unitSlug && !!doctor && !!service && durationMinutes > 0;
+    const canPickProcedure = !!unitSlug && !!doctor;
+    const canPickServices = canPickProcedure && !!service;
+    const canPick = canPickServices && durationMinutes > 0; // date+time
 
     // Auto-select today's date once the required selections are ready.
     useEffect(() => {
@@ -534,7 +536,7 @@ export default function BookingFlow() {
 
             {step !== "submitted" ? (
                 <div className="bookingFlow__grid">
-                    <div className="card" style={{ padding: 16 }}>
+                    <div className="card bookingFlow__cardDoctor" style={{ padding: 16 }}>
                         <div style={{ fontWeight: 900 }}>1) Doutor</div>
                         <div className="small" style={{ marginTop: 6, color: "var(--muted)" }}>
                             Selecione um(a) profissional (ou sem preferência).
@@ -654,11 +656,16 @@ export default function BookingFlow() {
                         </div>
                     </div>
 
-                    <div className="card" style={{ padding: 16 }}>
+                    <div className={`card bookingFlow__cardProcedure ${canPickProcedure ? "" : "bookingFlow__card--locked"}`.trim()} style={{ padding: 16 }}>
                         <div style={{ fontWeight: 900 }}>2) Procedimento</div>
                         <div className="small" style={{ marginTop: 6, color: "var(--muted)" }}>
                             Selecione o procedimento desejado (ou peça orientação).
                         </div>
+                        {!canPickProcedure ? (
+                            <div className="bookingFlow__lockOverlay" aria-hidden="true">
+                                <div className="bookingFlow__lockText">Primeiro selecione um(a) profissional.</div>
+                            </div>
+                        ) : null}
                         <ScrollPicker ariaLabel="Lista de procedimentos">
                             {services.map((s) => {
                                 const active = service?.id === s.id;
@@ -666,6 +673,7 @@ export default function BookingFlow() {
                                     <button
                                         key={s.id}
                                         type="button"
+                                        disabled={!canPickProcedure}
                                         className="bookingFlow__pickCard"
                                         onClick={() => {
                                             if (active) {
@@ -704,6 +712,7 @@ export default function BookingFlow() {
 
                             <button
                                 type="button"
+                                disabled={!canPickProcedure}
                                 className="bookingFlow__pickCard"
                                 onClick={() => {
                                     const active = service?.id === "any";
@@ -739,16 +748,21 @@ export default function BookingFlow() {
                         </ScrollPicker>
                     </div>
 
-                    <div className="card" style={{ padding: 16 }}>
+                    <div className={`card bookingFlow__cardServices ${canPickServices ? "" : "bookingFlow__card--locked"}`.trim()} style={{ padding: 16 }}>
                         <div style={{ fontWeight: 900 }}>3) Serviços</div>
                         <div className="small" style={{ marginTop: 6, color: "var(--muted)" }}>
                             Selecione um ou mais serviços para calcular o tempo total.
                         </div>
+                        {!canPickServices ? (
+                            <div className="bookingFlow__lockOverlay" aria-hidden="true">
+                                <div className="bookingFlow__lockText">Selecione um procedimento para liberar.</div>
+                            </div>
+                        ) : null}
                         <div style={{ marginTop: 10, display: "grid", gap: 10 }}>
                             <div className="small" style={{ color: "var(--muted)" }}>
                                 Total: <span style={{ fontWeight: 900 }}>{durationMinutes} min</span>
                             </div>
-                            <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 6 }}>
+                            <div style={{ display: "grid", gap: 10 }}>
                                 {[
                                     {
                                         key: "avaliacao" as const,
@@ -776,6 +790,7 @@ export default function BookingFlow() {
                                         key={opt.key}
                                         type="button"
                                         aria-pressed={opt.active}
+                                        disabled={!canPickServices}
                                         onClick={() => {
                                             opt.toggle();
                                             setDateKey(null);
@@ -785,14 +800,14 @@ export default function BookingFlow() {
                                         }}
                                         style={{
                                             padding: "10px 12px",
-                                            borderRadius: 999,
+                                            borderRadius: 12,
                                             border: opt.active ? "1px solid #111" : "1px solid var(--border)",
                                             background: opt.active ? "#111" : "#fff",
                                             color: opt.active ? "#fff" : "#111",
                                             fontWeight: 900,
-                                            cursor: "pointer",
-                                            whiteSpace: "nowrap",
-                                            flex: "0 0 auto",
+                                            cursor: canPickServices ? "pointer" : "not-allowed",
+                                            opacity: canPickServices ? 1 : 0.6,
+                                            textAlign: "left",
                                         }}
                                     >
                                         {opt.label}
@@ -807,11 +822,16 @@ export default function BookingFlow() {
                         </div>
                     </div>
 
-                    <div className="card bookingFlow__cardFull" style={{ padding: 16 }}>
+                    <div className={`card bookingFlow__cardFull bookingFlow__cardDateTime ${canPick ? "" : "bookingFlow__card--locked"}`.trim()} style={{ padding: 16 }}>
                         <div style={{ fontWeight: 900 }}>4) Data e horário</div>
                         <div className="small" style={{ marginTop: 6, color: "var(--muted)" }}>
                             {upcomingDays.length ? `${formatDatePtBr(upcomingDays[0])} – ${formatDatePtBr(upcomingDays[upcomingDays.length - 1] ?? upcomingDays[0])}` : null}
                         </div>
+                        {!canPick ? (
+                            <div className="bookingFlow__lockOverlay" aria-hidden="true">
+                                <div className="bookingFlow__lockText">Selecione profissional + procedimento para ver datas e horários.</div>
+                            </div>
+                        ) : null}
 
                         <div className="bookingFlow__datetimeGrid" style={{ marginTop: 12 }}>
                             <div>

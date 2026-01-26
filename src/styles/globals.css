@@ -331,16 +331,61 @@ button:focus-visible {
   margin-top: 18px;
   display: grid;
   gap: 18px;
+  grid-template-columns: 1fr;
 }
 
 @media (min-width: 960px) {
   .bookingFlow__grid {
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(12, minmax(0, 1fr));
   }
 }
 
 .bookingFlow__cardFull {
   grid-column: 1 / -1;
+}
+
+.bookingFlow__cardDoctor {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 960px) {
+  .bookingFlow__cardProcedure {
+    grid-column: span 9;
+  }
+
+  .bookingFlow__cardServices {
+    grid-column: span 3;
+  }
+}
+
+.bookingFlow__card--locked {
+  position: relative;
+  overflow: hidden;
+}
+
+.bookingFlow__lockOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  padding: 14px;
+  background: rgba(245, 245, 245, 0.74);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  pointer-events: all;
+}
+
+.bookingFlow__lockText {
+  font-weight: 900;
+  color: #111;
+  text-align: center;
+  max-width: 340px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.88);
+  padding: 10px 12px;
+  border-radius: 12px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.08);
 }
 
 .bookingFlow__picker {
