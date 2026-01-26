@@ -384,7 +384,7 @@ button:focus-visible {
 }
 
 .bookingFlow__selectItem:hover:not(:disabled),
-.bookingFlow__selectItem[data-active=\"true\"] {
+.bookingFlow__selectItem[data-active="true"] {
   transform: scale(1.02);
   background: #111;
   color: #fff;
@@ -400,19 +400,19 @@ button:focus-visible {
   border-radius: 14px;
 }
 
-.bookingFlow__doctorCard[data-active=\"true\"] {
+.bookingFlow__doctorCard[data-active="true"] {
   border-width: 2px;
 }
 
-.bookingFlow__serviceBtn[data-active=\"true\"] {
+.bookingFlow__serviceBtn[data-active="true"] {
   border-width: 2px;
 }
 
-.bookingFlow__dateBtn[data-active=\"true\"] {
+.bookingFlow__dateBtn[data-active="true"] {
   border-width: 2px;
 }
 
-.bookingFlow__timeBtn[data-active=\"true\"] {
+.bookingFlow__timeBtn[data-active="true"] {
   border-width: 2px;
 }
 
@@ -450,7 +450,7 @@ button:focus-visible {
 }
 
 .bookingFlow__selectItem:hover:not(:disabled) .bookingFlow__doctorSub,
-.bookingFlow__selectItem[data-active=\"true\"] .bookingFlow__doctorSub {
+.bookingFlow__selectItem[data-active="true"] .bookingFlow__doctorSub {
   color: rgba(255, 255, 255, 0.72);
 }
 
@@ -544,7 +544,7 @@ button:focus-visible {
 }
 
 .bookingFlow__timeBtn:hover:not(:disabled),
-.bookingFlow__timeBtn[data-active=\"true\"] {
+.bookingFlow__timeBtn[data-active="true"] {
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.12);
 }
 
