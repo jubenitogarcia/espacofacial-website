@@ -150,6 +150,9 @@ export default function BookingFlow() {
     const [whatsapp, setWhatsapp] = useState("");
     const [notes, setNotes] = useState("");
 
+    const [detailsStartedAtMs, setDetailsStartedAtMs] = useState<number | null>(null);
+    const [honeypot, setHoneypot] = useState("");
+
     const [submitting, setSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -191,6 +194,8 @@ export default function BookingFlow() {
         setDateTouched(false);
         setTimeKey(null);
         setStep("pick");
+        setDetailsStartedAtMs(null);
+        setHoneypot("");
         setSlots(null);
         setSlotsError(null);
     }, [unitSlug]);
@@ -324,6 +329,8 @@ export default function BookingFlow() {
                     patientName,
                     whatsapp,
                     notes,
+                    hp: honeypot,
+                    formStartedAtMs: detailsStartedAtMs,
                 }),
             });
 
@@ -337,6 +344,14 @@ export default function BookingFlow() {
                 }
                 if (err === "rate_limited") {
                     setSubmitError("Muitas tentativas em sequência. Aguarde alguns segundos e tente novamente.");
+                    return;
+                }
+                if (err === "too_fast") {
+                    setSubmitError("Muito rápido. Aguarde um instante e tente novamente.");
+                    return;
+                }
+                if (err === "spam_detected") {
+                    setSubmitError("Não foi possível enviar. Recarregue a página e tente novamente.");
                     return;
                 }
                 setSubmitError("Não foi possível enviar seu pedido. Tente novamente.");
@@ -690,10 +705,12 @@ export default function BookingFlow() {
                                                     if (active) {
                                                         setTimeKey(null);
                                                         setStep("pick");
+                                                        setDetailsStartedAtMs(null);
                                                         return;
                                                     }
                                                     setTimeKey(s.time);
                                                     setStep("details");
+                                                    setDetailsStartedAtMs(Date.now());
                                                 }}
                                                 style={{
                                                     padding: "12px 12px",
@@ -726,6 +743,29 @@ export default function BookingFlow() {
                             </div>
 
                             <div style={{ display: "grid", gap: 10, marginTop: 12 }}>
+                                <div
+                                    aria-hidden="true"
+                                    style={{
+                                        position: "absolute",
+                                        left: "-10000px",
+                                        top: "auto",
+                                        width: 1,
+                                        height: 1,
+                                        overflow: "hidden",
+                                    }}
+                                >
+                                    <label>
+                                        Empresa
+                                        <input
+                                            value={honeypot}
+                                            onChange={(e) => setHoneypot(e.target.value)}
+                                            tabIndex={-1}
+                                            autoComplete="off"
+                                            inputMode="text"
+                                        />
+                                    </label>
+                                </div>
+
                                 <label style={{ display: "grid", gap: 6 }}>
                                     <span style={{ fontWeight: 700 }}>Nome</span>
                                     <input

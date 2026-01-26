@@ -17,6 +17,8 @@ type Payload = {
     patientName?: string;
     whatsapp?: string;
     notes?: string;
+    hp?: string;
+    formStartedAtMs?: number;
 };
 
 type CfCacheStorage = {
@@ -107,6 +109,8 @@ export async function POST(request: Request) {
     const durationMinutesRaw = typeof body.durationMinutes === "number" ? body.durationMinutes : Number(body.durationMinutes ?? NaN);
     const date = sanitizeOneLine(body.date ?? "");
     const time = sanitizeOneLine(body.time ?? "");
+    const hp = sanitizeOneLine(body.hp ?? "");
+    const formStartedAtMsRaw = typeof body.formStartedAtMs === "number" ? body.formStartedAtMs : Number(body.formStartedAtMs ?? NaN);
 
     const patientName = clampText(sanitizeOneLine(body.patientName ?? ""), 80);
     const whatsapp = normalizePhone(body.whatsapp ?? "");
@@ -164,6 +168,18 @@ export async function POST(request: Request) {
 
     if (startAtMs < createdAtMs) {
         return json({ ok: false, error: "start_in_past" }, { status: 400 });
+    }
+
+    // Honeypot + minimum time-to-submit (best-effort spam filtering).
+    if (hp) {
+        return json({ ok: false, error: "spam_detected" }, { status: 400 });
+    }
+    if (Number.isFinite(formStartedAtMsRaw)) {
+        const elapsed = createdAtMs - Number(formStartedAtMsRaw);
+        // Avoid false positives with clock drift.
+        if (elapsed >= 0 && elapsed < 1200) {
+            return json({ ok: false, error: "too_fast" }, { status: 429 });
+        }
     }
 
     // Best-effort rate limit to reduce spam bursts (per edge location/cache).
