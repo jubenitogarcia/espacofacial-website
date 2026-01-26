@@ -42,7 +42,7 @@ export default function HeaderMobileMenu() {
 
   const links = useMemo(
     () => [
-      { href: "/#sobre-nos", label: "Sobre Nos" },
+      { href: "/#sobre-nos", label: "Sobre Nós" },
       { href: "/#doutores", label: "Nossos Doutores" },
       { href: "/#unidades", label: "Unidades" },
     ],
@@ -155,4 +155,3 @@ export default function HeaderMobileMenu() {
     </>
   );
 }
-

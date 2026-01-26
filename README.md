@@ -96,3 +96,16 @@ Checklist mensal recomendado:
 - Publicar campanhas com UTMs padronizadas (ex.: `utm_source=google&utm_medium=cpc&utm_campaign=YYYY-MM_nome`)
 - Validar `cta_agendar_click` com `ef_debug=1` em 2 dispositivos (mobile/desktop)
 - Conferir redirects de WhatsApp preservando `utm_*`/`gclid`
+
+## Segurança (GitHub + Cloudflare)
+
+### Turnstile no agendamento (anti-bot)
+- Guia: `docs/security/SETUP_TURNSTILE.md`
+- Secrets no GitHub Actions:
+  - `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (publica)
+  - `TURNSTILE_SECRET_KEY` (privada)
+
+### Sync de regras de segurança (WAF/rate limit)
+- Guia: `docs/security/SETUP_CLOUDFLARE_SECURITY_SYNC.md`
+- Workflow:
+  - `Sync Cloudflare Security` (manual + agendado)
