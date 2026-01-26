@@ -553,7 +553,8 @@ export default function BookingFlow() {
                                             <button
                                                 key={d.slug}
                                                 type="button"
-                                                className="card bookingFlow__pickCard"
+                                                className="bookingFlow__selectItem bookingFlow__doctorCard"
+                                                data-active={active ? "true" : "false"}
                                                 onClick={() => {
                                                     if (active) {
                                                         setDoctor(null);
@@ -567,9 +568,6 @@ export default function BookingFlow() {
                                                 }}
                                                 style={{
                                                     textAlign: "left",
-                                                    cursor: "pointer",
-                                                    border: active ? "2px solid #111" : "1px solid var(--border)",
-                                                    background: "white",
                                                     padding: 14,
                                                     width: 220,
                                                     minWidth: 220,
@@ -578,7 +576,7 @@ export default function BookingFlow() {
                                                 }}
                                             >
                                                 <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                                                    <div style={{ width: 56, height: 56, borderRadius: 14, overflow: "hidden", background: "#fff", flex: "0 0 auto" }}>
+                                                    <div className="bookingFlow__doctorAvatar">
                                                         {d.handle ? (
                                                             <Image
                                                                 src={avatarUrl(d.handle, d.nickname ?? d.name)}
@@ -590,8 +588,8 @@ export default function BookingFlow() {
                                                         ) : null}
                                                     </div>
                                                     <div style={{ minWidth: 0 }}>
-                                                        <div style={{ fontWeight: 900, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.name}</div>
-                                                        <div className="small" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.nickname || unitLabel}</div>
+                                                        <div className="bookingFlow__doctorName">{d.name}</div>
+                                                        <div className="bookingFlow__doctorSub">{d.nickname || unitLabel}</div>
                                                     </div>
                                                 </div>
                                             </button>
@@ -600,7 +598,8 @@ export default function BookingFlow() {
 
                                     <button
                                         type="button"
-                                        className="card bookingFlow__pickCard"
+                                        className="bookingFlow__selectItem bookingFlow__doctorCard"
+                                        data-active={doctor?.slug === "any" ? "true" : "false"}
                                         onClick={() => {
                                             const active = doctor?.slug === "any";
                                             if (active) {
@@ -615,9 +614,6 @@ export default function BookingFlow() {
                                         }}
                                         style={{
                                             textAlign: "left",
-                                            cursor: "pointer",
-                                            border: doctor?.slug === "any" ? "2px solid #111" : "1px solid var(--border)",
-                                            background: "white",
                                             padding: 14,
                                             width: 220,
                                             minWidth: 220,
@@ -627,25 +623,14 @@ export default function BookingFlow() {
                                     >
                                         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
                                             <div
-                                                style={{
-                                                    width: 56,
-                                                    height: 56,
-                                                    borderRadius: 14,
-                                                    background: "#111",
-                                                    color: "#fff",
-                                                    display: "grid",
-                                                    placeItems: "center",
-                                                    fontWeight: 900,
-                                                    letterSpacing: "-0.4px",
-                                                    flex: "0 0 auto",
-                                                }}
+                                                className="bookingFlow__doctorAvatar bookingFlow__doctorAvatar--fallback"
                                                 aria-hidden="true"
                                             >
                                                 EF
                                             </div>
                                             <div style={{ minWidth: 0 }}>
-                                                <div style={{ fontWeight: 900, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Sem preferência</div>
-                                                <div className="small" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Primeiro horário disponível</div>
+                                                <div className="bookingFlow__doctorName">Sem preferência</div>
+                                                <div className="bookingFlow__doctorSub">Primeiro horário disponível</div>
                                             </div>
                                         </div>
                                     </button>
@@ -670,7 +655,7 @@ export default function BookingFlow() {
                                         key={s.id}
                                         type="button"
                                         disabled={!canPickProcedure}
-                                        className={`bookingFlow__pickCard bookingFlow__procedureCard ${active ? "bookingFlow__procedureCard--active" : ""}`.trim()}
+                                        className={`bookingFlow__procedureCard ${active ? "bookingFlow__procedureCard--active" : ""}`.trim()}
                                         onClick={() => {
                                             if (active) {
                                                 setService(null);
@@ -690,31 +675,23 @@ export default function BookingFlow() {
                                             scrollSnapAlign: "start",
                                         }}
                                     >
-                                        <div
-                                            className="bookingFlow__procedureMedia"
-                                        >
-                                            <div className="bookingFlow__procedureMediaInner">
-                                                {s.highlightImage ? (
-                                                    <Image
-                                                        src={s.highlightImage}
-                                                        alt={s.name}
-                                                        fill
-                                                        sizes="240px"
-                                                        style={{ objectFit: "contain" }}
-                                                        unoptimized
-                                                    />
-                                                ) : (
-                                                    <div className="bookingFlow__procedureMediaFallback" aria-hidden="true">
-                                                        EF
-                                                    </div>
-                                                )}
+                                        {s.highlightImage ? (
+                                            <Image
+                                                src={s.highlightImage}
+                                                alt={s.name}
+                                                fill
+                                                sizes="240px"
+                                                style={{ objectFit: "cover" }}
+                                                unoptimized
+                                            />
+                                        ) : (
+                                            <div className="bookingFlow__procedureMediaFallback" aria-hidden="true">
+                                                EF
                                             </div>
-                                        </div>
-                                        <div className="bookingFlow__procedureMeta">
-                                            <div style={{ fontWeight: 850, lineHeight: 1.15, fontSize: 13 }}>{s.name}</div>
-                                            {s.subtitle ? (
-                                                <div className="bookingFlow__procedureSub">{s.subtitle}</div>
-                                            ) : null}
+                                        )}
+                                        <div className="bookingFlow__procedureOverlay">
+                                            <div className="bookingFlow__procedureTitle">{s.name}</div>
+                                            {s.subtitle ? <div className="bookingFlow__procedureSub">{s.subtitle}</div> : null}
                                         </div>
                                     </button>
                                 );
@@ -723,7 +700,7 @@ export default function BookingFlow() {
                             <button
                                 type="button"
                                 disabled={!canPickProcedure}
-                                className={`bookingFlow__pickCard bookingFlow__procedureCard ${service?.id === "any" ? "bookingFlow__procedureCard--active" : ""}`.trim()}
+                                className={`bookingFlow__procedureCard ${service?.id === "any" ? "bookingFlow__procedureCard--active" : ""}`.trim()}
                                 onClick={() => {
                                     const active = service?.id === "any";
                                     if (active) {
@@ -738,13 +715,11 @@ export default function BookingFlow() {
                                 }}
                                 style={{ textAlign: "left", width: 240, minWidth: 240, flex: "0 0 auto", scrollSnapAlign: "start" }}
                             >
-                                <div className="bookingFlow__procedureMedia" aria-hidden="true">
-                                    <div className="bookingFlow__procedureMediaInner">
-                                        <div className="bookingFlow__procedureMediaFallback">EF</div>
-                                    </div>
+                                <div className="bookingFlow__procedureMediaFallback" aria-hidden="true">
+                                    EF
                                 </div>
-                                <div className="bookingFlow__procedureMeta">
-                                    <div style={{ fontWeight: 850, lineHeight: 1.15, fontSize: 13 }}>Quero orientação</div>
+                                <div className="bookingFlow__procedureOverlay">
+                                    <div className="bookingFlow__procedureTitle">Quero orientação</div>
                                     <div className="bookingFlow__procedureSub">Ainda não sei qual procedimento</div>
                                 </div>
                             </button>
@@ -792,6 +767,8 @@ export default function BookingFlow() {
                                         type="button"
                                         aria-pressed={opt.active}
                                         disabled={!canPickServices}
+                                        className="bookingFlow__selectItem bookingFlow__serviceBtn"
+                                        data-active={opt.active ? "true" : "false"}
                                         onClick={() => {
                                             opt.toggle();
                                             setDateKey(null);
@@ -801,12 +778,7 @@ export default function BookingFlow() {
                                         }}
                                         style={{
                                             padding: "10px 12px",
-                                            borderRadius: 12,
-                                            border: opt.active ? "1px solid #111" : "1px solid var(--border)",
-                                            background: opt.active ? "#111" : "#fff",
-                                            color: opt.active ? "#fff" : "#111",
                                             fontWeight: 900,
-                                            cursor: canPickServices ? "pointer" : "not-allowed",
                                             opacity: canPickServices ? 1 : 0.6,
                                             textAlign: "left",
                                         }}
@@ -847,6 +819,8 @@ export default function BookingFlow() {
                                                 key={d}
                                                 type="button"
                                                 disabled={!canPick}
+                                                className="bookingFlow__selectItem bookingFlow__dateBtn"
+                                                data-active={active ? "true" : "false"}
                                                 onClick={() => {
                                                     setDateTouched(true);
                                                     if (active) {
@@ -861,11 +835,7 @@ export default function BookingFlow() {
                                                     setStep("pick");
                                                 }}
                                                 style={{
-                                                    cursor: canPick ? "pointer" : "not-allowed",
                                                     opacity: canPick ? 1 : 0.5,
-                                                    border: active ? "1px solid #111" : "1px solid var(--border)",
-                                                    background: active ? "#111" : "#fff",
-                                                    color: active ? "#fff" : "#111",
                                                     fontWeight: 900,
                                                     borderRadius: 12,
                                                     padding: "10px 8px",
@@ -921,6 +891,8 @@ export default function BookingFlow() {
                                                         key={s.time}
                                                         type="button"
                                                         disabled={disabled}
+                                                        className="bookingFlow__selectItem bookingFlow__timeBtn"
+                                                        data-active={active ? "true" : "false"}
                                                         onClick={() => {
                                                             if (active) {
                                                                 setTimeKey(null);
@@ -939,10 +911,6 @@ export default function BookingFlow() {
                                                         style={{
                                                             padding: "12px 12px",
                                                             borderRadius: 12,
-                                                            border: active ? "2px solid #111" : "1px solid var(--border)",
-                                                            background: disabled ? "#f3f3f3" : active ? "#111" : "#fff",
-                                                            color: disabled ? "#777" : active ? "#fff" : "#111",
-                                                            cursor: disabled ? "not-allowed" : "pointer",
                                                             fontWeight: 900,
                                                             textAlign: "left",
                                                         }}
