@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type WheelEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode, type WheelEvent } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { units } from "@/data/units";
@@ -123,6 +123,80 @@ function formatBrPhone(input: string): string {
     if (d.length <= 2) return d ? `(${d}` : "";
     if (d.length <= 7) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
     return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}
+
+function ScrollPicker(props: { ariaLabel: string; children: ReactNode; className?: string }) {
+    const ref = useRef<HTMLDivElement | null>(null);
+    const [canLeft, setCanLeft] = useState(false);
+    const [canRight, setCanRight] = useState(false);
+
+    const update = () => {
+        const el = ref.current;
+        if (!el) return;
+        const left = el.scrollLeft;
+        const maxLeft = el.scrollWidth - el.clientWidth;
+        setCanLeft(left > 1);
+        setCanRight(left < maxLeft - 1);
+    };
+
+    useEffect(() => {
+        update();
+        const onResize = () => update();
+        window.addEventListener("resize", onResize);
+        return () => window.removeEventListener("resize", onResize);
+    }, []);
+
+    const handleWheel = (event: WheelEvent<HTMLDivElement>) => {
+        if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+        event.currentTarget.scrollLeft += event.deltaY;
+        event.preventDefault();
+    };
+
+    const scrollByDir = (dir: -1 | 1) => {
+        const el = ref.current;
+        if (!el) return;
+        const delta = Math.max(220, Math.floor(el.clientWidth * 0.8));
+        el.scrollBy({ left: dir * delta, behavior: "smooth" });
+    };
+
+    return (
+        <div className={`bookingFlow__picker ${props.className ?? ""}`.trim()}>
+            <button
+                type="button"
+                className="bookingFlow__scrollArrow bookingFlow__scrollArrow--left"
+                onClick={() => scrollByDir(-1)}
+                disabled={!canLeft}
+                aria-label="Rolagem para a esquerda"
+            >
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                    <path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+            </button>
+
+            <button
+                type="button"
+                className="bookingFlow__scrollArrow bookingFlow__scrollArrow--right"
+                onClick={() => scrollByDir(1)}
+                disabled={!canRight}
+                aria-label="Rolagem para a direita"
+            >
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                    <path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+            </button>
+
+            <div
+                ref={ref}
+                className="bookingFlow__scrollWindow"
+                onWheel={handleWheel}
+                onScroll={update}
+                role="group"
+                aria-label={props.ariaLabel}
+            >
+                {props.children}
+            </div>
+        </div>
+    );
 }
 
 export default function BookingFlow() {
@@ -298,7 +372,7 @@ export default function BookingFlow() {
             return;
         }
         if (!doctor || !service || !dateKey || !timeKey) {
-            setSubmitError("Selecione doutor, procedimento, data e horário.");
+            setSubmitError("Selecione profissional, procedimento, data e horário.");
             return;
         }
         if (durationMinutes <= 0) {
@@ -351,6 +425,14 @@ export default function BookingFlow() {
                 const err = (json && "error" in json && json.error) || "Não foi possível enviar seu pedido.";
                 if (err === "slot_in_review") {
                     setSubmitError("Esse horário acabou de entrar em análise. Escolha outro horário.");
+                    return;
+                }
+                if (err === "no_availability") {
+                    setSubmitError("Esse horário não está mais disponível. Escolha outro horário.");
+                    return;
+                }
+                if (err === "no_doctors_for_unit") {
+                    setSubmitError("Não foi possível selecionar um profissional para esta unidade. Tente escolher um profissional específico.");
                     return;
                 }
                 if (err === "rate_limited") {
@@ -432,18 +514,12 @@ export default function BookingFlow() {
     const whatsappSeemsValid = whatsappDigits.length >= 10;
     const turnstileRequired = !!turnstileSiteKey;
 
-    const handleHorizontalScroll = (event: WheelEvent<HTMLDivElement>) => {
-        if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
-        event.currentTarget.scrollLeft += event.deltaY;
-        event.preventDefault();
-    };
-
     return (
         <div className="bookingFlow">
             <div className="bookingFlow__intro">
                 <h1>Agendamento</h1>
                 <p>
-                    Escolha o doutor, o procedimento, os serviços e o horário. Você recebe a confirmação por WhatsApp em até 1 hora.
+                    Escolha um(a) profissional (ou sem preferência), o procedimento (ou quero orientação), os serviços e o horário. Você recebe a confirmação por WhatsApp em até 1 hora.
                 </p>
                 {unit ? (
                     <div className="small bookingFlow__unitStatus">
@@ -460,6 +536,9 @@ export default function BookingFlow() {
                 <div className="bookingFlow__grid">
                     <div className="card" style={{ padding: 16 }}>
                         <div style={{ fontWeight: 900 }}>1) Doutor</div>
+                        <div className="small" style={{ marginTop: 6, color: "var(--muted)" }}>
+                            Selecione um(a) profissional (ou sem preferência).
+                        </div>
                         <div style={{ marginTop: 10 }}>
                             {unitLabel ? null : <div className="small">Selecione BarraShoppingSul ou Novo Hamburgo no topo para ver doutores.</div>}
                             {doctorsForUnit === null ? (
@@ -467,14 +546,14 @@ export default function BookingFlow() {
                             ) : doctorsForUnit.length === 0 ? (
                                 <div className="small">Nenhum doutor encontrado para esta unidade.</div>
                             ) : (
-                                <div className="bookingFlow__scrollWindow" onWheel={handleHorizontalScroll}>
+                                <ScrollPicker ariaLabel="Lista de profissionais">
                                     {doctorsForUnit.map((d) => {
                                         const active = doctor?.slug === d.slug;
                                         return (
                                             <button
                                                 key={d.slug}
                                                 type="button"
-                                                className="card"
+                                                className="card bookingFlow__pickCard"
                                                 onClick={() => {
                                                     if (active) {
                                                         setDoctor(null);
@@ -492,19 +571,20 @@ export default function BookingFlow() {
                                                     border: active ? "2px solid #111" : "1px solid var(--border)",
                                                     background: "white",
                                                     padding: 14,
-                                                    minWidth: 260,
+                                                    width: 220,
+                                                    minWidth: 220,
                                                     flex: "0 0 auto",
                                                     scrollSnapAlign: "start",
                                                 }}
                                             >
                                                 <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                                                    <div style={{ width: 44, height: 44, borderRadius: 12, overflow: "hidden", background: "#fff" }}>
+                                                    <div style={{ width: 56, height: 56, borderRadius: 14, overflow: "hidden", background: "#fff", flex: "0 0 auto" }}>
                                                         {d.handle ? (
                                                             <Image
                                                                 src={avatarUrl(d.handle, d.nickname ?? d.name)}
                                                                 alt={d.nickname ?? d.name}
-                                                                width={44}
-                                                                height={44}
+                                                                width={56}
+                                                                height={56}
                                                                 unoptimized
                                                             />
                                                         ) : null}
@@ -517,20 +597,76 @@ export default function BookingFlow() {
                                             </button>
                                         );
                                     })}
-                                </div>
+
+                                    <button
+                                        type="button"
+                                        className="card bookingFlow__pickCard"
+                                        onClick={() => {
+                                            const active = doctor?.slug === "any";
+                                            if (active) {
+                                                setDoctor(null);
+                                            } else {
+                                                setDoctor({ slug: "any", name: "Sem preferência", handle: null });
+                                            }
+                                            setDateKey(null);
+                                            setDateTouched(false);
+                                            setTimeKey(null);
+                                            setStep("pick");
+                                        }}
+                                        style={{
+                                            textAlign: "left",
+                                            cursor: "pointer",
+                                            border: doctor?.slug === "any" ? "2px solid #111" : "1px solid var(--border)",
+                                            background: "white",
+                                            padding: 14,
+                                            width: 220,
+                                            minWidth: 220,
+                                            flex: "0 0 auto",
+                                            scrollSnapAlign: "start",
+                                        }}
+                                    >
+                                        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                                            <div
+                                                style={{
+                                                    width: 56,
+                                                    height: 56,
+                                                    borderRadius: 14,
+                                                    background: "#111",
+                                                    color: "#fff",
+                                                    display: "grid",
+                                                    placeItems: "center",
+                                                    fontWeight: 900,
+                                                    letterSpacing: "-0.4px",
+                                                    flex: "0 0 auto",
+                                                }}
+                                                aria-hidden="true"
+                                            >
+                                                EF
+                                            </div>
+                                            <div style={{ minWidth: 0 }}>
+                                                <div style={{ fontWeight: 900, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Sem preferência</div>
+                                                <div className="small" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Primeiro horário disponível</div>
+                                            </div>
+                                        </div>
+                                    </button>
+                                </ScrollPicker>
                             )}
                         </div>
                     </div>
 
                     <div className="card" style={{ padding: 16 }}>
                         <div style={{ fontWeight: 900 }}>2) Procedimento</div>
-                        <div className="bookingFlow__scrollWindow" onWheel={handleHorizontalScroll}>
+                        <div className="small" style={{ marginTop: 6, color: "var(--muted)" }}>
+                            Selecione o procedimento desejado (ou peça orientação).
+                        </div>
+                        <ScrollPicker ariaLabel="Lista de procedimentos">
                             {services.map((s) => {
                                 const active = service?.id === s.id;
                                 return (
                                     <button
                                         key={s.id}
                                         type="button"
+                                        className="bookingFlow__pickCard"
                                         onClick={() => {
                                             if (active) {
                                                 setService(null);
@@ -552,7 +688,8 @@ export default function BookingFlow() {
                                             color: "#111",
                                             display: "grid",
                                             gap: 2,
-                                            minWidth: 260,
+                                            width: 220,
+                                            minWidth: 220,
                                             flex: "0 0 auto",
                                             scrollSnapAlign: "start",
                                         }}
@@ -564,11 +701,49 @@ export default function BookingFlow() {
                                     </button>
                                 );
                             })}
-                        </div>
+
+                            <button
+                                type="button"
+                                className="bookingFlow__pickCard"
+                                onClick={() => {
+                                    const active = service?.id === "any";
+                                    if (active) {
+                                        setService(null);
+                                    } else {
+                                        setService({ id: "any", name: "Quero orientação", subtitle: "Ainda não sei qual procedimento" });
+                                    }
+                                    setDateKey(null);
+                                    setDateTouched(false);
+                                    setTimeKey(null);
+                                    setStep("pick");
+                                }}
+                                style={{
+                                    cursor: "pointer",
+                                    textAlign: "left",
+                                    padding: "10px 12px",
+                                    borderRadius: 12,
+                                    border: service?.id === "any" ? "2px solid #111" : "1px solid var(--border)",
+                                    background: "#fff",
+                                    color: "#111",
+                                    display: "grid",
+                                    gap: 2,
+                                    width: 220,
+                                    minWidth: 220,
+                                    flex: "0 0 auto",
+                                    scrollSnapAlign: "start",
+                                }}
+                            >
+                                <div style={{ fontWeight: 850, lineHeight: 1.15, fontSize: 13 }}>Quero orientação</div>
+                                <div style={{ fontSize: 11.5, color: "var(--muted)", lineHeight: 1.2 }}>Ainda não sei qual procedimento</div>
+                            </button>
+                        </ScrollPicker>
                     </div>
 
                     <div className="card" style={{ padding: 16 }}>
                         <div style={{ fontWeight: 900 }}>3) Serviços</div>
+                        <div className="small" style={{ marginTop: 6, color: "var(--muted)" }}>
+                            Selecione um ou mais serviços para calcular o tempo total.
+                        </div>
                         <div style={{ marginTop: 10, display: "grid", gap: 10 }}>
                             <div className="small" style={{ color: "var(--muted)" }}>
                                 Total: <span style={{ fontWeight: 900 }}>{durationMinutes} min</span>
@@ -620,7 +795,7 @@ export default function BookingFlow() {
                                             flex: "0 0 auto",
                                         }}
                                     >
-                                        {opt.label} (+{opt.minutes})
+                                        {opt.label}
                                     </button>
                                 ))}
                             </div>
@@ -632,134 +807,144 @@ export default function BookingFlow() {
                         </div>
                     </div>
 
-                    <div className="card" style={{ padding: 16 }}>
-                        <div style={{ fontWeight: 900 }}>4) Data</div>
-                        <div className="small" style={{ marginTop: 8, color: "var(--muted)" }}>
+                    <div className="card bookingFlow__cardFull" style={{ padding: 16 }}>
+                        <div style={{ fontWeight: 900 }}>4) Data e horário</div>
+                        <div className="small" style={{ marginTop: 6, color: "var(--muted)" }}>
                             {upcomingDays.length ? `${formatDatePtBr(upcomingDays[0])} – ${formatDatePtBr(upcomingDays[upcomingDays.length - 1] ?? upcomingDays[0])}` : null}
                         </div>
-                        <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", gap: 8 }}>
-                            {upcomingDays.map((d) => {
-                                const active = dateKey === d;
-                                return (
-                                    <button
-                                        key={d}
-                                        type="button"
-                                        disabled={!canPick}
-                                        onClick={() => {
-                                            setDateTouched(true);
-                                            if (active) {
-                                                setDateKey(null);
-                                                setTimeKey(null);
-                                                setStep("pick");
-                                                return;
-                                            }
 
-                                            setDateKey(d);
-                                            setTimeKey(null);
-                                            setStep("pick");
-                                        }}
-                                        style={{
-                                            cursor: canPick ? "pointer" : "not-allowed",
-                                            opacity: canPick ? 1 : 0.5,
-                                            border: active ? "1px solid #111" : "1px solid var(--border)",
-                                            background: active ? "#111" : "#fff",
-                                            color: active ? "#fff" : "#111",
-                                            fontWeight: 900,
-                                            borderRadius: 12,
-                                            padding: "10px 8px",
-                                            textAlign: "center",
-                                            display: "grid",
-                                            gap: 2,
-                                        }}
-                                    >
-                                        <div style={{ fontSize: 11, fontWeight: 800, opacity: active ? 0.9 : 0.75 }}>
-                                            {weekdayPtBrShort(d)}
-                                        </div>
-                                        <div style={{ fontSize: 14, fontWeight: 950, letterSpacing: "-0.2px" }}>
-                                            {parseLocalDateKey(d)?.getDate()}
-                                        </div>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                        {!canPick ? (
-                            <div className="small" style={{ marginTop: 10 }}>
-                                {!unitSlug ? "Selecione a unidade no topo para liberar as datas." : "Selecione doutor, procedimento e serviços para liberar as datas."}
-                            </div>
-                        ) : null}
-                    </div>
-
-                    <div className="card" style={{ padding: 16 }}>
-                        <div style={{ fontWeight: 900 }}>5) Horário</div>
-                        <div style={{ marginTop: 10 }}>
-                            {!dateKey ? (
-                                <div className="small">Escolha uma data para ver horários.</div>
-                            ) : slotsLoading ? (
-                                <div className="small">Carregando horários…</div>
-                            ) : slotsError ? (
-                                <div className="small">{slotsError}</div>
-                            ) : slots ? (
-                                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: 10 }}>
-                                    {slots.slots.map((s) => {
-                                        const active = timeKey === s.time;
-                                        const disabled = !s.available;
-                                        const label =
-                                            s.reason === "booked"
-                                                ? "Indisponível"
-                                                : s.reason === "in_review"
-                                                    ? "Em análise"
-                                                    : s.reason === "past"
-                                                        ? "Passou"
-                                                        : "";
-
+                        <div className="bookingFlow__datetimeGrid" style={{ marginTop: 12 }}>
+                            <div>
+                                <div className="small" style={{ fontWeight: 800, marginBottom: 8 }}>
+                                    Datas
+                                </div>
+                                <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", gap: 8 }}>
+                                    {upcomingDays.map((d) => {
+                                        const active = dateKey === d;
                                         return (
                                             <button
-                                                key={s.time}
+                                                key={d}
                                                 type="button"
-                                                disabled={disabled}
+                                                disabled={!canPick}
                                                 onClick={() => {
+                                                    setDateTouched(true);
                                                     if (active) {
+                                                        setDateKey(null);
                                                         setTimeKey(null);
                                                         setStep("pick");
-                                                        setDetailsStartedAtMs(null);
-                                                        setTurnstileToken(null);
-                                                        setTurnstileHadError(false);
                                                         return;
                                                     }
-                                                    setTimeKey(s.time);
-                                                    setStep("details");
-                                                    setDetailsStartedAtMs(Date.now());
-                                                    setTurnstileToken(null);
-                                                    setTurnstileHadError(false);
+
+                                                    setDateKey(d);
+                                                    setTimeKey(null);
+                                                    setStep("pick");
                                                 }}
                                                 style={{
-                                                    padding: "12px 12px",
-                                                    borderRadius: 12,
-                                                    border: active ? "2px solid #111" : "1px solid var(--border)",
-                                                    background: disabled ? "#f3f3f3" : active ? "#111" : "#fff",
-                                                    color: disabled ? "#777" : active ? "#fff" : "#111",
-                                                    cursor: disabled ? "not-allowed" : "pointer",
+                                                    cursor: canPick ? "pointer" : "not-allowed",
+                                                    opacity: canPick ? 1 : 0.5,
+                                                    border: active ? "1px solid #111" : "1px solid var(--border)",
+                                                    background: active ? "#111" : "#fff",
+                                                    color: active ? "#fff" : "#111",
                                                     fontWeight: 900,
-                                                    textAlign: "left",
+                                                    borderRadius: 12,
+                                                    padding: "10px 8px",
+                                                    textAlign: "center",
+                                                    display: "grid",
+                                                    gap: 2,
                                                 }}
                                             >
-                                                <div>{s.time}</div>
-                                                {label ? <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.8 }}>{label}</div> : null}
+                                                <div style={{ fontSize: 11, fontWeight: 800, opacity: active ? 0.9 : 0.75 }}>
+                                                    {weekdayPtBrShort(d)}
+                                                </div>
+                                                <div style={{ fontSize: 14, fontWeight: 950, letterSpacing: "-0.2px" }}>
+                                                    {parseLocalDateKey(d)?.getDate()}
+                                                </div>
                                             </button>
                                         );
                                     })}
                                 </div>
-                            ) : (
-                                <div className="small">Selecione os passos acima para ver horários.</div>
-                            )}
+                                {!canPick ? (
+                                    <div className="small" style={{ marginTop: 10 }}>
+                                        {!unitSlug ? "Selecione a unidade no topo para liberar as datas." : "Selecione profissional, procedimento e serviços para liberar as datas."}
+                                    </div>
+                                ) : null}
+                            </div>
+
+                            <div>
+                                <div className="small" style={{ fontWeight: 800, marginBottom: 8 }}>
+                                    Horários
+                                </div>
+                                <div style={{ minHeight: 44 }}>
+                                    {!dateKey ? (
+                                        <div className="small">Escolha uma data para ver horários.</div>
+                                    ) : slotsLoading ? (
+                                        <div className="small">Carregando horários…</div>
+                                    ) : slotsError ? (
+                                        <div className="small">{slotsError}</div>
+                                    ) : slots ? (
+                                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: 10 }}>
+                                            {slots.slots.map((s) => {
+                                                const active = timeKey === s.time;
+                                                const disabled = !s.available;
+                                                const label =
+                                                    s.reason === "booked"
+                                                        ? "Indisponível"
+                                                        : s.reason === "in_review"
+                                                            ? "Em análise"
+                                                            : s.reason === "past"
+                                                                ? "Passou"
+                                                                : "";
+
+                                                return (
+                                                    <button
+                                                        key={s.time}
+                                                        type="button"
+                                                        disabled={disabled}
+                                                        onClick={() => {
+                                                            if (active) {
+                                                                setTimeKey(null);
+                                                                setStep("pick");
+                                                                setDetailsStartedAtMs(null);
+                                                                setTurnstileToken(null);
+                                                                setTurnstileHadError(false);
+                                                                return;
+                                                            }
+                                                            setTimeKey(s.time);
+                                                            setStep("details");
+                                                            setDetailsStartedAtMs(Date.now());
+                                                            setTurnstileToken(null);
+                                                            setTurnstileHadError(false);
+                                                        }}
+                                                        style={{
+                                                            padding: "12px 12px",
+                                                            borderRadius: 12,
+                                                            border: active ? "2px solid #111" : "1px solid var(--border)",
+                                                            background: disabled ? "#f3f3f3" : active ? "#111" : "#fff",
+                                                            color: disabled ? "#777" : active ? "#fff" : "#111",
+                                                            cursor: disabled ? "not-allowed" : "pointer",
+                                                            fontWeight: 900,
+                                                            textAlign: "left",
+                                                        }}
+                                                    >
+                                                        <div>{s.time}</div>
+                                                        {label ? <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.8 }}>{label}</div> : null}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    ) : (
+                                        <div className="small">Selecione os passos acima para ver horários.</div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     {step === "details" && unitSlug && doctor && service && dateKey && timeKey ? (
                         <div className="card bookingFlow__cardFull" style={{ padding: 16 }}>
-                            <div style={{ fontWeight: 900 }}>6) Seus dados</div>
+                            <div style={{ fontWeight: 900 }}>5) Seus dados</div>
                             <div className="small" style={{ marginTop: 8 }}>
-                                {service.name} ({durationMinutes}min) · {formatDatePtBr(dateKey)} às {timeKey}
+                                {service.name} ({durationMinutes} min) · {formatDatePtBr(dateKey)} às {timeKey}
                             </div>
 
                             <div style={{ display: "grid", gap: 10, marginTop: 12 }}>

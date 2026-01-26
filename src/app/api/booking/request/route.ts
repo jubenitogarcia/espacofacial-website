@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getBookingDb, nowMs, addMinutes, clampText, normalizePhone, sanitizeOneLine, isValidDateKey, isValidTimeKey, toSaoPauloIso, slugify } from "@/lib/bookingDb";
 import { getServiceById } from "@/data/services";
 import { signBookingDecision } from "@/lib/bookingSecurity";
+import { getUnitDoctors } from "@/lib/injectorsDirectory";
 
 export const dynamic = "force-dynamic";
 
@@ -166,7 +167,10 @@ export async function POST(request: Request) {
         return json({ ok: false, error: "invalid_whatsapp" }, { status: 400 });
     }
 
-    const service = getServiceById(serviceId);
+    const service =
+        serviceId === "any"
+            ? { id: "any", name: "Sem preferência" }
+            : getServiceById(serviceId);
     if (!service) {
         return json({ ok: false, error: "invalid_service" }, { status: 400 });
     }
@@ -179,7 +183,8 @@ export async function POST(request: Request) {
         return json({ ok: false, error: "invalid_duration" }, { status: 400 });
     }
 
-    const doctorSlug = doctorSlugRaw || (doctorName ? slugify(doctorName) : "");
+    const wantsAnyDoctor = doctorSlugRaw === "any";
+    const doctorSlug = wantsAnyDoctor ? "any" : doctorSlugRaw || (doctorName ? slugify(doctorName) : "");
     if (!doctorSlug) {
         return json({ ok: false, error: "invalid_doctor" }, { status: 400 });
     }
@@ -248,12 +253,59 @@ export async function POST(request: Request) {
 
     const db = await getBookingDb();
 
+    // If the user has no preference, pick a free doctor for that unit+slot.
+    let effectiveDoctorSlug = doctorSlug;
+    let safeDoctorName = clampText(doctorName || doctorSlug, 120);
+    if (wantsAnyDoctor) {
+        const doctors = await getUnitDoctors(unitSlug);
+        if (doctors.length === 0) {
+            return json({ ok: false, error: "no_doctors_for_unit" }, { status: 400 });
+        }
+
+        const placeholders = doctors.map(() => "?").join(", ");
+        const overlapsRes = await db
+            .prepare(
+                `SELECT id, doctor_slug, status, confirm_by_ms, start_at_ms, end_at_ms FROM booking_requests WHERE unit_slug = ? AND doctor_slug IN (${placeholders}) AND start_at_ms < ? AND end_at_ms > ?`,
+            )
+            .bind(unitSlug, ...doctors.map((d) => d.slug), endAtMs, startAtMs)
+            .all<{ id: string; doctor_slug: string; status: string; confirm_by_ms: number; start_at_ms: number; end_at_ms: number }>();
+
+        await expireStaleOverlaps(db, overlapsRes.results);
+
+        const now = nowMs();
+        const activeByDoctor = new Map<string, { hasConfirmed: boolean; hasPending: boolean }>();
+
+        for (const o of overlapsRes.results) {
+            const status = (o.status ?? "").toString();
+            const isConfirmed = status === "confirmed";
+            const isPending = status === "pending" || status === "needs_approval";
+            if (!isConfirmed && !isPending) continue;
+
+            if (isPending && now > Number(o.confirm_by_ms ?? 0)) continue;
+
+            const slug = (o.doctor_slug ?? "").toString();
+            const cur = activeByDoctor.get(slug) ?? { hasConfirmed: false, hasPending: false };
+            if (isConfirmed) cur.hasConfirmed = true;
+            if (isPending) cur.hasPending = true;
+            activeByDoctor.set(slug, cur);
+        }
+
+        const pick = doctors.find((d) => !activeByDoctor.has(d.slug)) ?? null;
+        if (!pick) {
+            const anyPending = Array.from(activeByDoctor.values()).some((v) => v.hasPending);
+            return json({ ok: false, error: anyPending ? "slot_in_review" : "no_availability" }, { status: 409 });
+        }
+
+        effectiveDoctorSlug = pick.slug;
+        safeDoctorName = clampText(pick.name, 120);
+    }
+
     // Check overlaps for the same unit+doctor.
     const overlapsRes = await db
         .prepare(
             "SELECT id, status, confirm_by_ms, start_at_ms, end_at_ms FROM booking_requests WHERE unit_slug = ? AND doctor_slug = ? AND start_at_ms < ? AND end_at_ms > ?",
         )
-        .bind(unitSlug, doctorSlug, endAtMs, startAtMs)
+        .bind(unitSlug, effectiveDoctorSlug, endAtMs, startAtMs)
         .all<{ id: string; status: string; confirm_by_ms: number; start_at_ms: number; end_at_ms: number }>();
 
     await expireStaleOverlaps(db, overlapsRes.results);
@@ -282,8 +334,6 @@ export async function POST(request: Request) {
 
     const id = uuid();
 
-    const safeDoctorName = clampText(doctorName || doctorSlug, 120);
-
     const siteUrl = getSiteUrl(request);
     const decisionSecret = (process.env.BOOKING_DECISION_SECRET ?? "").trim();
     const decisionExpMs = confirmByMs;
@@ -309,7 +359,7 @@ export async function POST(request: Request) {
             id,
             status,
             unitSlug,
-            doctorSlug,
+            doctorSlug: effectiveDoctorSlug,
             doctorName: safeDoctorName,
             durationMinutes,
             includes: body.includes ?? null,
@@ -332,7 +382,7 @@ export async function POST(request: Request) {
             .bind(
                 id,
                 unitSlug,
-                doctorSlug,
+                effectiveDoctorSlug,
                 serviceId,
                 startAtMs,
                 endAtMs,
@@ -356,7 +406,7 @@ export async function POST(request: Request) {
             status,
             confirmByMs,
             unitSlug,
-            doctorSlug,
+            doctorSlug: effectiveDoctorSlug,
             doctorName: safeDoctorName,
             durationMinutes,
             service: { id: service.id, name: service.name },

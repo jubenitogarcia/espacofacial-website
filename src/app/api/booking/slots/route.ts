@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getBookingDb, nowMs, addMinutes, isValidDateKey, isValidTimeKey, toSaoPauloIso } from "@/lib/bookingDb";
 import { getServiceById } from "@/data/services";
+import { getUnitDoctors } from "@/lib/injectorsDirectory";
 
 export const dynamic = "force-dynamic";
 
@@ -90,9 +91,11 @@ export async function GET(req: Request) {
         return json({ ok: false, error: "invalid_date" }, { status: 400 });
     }
 
-    const service = getServiceById(serviceId);
-    if (!service) {
-        return json({ ok: false, error: "invalid_service" }, { status: 400 });
+    if (serviceId !== "any") {
+        const service = getServiceById(serviceId);
+        if (!service) {
+            return json({ ok: false, error: "invalid_service" }, { status: 400 });
+        }
     }
 
     if (!Number.isFinite(durationMinutesRaw)) {
@@ -106,17 +109,25 @@ export async function GET(req: Request) {
 
     const db = await getBookingDb();
 
-    // Fetch existing bookings for that day (unit + doctor only)
+    const wantsAnyDoctor = doctorSlug === "any";
+    const unitDoctors = wantsAnyDoctor ? await getUnitDoctors(unitSlug) : null;
+    const doctorSlugs = wantsAnyDoctor ? unitDoctors!.map((d) => d.slug) : [doctorSlug];
+    if (wantsAnyDoctor && doctorSlugs.length === 0) {
+        return json({ ok: false, error: "no_doctors_for_unit" }, { status: 400 });
+    }
+
+    // Fetch existing bookings for that day (unit + doctor(s))
     const dayStartIso = toSaoPauloIso(date, "00:00");
     const dayStartMs = Date.parse(dayStartIso);
     const dayEndMs = addMinutes(dayStartMs, 24 * 60);
 
+    const inPlaceholders = doctorSlugs.map(() => "?").join(", ");
     const existing = await db
         .prepare(
-            "SELECT id, start_at_ms, end_at_ms, status, confirm_by_ms FROM booking_requests WHERE unit_slug = ? AND doctor_slug = ? AND start_at_ms < ? AND end_at_ms > ?",
+            `SELECT id, doctor_slug, start_at_ms, end_at_ms, status, confirm_by_ms FROM booking_requests WHERE unit_slug = ? AND doctor_slug IN (${inPlaceholders}) AND start_at_ms < ? AND end_at_ms > ?`,
         )
-        .bind(unitSlug, doctorSlug, dayEndMs, dayStartMs)
-        .all<{ id: string; start_at_ms: number; end_at_ms: number; status: string; confirm_by_ms: number }>();
+        .bind(unitSlug, ...doctorSlugs, dayEndMs, dayStartMs)
+        .all<{ id: string; doctor_slug: string; start_at_ms: number; end_at_ms: number; status: string; confirm_by_ms: number }>();
 
     // Expire stale rows we just loaded.
     for (const row of existing.results) {
@@ -133,6 +144,7 @@ export async function GET(req: Request) {
             const activeConfirmed = status === "confirmed";
             return {
                 id: r.id,
+                doctorSlug: (r.doctor_slug ?? "").toString(),
                 start: Number(r.start_at_ms),
                 end: Number(r.end_at_ms),
                 status,
@@ -141,6 +153,14 @@ export async function GET(req: Request) {
             };
         })
         .filter((r) => r.active);
+
+    const byDoctor = new Map<string, Array<{ start: number; end: number; isConfirmed: boolean }>>();
+    for (const e of normalizedExisting) {
+        const key = e.doctorSlug;
+        const list = byDoctor.get(key) ?? [];
+        list.push({ start: e.start, end: e.end, isConfirmed: e.isConfirmed });
+        if (!byDoctor.has(key)) byDoctor.set(key, list);
+    }
 
     const out = daySlots.map((s) => {
         const time = s.time;
@@ -155,12 +175,34 @@ export async function GET(req: Request) {
         let available = true;
         let reason: string | null = null;
 
-        for (const e of normalizedExisting) {
-            const overlaps = e.start < endMs && e.end > startMs;
-            if (!overlaps) continue;
-            available = false;
-            reason = e.isConfirmed ? "booked" : "in_review";
-            break;
+        if (!wantsAnyDoctor) {
+            for (const e of normalizedExisting) {
+                const overlaps = e.start < endMs && e.end > startMs;
+                if (!overlaps) continue;
+                available = false;
+                reason = e.isConfirmed ? "booked" : "in_review";
+                break;
+            }
+        } else {
+            let hasPending = false;
+            let hasConfirmed = false;
+            let anyFree = false;
+
+            for (const slug of doctorSlugs) {
+                const ranges = byDoctor.get(slug) ?? [];
+                const overlap = ranges.some((e) => e.start < endMs && e.end > startMs);
+                if (!overlap) {
+                    anyFree = true;
+                    break;
+                }
+                if (ranges.some((e) => e.start < endMs && e.end > startMs && e.isConfirmed)) hasConfirmed = true;
+                if (ranges.some((e) => e.start < endMs && e.end > startMs && !e.isConfirmed)) hasPending = true;
+            }
+
+            if (!anyFree) {
+                available = false;
+                reason = hasPending ? "in_review" : hasConfirmed ? "booked" : "booked";
+            }
         }
 
         // Prevent booking in the past.

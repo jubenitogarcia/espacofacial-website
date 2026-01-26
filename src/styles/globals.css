@@ -343,6 +343,62 @@ button:focus-visible {
   grid-column: 1 / -1;
 }
 
+.bookingFlow__picker {
+  position: relative;
+  margin-top: 10px;
+}
+
+.bookingFlow__picker .bookingFlow__scrollWindow {
+  margin-top: 0;
+  padding-left: 28px;
+  padding-right: 28px;
+  scroll-padding-left: 28px;
+  scroll-padding-right: 28px;
+}
+
+.bookingFlow__scrollArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.92);
+  color: #111;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+}
+
+.bookingFlow__scrollArrow:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.bookingFlow__scrollArrow--left {
+  left: 6px;
+}
+
+.bookingFlow__scrollArrow--right {
+  right: 6px;
+}
+
+.bookingFlow__datetimeGrid {
+  display: grid;
+  gap: 16px;
+}
+
+@media (min-width: 860px) {
+  .bookingFlow__datetimeGrid {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
 .bookingFlow__scrollWindow {
   margin-top: 10px;
   width: 100%;
