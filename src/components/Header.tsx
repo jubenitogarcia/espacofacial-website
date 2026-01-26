@@ -3,6 +3,7 @@ import AgendeCta from "@/components/AgendeCta";
 import UnitChooser from "@/components/UnitChooser";
 import HeaderInstagram from "@/components/HeaderInstagram";
 import Brand from "@/components/Brand";
+import HeaderMobileMenu from "@/components/HeaderMobileMenu";
 
 export default function Header() {
   return (
@@ -10,6 +11,7 @@ export default function Header() {
       <div className="container">
         <div className="nav">
           <div className="navLeft">
+            <HeaderMobileMenu />
             <Brand className="brand--header" />
           </div>
 
