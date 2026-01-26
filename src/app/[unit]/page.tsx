@@ -16,6 +16,20 @@ function normalizeSlug(value: string): string {
     return value.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
+function unitLocality(unitSlug: string): string | null {
+    const normalized = normalizeSlug(unitSlug);
+    if (normalized === "novohamburgo") return "Novo Hamburgo";
+    if (normalized === "barrashoppingsul") return "Porto Alegre";
+    return null;
+}
+
+function normalizeTelephone(value: string | undefined): string | null {
+    const v = (value ?? "").trim();
+    if (!v) return null;
+    if (v.startsWith("tel:")) return v.slice(4);
+    return v;
+}
+
 function resolveUnitFromParam(param: string) {
     const direct = units.find((u) => u.slug === param);
     if (direct) return direct;
@@ -88,10 +102,51 @@ export default function UnitHomePage({
         redirect(suffix ? `/${canonicalPath}?${suffix}` : `/${canonicalPath}`);
     }
 
+    const isIndexable = isIndexableUnitPath(canonicalPath);
+    const locality = unitLocality(unit.slug);
+    const telephone = normalizeTelephone(unit.whatsappPhone) ?? normalizeTelephone(unit.phone);
+
+    const localBusinessJsonLd =
+        isIndexable && locality && unit.addressLine
+            ? {
+                "@context": "https://schema.org",
+                "@type": "MedicalBusiness",
+                "@id": `${siteUrl}/${canonicalPath}#localbusiness`,
+                name: `Espaço Facial - ${unit.name}`,
+                url: `${siteUrl}/${canonicalPath}`,
+                image: `${siteUrl}/opengraph-image`,
+                telephone: telephone ?? undefined,
+                address: {
+                    "@type": "PostalAddress",
+                    streetAddress: unit.addressLine,
+                    addressLocality: locality,
+                    addressRegion: unit.state ?? "RS",
+                    addressCountry: "BR",
+                },
+                geo:
+                    typeof unit.lat === "number" && typeof unit.lng === "number"
+                        ? {
+                            "@type": "GeoCoordinates",
+                            latitude: unit.lat,
+                            longitude: unit.lng,
+                        }
+                        : undefined,
+                sameAs: [unit.instagram, unit.facebook].filter(Boolean),
+                hasMap: unit.maps ?? undefined,
+            }
+            : null;
+
     return (
         <>
             <UnitSelectionSync slug={unit.slug} />
             <Header />
+            {localBusinessJsonLd ? (
+                <script
+                    type="application/ld+json"
+                    // eslint-disable-next-line react/no-danger
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
+                />
+            ) : null}
 
             <h1 className="srOnly">Espaço Facial</h1>
 
