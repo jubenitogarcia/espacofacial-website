@@ -335,6 +335,10 @@ export default function BookingFlow() {
                     setSubmitError("Esse horário acabou de entrar em análise. Escolha outro horário.");
                     return;
                 }
+                if (err === "rate_limited") {
+                    setSubmitError("Muitas tentativas em sequência. Aguarde alguns segundos e tente novamente.");
+                    return;
+                }
                 setSubmitError("Não foi possível enviar seu pedido. Tente novamente.");
                 return;
             }
