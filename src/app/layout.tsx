@@ -29,13 +29,13 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/icon.svg",
+        url: "/opengraph-image",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    images: ["/icon.svg"],
+    images: ["/twitter-image"],
   },
   icons: {
     icon: "/icon.svg",
