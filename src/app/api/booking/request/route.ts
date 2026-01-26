@@ -19,6 +19,10 @@ type Payload = {
     notes?: string;
 };
 
+type CfCacheStorage = {
+    default?: Cache;
+};
+
 function json(data: unknown, init?: ResponseInit) {
     return NextResponse.json(data, init);
 }
@@ -34,6 +38,19 @@ function getSiteUrl(request: Request): string {
     if (fromEnv) return fromEnv.replace(/\/$/, "");
     const url = new URL(request.url);
     return url.origin;
+}
+
+function getCloudflareCache(): Cache | null {
+    const cachesAny = (globalThis as unknown as { caches?: CfCacheStorage }).caches;
+    return cachesAny?.default ?? null;
+}
+
+function clientIp(request: Request): string | null {
+    const fromCf = (request.headers.get("cf-connecting-ip") ?? "").trim();
+    if (fromCf) return fromCf;
+    const xff = (request.headers.get("x-forwarded-for") ?? "").trim();
+    if (xff) return xff.split(",")[0]?.trim() || null;
+    return null;
 }
 
 async function tryPostWebhook(payload: unknown) {
@@ -147,6 +164,30 @@ export async function POST(request: Request) {
 
     if (startAtMs < createdAtMs) {
         return json({ ok: false, error: "start_in_past" }, { status: 400 });
+    }
+
+    // Best-effort rate limit to reduce spam bursts (per edge location/cache).
+    // We apply this only after basic validation to avoid blocking genuine corrections.
+    const cache = getCloudflareCache();
+    const ip = clientIp(request);
+    if (cache && ip) {
+        const origin = new URL(request.url).origin;
+        const cacheKey = new Request(`${origin}/__rate/booking_request/${encodeURIComponent(ip)}`);
+        try {
+            const hit = await cache.match(cacheKey);
+            if (hit) {
+                return json({ ok: false, error: "rate_limited" }, { status: 429 });
+            }
+            await cache.put(
+                cacheKey,
+                new Response("ok", {
+                    status: 200,
+                    headers: { "cache-control": "public, max-age=12, s-maxage=12" },
+                }),
+            );
+        } catch {
+            // ignore cache/rate-limit errors
+        }
     }
 
     const db = await getBookingDb();
