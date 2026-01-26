@@ -371,6 +371,76 @@ button:focus-visible {
   opacity: 0.8;
 }
 
+.bookingFlow__procedureCard {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: #111;
+  border-radius: 14px;
+  padding: 0;
+  overflow: hidden;
+  height: 192px;
+  cursor: pointer;
+  transition: transform 160ms ease, background 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+  will-change: transform;
+}
+
+.bookingFlow__procedureCard:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.bookingFlow__procedureCard:hover:not(:disabled),
+.bookingFlow__procedureCard--active {
+  transform: scale(1.02);
+  background: #111;
+  color: #fff;
+  border-color: rgba(17, 17, 17, 0.9);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.14);
+}
+
+.bookingFlow__procedureMedia {
+  height: 120px;
+  padding: 8px;
+  background: linear-gradient(135deg, rgba(17, 17, 17, 0.92), rgba(17, 17, 17, 0.62));
+}
+
+.bookingFlow__procedureMediaInner {
+  position: relative;
+  height: 100%;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  overflow: hidden;
+}
+
+.bookingFlow__procedureMediaFallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 900;
+  letter-spacing: -0.6px;
+}
+
+.bookingFlow__procedureMeta {
+  padding: 10px 12px;
+  display: grid;
+  gap: 2px;
+}
+
+.bookingFlow__procedureSub {
+  font-size: 11.5px;
+  line-height: 1.2;
+  color: var(--muted);
+}
+
+.bookingFlow__procedureCard:hover:not(:disabled) .bookingFlow__procedureSub,
+.bookingFlow__procedureCard--active .bookingFlow__procedureSub {
+  color: rgba(255, 255, 255, 0.72);
+}
+
 .bookingFlow__lockOverlay {
   position: absolute;
   inset: 0;

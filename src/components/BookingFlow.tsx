@@ -670,7 +670,7 @@ export default function BookingFlow() {
                                         key={s.id}
                                         type="button"
                                         disabled={!canPickProcedure}
-                                        className="bookingFlow__pickCard"
+                                        className={`bookingFlow__pickCard bookingFlow__procedureCard ${active ? "bookingFlow__procedureCard--active" : ""}`.trim()}
                                         onClick={() => {
                                             if (active) {
                                                 setService(null);
@@ -683,58 +683,37 @@ export default function BookingFlow() {
                                             setStep("pick");
                                         }}
                                         style={{
-                                            cursor: "pointer",
                                             textAlign: "left",
-                                            padding: 0,
-                                            borderRadius: 14,
-                                            border: active ? "2px solid #111" : "1px solid var(--border)",
-                                            background: "#fff",
-                                            color: "#111",
-                                            width: 220,
-                                            minWidth: 220,
+                                            width: 240,
+                                            minWidth: 240,
                                             flex: "0 0 auto",
                                             scrollSnapAlign: "start",
-                                            overflow: "hidden",
-                                            height: 176,
                                         }}
                                     >
                                         <div
-                                            style={{
-                                                position: "relative",
-                                                height: 96,
-                                                background: "linear-gradient(135deg, rgba(17,17,17,0.92), rgba(17,17,17,0.62))",
-                                            }}
+                                            className="bookingFlow__procedureMedia"
                                         >
-                                            {s.highlightImage ? (
-                                                <Image
-                                                    src={s.highlightImage}
-                                                    alt={s.name}
-                                                    fill
-                                                    sizes="220px"
-                                                    style={{ objectFit: "cover" }}
-                                                    unoptimized
-                                                />
-                                            ) : (
-                                                <div
-                                                    aria-hidden="true"
-                                                    style={{
-                                                        position: "absolute",
-                                                        inset: 0,
-                                                        display: "grid",
-                                                        placeItems: "center",
-                                                        color: "rgba(255,255,255,0.85)",
-                                                        fontWeight: 900,
-                                                        letterSpacing: "-0.6px",
-                                                    }}
-                                                >
-                                                    EF
-                                                </div>
-                                            )}
+                                            <div className="bookingFlow__procedureMediaInner">
+                                                {s.highlightImage ? (
+                                                    <Image
+                                                        src={s.highlightImage}
+                                                        alt={s.name}
+                                                        fill
+                                                        sizes="240px"
+                                                        style={{ objectFit: "contain" }}
+                                                        unoptimized
+                                                    />
+                                                ) : (
+                                                    <div className="bookingFlow__procedureMediaFallback" aria-hidden="true">
+                                                        EF
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
-                                        <div style={{ padding: "10px 12px", display: "grid", gap: 2 }}>
+                                        <div className="bookingFlow__procedureMeta">
                                             <div style={{ fontWeight: 850, lineHeight: 1.15, fontSize: 13 }}>{s.name}</div>
                                             {s.subtitle ? (
-                                                <div style={{ fontSize: 11.5, color: "var(--muted)", lineHeight: 1.2 }}>{s.subtitle}</div>
+                                                <div className="bookingFlow__procedureSub">{s.subtitle}</div>
                                             ) : null}
                                         </div>
                                     </button>
@@ -744,7 +723,7 @@ export default function BookingFlow() {
                             <button
                                 type="button"
                                 disabled={!canPickProcedure}
-                                className="bookingFlow__pickCard"
+                                className={`bookingFlow__pickCard bookingFlow__procedureCard ${service?.id === "any" ? "bookingFlow__procedureCard--active" : ""}`.trim()}
                                 onClick={() => {
                                     const active = service?.id === "any";
                                     if (active) {
@@ -757,40 +736,16 @@ export default function BookingFlow() {
                                     setTimeKey(null);
                                     setStep("pick");
                                 }}
-                                style={{
-                                    cursor: "pointer",
-                                    textAlign: "left",
-                                    padding: 0,
-                                    borderRadius: 14,
-                                    border: service?.id === "any" ? "2px solid #111" : "1px solid var(--border)",
-                                    background: "#fff",
-                                    color: "#111",
-                                    width: 220,
-                                    minWidth: 220,
-                                    flex: "0 0 auto",
-                                    scrollSnapAlign: "start",
-                                    overflow: "hidden",
-                                    height: 176,
-                                }}
+                                style={{ textAlign: "left", width: 240, minWidth: 240, flex: "0 0 auto", scrollSnapAlign: "start" }}
                             >
-                                <div
-                                    aria-hidden="true"
-                                    style={{
-                                        position: "relative",
-                                        height: 96,
-                                        background: "linear-gradient(135deg, rgba(17,17,17,0.92), rgba(17,17,17,0.62))",
-                                        color: "rgba(255,255,255,0.92)",
-                                        display: "grid",
-                                        placeItems: "center",
-                                        fontWeight: 900,
-                                        letterSpacing: "-0.6px",
-                                    }}
-                                >
-                                    EF
+                                <div className="bookingFlow__procedureMedia" aria-hidden="true">
+                                    <div className="bookingFlow__procedureMediaInner">
+                                        <div className="bookingFlow__procedureMediaFallback">EF</div>
+                                    </div>
                                 </div>
-                                <div style={{ padding: "10px 12px", display: "grid", gap: 2 }}>
+                                <div className="bookingFlow__procedureMeta">
                                     <div style={{ fontWeight: 850, lineHeight: 1.15, fontSize: 13 }}>Quero orientação</div>
-                                    <div style={{ fontSize: 11.5, color: "var(--muted)", lineHeight: 1.2 }}>Ainda não sei qual procedimento</div>
+                                    <div className="bookingFlow__procedureSub">Ainda não sei qual procedimento</div>
                                 </div>
                             </button>
                         </ScrollPicker>
