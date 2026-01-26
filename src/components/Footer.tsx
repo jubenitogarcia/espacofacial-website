@@ -1,4 +1,5 @@
 import Brand from "@/components/Brand";
+import Link from "next/link";
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -15,6 +16,11 @@ export default function Footer() {
             <div className="footerSmall">
               50.090.741/0001-89 &nbsp;&nbsp; Skincare &amp; Cosmetics Ltda. <br />
               54.425.741/0001-43 &nbsp;&nbsp; Skincare &amp; Cosmetics POA Ltda.
+            </div>
+            <div className="footerSmall" style={{ marginTop: 10 }}>
+              <Link href="/privacidade" style={{ textDecoration: "underline" }}>Privacidade e Cookies</Link>
+              {" · "}
+              <Link href="/termos" style={{ textDecoration: "underline" }}>Termos de Uso</Link>
             </div>
           </div>
         </div>

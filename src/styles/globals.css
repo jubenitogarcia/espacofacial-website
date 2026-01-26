@@ -1593,6 +1593,10 @@ video.heroMediaEl {
   color: #111;
 }
 
+.cookieBannerButton:hover {
+  background: #f3f3f3;
+}
+
 @media (max-width:900px) {
   .grid {
     grid-template-columns: repeat(2, 1fr)
