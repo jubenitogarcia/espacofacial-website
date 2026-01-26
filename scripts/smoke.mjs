@@ -32,7 +32,7 @@ async function run() {
     const tomorrowKey = `${yyyy}-${mm}-${dd}`;
 
     // Core pages
-    for (const path of ["/", "/unidades", "/doutores", "/sobre", "/termos", "/agendamento"]) {
+    for (const path of ["/", "/unidades", "/doutores", "/sobre", "/termos", "/privacidade", "/agendamento"]) {
         const res = await fetchHead(path, { redirect: "follow" });
         assert(res.status === 200, `${path} expected 200, got ${res.status}`);
     }

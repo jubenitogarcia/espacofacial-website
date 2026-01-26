@@ -27,7 +27,10 @@ export default function HeaderInstagram() {
     const allowed = useMemo(() => allowedUnits(), []);
 
     const [open, setOpen] = useState(false);
+    const [activeIndex, setActiveIndex] = useState(0);
     const wrapRef = useRef<HTMLDivElement | null>(null);
+    const buttonRef = useRef<HTMLButtonElement | null>(null);
+    const itemRefs = useRef<Array<HTMLAnchorElement | null>>([]);
 
     useEffect(() => {
         function onDocClick(e: MouseEvent) {
@@ -40,6 +43,17 @@ export default function HeaderInstagram() {
         document.addEventListener("click", onDocClick);
         return () => document.removeEventListener("click", onDocClick);
     }, []);
+
+    useEffect(() => {
+        if (!open) return;
+        const selectedIdx = unit?.slug ? allowed.findIndex((u) => u.slug === unit.slug) : -1;
+        const nextIdx = selectedIdx >= 0 ? selectedIdx : 0;
+        setActiveIndex(nextIdx);
+        const t = window.setTimeout(() => {
+            itemRefs.current[nextIdx]?.focus();
+        }, 0);
+        return () => window.clearTimeout(t);
+    }, [open, allowed, unit?.slug]);
 
     const currentInstagram = useMemo(() => {
         const slug = unit?.slug;
@@ -63,17 +77,65 @@ export default function HeaderInstagram() {
                     setOpen((v) => !v);
                     trackHeaderInstagramOpen({ unitSlug: unit?.slug ?? null, mode: "picker" });
                 }}
+                onKeyDown={(e) => {
+                    if (e.key === "Escape") {
+                        setOpen(false);
+                        return;
+                    }
+                    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+                        e.preventDefault();
+                        if (!currentInstagram) setOpen(true);
+                    }
+                }}
                 aria-haspopup="menu"
                 aria-expanded={open}
                 aria-label="Instagram"
                 title="Instagram"
+                ref={buttonRef}
             >
                 {instagramIcon()}
             </button>
 
             {open ? (
-                <div className="unitChooserMenu" role="menu" aria-label="Instagram das unidades">
-                    {allowed.map((u) => (
+                <div
+                    className="unitChooserMenu"
+                    role="menu"
+                    aria-label="Instagram das unidades"
+                    onKeyDown={(e) => {
+                        if (e.key === "Escape") {
+                            e.preventDefault();
+                            setOpen(false);
+                            buttonRef.current?.focus();
+                            return;
+                        }
+
+                        if (!allowed.length) return;
+
+                        if (e.key === "Home") {
+                            e.preventDefault();
+                            setActiveIndex(0);
+                            itemRefs.current[0]?.focus();
+                            return;
+                        }
+                        if (e.key === "End") {
+                            e.preventDefault();
+                            const idx = allowed.length - 1;
+                            setActiveIndex(idx);
+                            itemRefs.current[idx]?.focus();
+                            return;
+                        }
+
+                        if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+                            e.preventDefault();
+                            const dir = e.key === "ArrowDown" ? 1 : -1;
+                            const next = (activeIndex + dir + allowed.length) % allowed.length;
+                            setActiveIndex(next);
+                            itemRefs.current[next]?.focus();
+                            return;
+                        }
+                    }}
+                >
+                    {allowed.map((u, idx) => (
                         <a
                             key={u.slug}
                             className="unitChooserItem"
@@ -81,6 +143,10 @@ export default function HeaderInstagram() {
                             href={u.instagram ?? "#"}
                             target="_blank"
                             rel="noreferrer"
+                            tabIndex={idx === activeIndex ? 0 : -1}
+                            ref={(el) => {
+                                itemRefs.current[idx] = el;
+                            }}
                             onClick={(e) => {
                                 if (!u.instagram) {
                                     e.preventDefault();
@@ -88,6 +154,7 @@ export default function HeaderInstagram() {
                                 }
                                 trackHeaderInstagramClick({ unitSlug: u.slug, mode: "picker" });
                                 setOpen(false);
+                                buttonRef.current?.focus();
                             }}
                             style={{ display: "block" }}
                         >
