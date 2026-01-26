@@ -131,6 +131,8 @@ function Pin({
     onEnter,
     onLeave,
     onToggle,
+    onToggleKeyboard,
+    setRef,
 }: {
     x: number;
     y: number;
@@ -138,6 +140,8 @@ function Pin({
     onEnter: () => void;
     onLeave: () => void;
     onToggle: () => void;
+    onToggleKeyboard?: () => void;
+    setRef?: (el: SVGGElement | null) => void;
 }) {
     // Balloon marker similar to the provided reference (simplified, original SVG).
     const w = 86;
@@ -146,13 +150,22 @@ function Pin({
 
     return (
         <g
+            ref={setRef}
             transform={`translate(${x} ${y})`}
             onMouseEnter={onEnter}
             onMouseLeave={onLeave}
             onClick={onToggle}
+            onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    (onToggleKeyboard ?? onToggle)();
+                }
+            }}
             style={{ cursor: "pointer" }}
             role="button"
             aria-label="Ver unidades"
+            aria-pressed={active}
+            tabIndex={0}
         >
             <g transform={`translate(${-w / 2} ${-h})`}>
                 <g className={cls}>
@@ -197,6 +210,9 @@ export default function UnitsMapSection() {
     const [hoverUf, setHoverUf] = useState<string | null>(null);
     const hoverClearTimerRef = useRef<number | null>(null);
     const tooltipHoverRef = useRef(false);
+    const openByKeyboardRef = useRef(false);
+    const pinRefs = useRef<Record<string, SVGGElement | null>>({});
+    const tooltipItemRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
     const [pointsByUf, setPointsByUf] = useState<Record<string, ProjectedPoint>>({});
 
@@ -226,6 +242,33 @@ export default function UnitsMapSection() {
             }
         };
     }, []);
+
+    useEffect(() => {
+        if (!openState) return;
+        const uf = openState.uf;
+
+        function onKeyDown(e: KeyboardEvent) {
+            if (e.key !== "Escape") return;
+            e.preventDefault();
+            setOpenState(null);
+            pinRefs.current[uf]?.focus();
+        }
+
+        document.addEventListener("keydown", onKeyDown);
+        return () => document.removeEventListener("keydown", onKeyDown);
+    }, [openState]);
+
+    useEffect(() => {
+        if (!openState) return;
+        if (!openByKeyboardRef.current) return;
+        openByKeyboardRef.current = false;
+
+        const t = window.setTimeout(() => {
+            tooltipItemRefs.current[0]?.focus();
+        }, 0);
+
+        return () => window.clearTimeout(t);
+    }, [openState]);
 
     const stateGroups = useMemo(() => {
         const map = new Map<string, (typeof units)[number][]>();
@@ -358,6 +401,7 @@ export default function UnitsMapSection() {
     }, [stateGroups]);
 
     function openTooltipAt(uf: string, x: number, y: number) {
+        tooltipItemRefs.current = [];
         const wrap = wrapRef.current;
         const svg = svgRef.current;
         if (!wrap || !svg) return;
@@ -422,13 +466,24 @@ export default function UnitsMapSection() {
 
                                             openTooltipAt(g.uf, p.x, p.y);
                                         }}
+                                        onToggleKeyboard={() => {
+                                            openByKeyboardRef.current = true;
+                                            if (openState?.uf === g.uf) {
+                                                setOpenState(null);
+                                                return;
+                                            }
+                                            openTooltipAt(g.uf, p.x, p.y);
+                                        }}
+                                        setRef={(el) => {
+                                            pinRefs.current[g.uf] = el;
+                                        }}
                                     />
                                 );
                             })}
                         </svg>
 
                         <div className="brMapHint">
-                            Passe o mouse no balão para ver as unidades do estado.
+                            Passe o mouse ou use Tab/Enter no balão para ver as unidades do estado.
                         </div>
 
                         {openState && activeGroup ? (
@@ -442,6 +497,15 @@ export default function UnitsMapSection() {
                                     tooltipHoverRef.current = false;
                                     setOpenState(null);
                                 }}
+                                onFocusCapture={() => {
+                                    tooltipHoverRef.current = true;
+                                }}
+                                onBlurCapture={(e) => {
+                                    const next = e.relatedTarget as Node | null;
+                                    if (next && e.currentTarget.contains(next)) return;
+                                    tooltipHoverRef.current = false;
+                                    setOpenState(null);
+                                }}
                             >
                                 <div className="brTooltipTitleRow">
                                     <div className="brTooltipTitleMain">{activeTitle}</div>
@@ -451,10 +515,13 @@ export default function UnitsMapSection() {
                                     {activeGroup.units
                                         .slice()
                                         .sort((a, b) => a.name.localeCompare(b.name))
-                                        .map((u) => (
+                                        .map((u, idx) => (
                                             <button
                                                 key={u.slug}
                                                 className="brTooltipItem"
+                                                ref={(el) => {
+                                                    tooltipItemRefs.current[idx] = el;
+                                                }}
                                                 onClick={() => {
                                                     const dest = getUnitDestination(u);
                                                     trackEvent("unit_map_click", { unitSlug: u.slug, placement: "state_tooltip", destination: dest });

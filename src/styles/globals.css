@@ -1455,6 +1455,20 @@ video.heroMediaEl {
   line-height: 1.45
 }
 
+.doctorCardMainLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.doctorCardMainLink:hover {
+  text-decoration: underline;
+}
+
 .footer {
   margin-top: 60px;
   padding: 34px 0 50px;

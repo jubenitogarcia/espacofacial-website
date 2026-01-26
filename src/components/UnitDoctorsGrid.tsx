@@ -132,32 +132,55 @@ export default function UnitDoctorsGrid() {
                     const waHref = handle && selectedSigla ? whatsappUrl(selectedSigla, handle) : null;
 
                     return (
-                        <div
+                        <article
                             key={`${fullName}-${href ?? "noinsta"}`}
                             className="card"
-                            onClick={() => {
-                                if (!href) return;
-                                trackDoctorInstagramClick({
-                                    unitSlug: unit?.slug ?? null,
-                                    doctorName: fullName,
-                                    instagramUrl: href,
-                                });
-                                window.open(href, "_blank", "noopener,noreferrer");
-                            }}
-                            style={{ display: "block", cursor: href ? "pointer" : "default" }}
+                            style={{ display: "block" }}
                         >
                             <div style={{ display: "flex", gap: 12, alignItems: "center", justifyContent: "space-between" }}>
-                                <div style={{ width: 56, height: 56, borderRadius: 14, overflow: "hidden", background: "white" }}>
-                                    {handle ? (
-                                        <Image src={avatarUrl(handle, nickname ?? fullName)} alt={nickname ?? fullName} width={56} height={56} unoptimized />
-                                    ) : null}
-                                </div>
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                    <h3 style={{ margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{fullName}</h3>
-                                    <p style={{ margin: 0, color: "var(--muted)", fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                        {nickname || unitLabel}
-                                    </p>
-                                </div>
+                                {href ? (
+                                    <a
+                                        className="doctorCardMainLink"
+                                        href={href}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        onClick={() => {
+                                            trackDoctorInstagramClick({
+                                                unitSlug: unit?.slug ?? null,
+                                                doctorName: fullName,
+                                                instagramUrl: href,
+                                            });
+                                        }}
+                                        aria-label={`Abrir Instagram de ${fullName}`}
+                                        title="Abrir Instagram"
+                                    >
+                                        <div style={{ width: 56, height: 56, borderRadius: 14, overflow: "hidden", background: "white" }}>
+                                            {handle ? (
+                                                <Image src={avatarUrl(handle, nickname ?? fullName)} alt={nickname ?? fullName} width={56} height={56} unoptimized />
+                                            ) : null}
+                                        </div>
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                            <h3 style={{ margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{fullName}</h3>
+                                            <p style={{ margin: 0, color: "var(--muted)", fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                                {nickname || unitLabel}
+                                            </p>
+                                        </div>
+                                    </a>
+                                ) : (
+                                    <div className="doctorCardMainLink" aria-label={fullName}>
+                                        <div style={{ width: 56, height: 56, borderRadius: 14, overflow: "hidden", background: "white" }}>
+                                            {handle ? (
+                                                <Image src={avatarUrl(handle, nickname ?? fullName)} alt={nickname ?? fullName} width={56} height={56} unoptimized />
+                                            ) : null}
+                                        </div>
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                            <h3 style={{ margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{fullName}</h3>
+                                            <p style={{ margin: 0, color: "var(--muted)", fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                                {nickname || unitLabel}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
 
                                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
                                     {href ? (
@@ -166,14 +189,7 @@ export default function UnitDoctorsGrid() {
                                             href={href}
                                             target="_blank"
                                             rel="noreferrer"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                trackDoctorInstagramClick({
-                                                    unitSlug: unit?.slug ?? null,
-                                                    doctorName: fullName,
-                                                    instagramUrl: href,
-                                                });
-                                            }}
+                                            onClick={() => trackDoctorInstagramClick({ unitSlug: unit?.slug ?? null, doctorName: fullName, instagramUrl: href })}
                                             aria-label="Instagram"
                                             title="Instagram"
                                         >
@@ -187,15 +203,14 @@ export default function UnitDoctorsGrid() {
                                             href={waHref}
                                             target="_blank"
                                             rel="noreferrer"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
+                                            onClick={() =>
                                                 trackDoctorWhatsappClick({
                                                     unitSlug: unit?.slug ?? null,
                                                     doctorName: fullName,
                                                     unitSigla: selectedSigla,
                                                     whatsappUrl: waHref,
-                                                });
-                                            }}
+                                                })
+                                            }
                                             aria-label={`WhatsApp ${selectedCode}`}
                                             title={`WhatsApp ${selectedCode}`}
                                         >
@@ -204,7 +219,7 @@ export default function UnitDoctorsGrid() {
                                     ) : null}
                                 </div>
                             </div>
-                        </div>
+                        </article>
                     );
                 })}
             </div>
