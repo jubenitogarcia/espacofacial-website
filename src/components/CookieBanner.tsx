@@ -1,25 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-const COOKIE_NAME = "ef_cookie_consent";
-
-function hasConsentCookie(): boolean {
-    if (typeof document === "undefined") return true;
-    return document.cookie.split(";").some((c) => c.trim().startsWith(`${COOKIE_NAME}=1`));
-}
-
-function setConsentCookie(): void {
-    const oneYear = 60 * 60 * 24 * 365;
-    const secure = typeof location !== "undefined" && location.protocol === "https:" ? "; Secure" : "";
-    document.cookie = `${COOKIE_NAME}=1; Max-Age=${oneYear}; Path=/; SameSite=Lax${secure}`;
-}
+import { hasCookieConsent, setCookieConsent } from "@/lib/cookieConsent";
 
 export default function CookieBanner() {
     const [visible, setVisible] = useState(false);
 
     useEffect(() => {
-        setVisible(!hasConsentCookie());
+        setVisible(!hasCookieConsent());
     }, []);
 
     if (!visible) return null;
@@ -33,8 +21,9 @@ export default function CookieBanner() {
                 <button
                     className="cookieBannerButton"
                     onClick={() => {
-                        setConsentCookie();
+                        setCookieConsent();
                         setVisible(false);
+                        window.dispatchEvent(new Event("ef_cookie_consent"));
                     }}
                 >
                     Aceitar

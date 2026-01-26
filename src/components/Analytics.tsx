@@ -1,11 +1,31 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Script from "next/script";
+import { hasCookieConsent } from "@/lib/cookieConsent";
 
 const GA4_ID = process.env.NEXT_PUBLIC_GA4_ID;
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
 
 export default function Analytics() {
+    const [enabled, setEnabled] = useState<boolean>(() => hasCookieConsent());
+
+    useEffect(() => {
+        if (hasCookieConsent()) {
+            setEnabled(true);
+            return;
+        }
+
+        function onConsent() {
+            setEnabled(true);
+        }
+
+        window.addEventListener("ef_cookie_consent", onConsent);
+        return () => window.removeEventListener("ef_cookie_consent", onConsent);
+    }, []);
+
+    if (!enabled) return null;
+
     return (
         <>
             <Script
