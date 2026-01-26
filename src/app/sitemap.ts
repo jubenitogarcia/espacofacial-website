@@ -6,9 +6,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     const now = new Date();
 
     const staticRoutes: MetadataRoute.Sitemap = [
-        { url: `${siteUrl}/`, lastModified: now },
-        { url: `${siteUrl}/novohamburgo`, lastModified: now },
-        { url: `${siteUrl}/barrashoppingsul`, lastModified: now },
+        { url: `${siteUrl}/`, lastModified: now, changeFrequency: "weekly", priority: 1 },
+        { url: `${siteUrl}/novohamburgo`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+        { url: `${siteUrl}/barrashoppingsul`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     ];
 
     return staticRoutes;
