@@ -708,7 +708,7 @@ export default function BookingFlow() {
                                             {s.highlightImage ? (
                                                 <Image
                                                     src={s.highlightImage}
-                                                    alt=""
+                                                    alt={s.name}
                                                     fill
                                                     sizes="220px"
                                                     style={{ objectFit: "cover" }}
