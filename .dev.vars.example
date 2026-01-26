@@ -6,3 +6,9 @@ BOOKING_DECISION_SECRET=
 # Opcional: webhook para automação (ex.: seu serviço que envia WhatsApp)
 BOOKING_WEBHOOK_URL=
 BOOKING_WEBHOOK_SECRET=
+
+# Opcional: Cloudflare Turnstile (anti-bot) para o formulário de agendamento
+# - Site key: public (vai para o bundle)
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=
+# - Secret key: server-side (configure como Worker secret em produção)
+TURNSTILE_SECRET_KEY=

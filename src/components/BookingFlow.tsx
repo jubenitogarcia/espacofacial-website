@@ -7,6 +7,7 @@ import { units } from "@/data/units";
 import { services, type Service } from "@/data/services";
 import { useCurrentUnit } from "@/hooks/useCurrentUnit";
 import { setStoredUnitSlug } from "@/lib/unitSelection";
+import TurnstileWidget from "@/components/TurnstileWidget";
 
 type TeamMember = {
     name: string;
@@ -127,6 +128,7 @@ function formatBrPhone(input: string): string {
 export default function BookingFlow() {
     const currentUnit = useCurrentUnit();
     const searchParams = useSearchParams();
+    const turnstileSiteKey = (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "").trim();
 
     const [step, setStep] = useState<"pick" | "details" | "submitted">("pick");
 
@@ -152,6 +154,8 @@ export default function BookingFlow() {
 
     const [detailsStartedAtMs, setDetailsStartedAtMs] = useState<number | null>(null);
     const [honeypot, setHoneypot] = useState("");
+    const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+    const [turnstileHadError, setTurnstileHadError] = useState(false);
 
     const [submitting, setSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
@@ -196,6 +200,8 @@ export default function BookingFlow() {
         setStep("pick");
         setDetailsStartedAtMs(null);
         setHoneypot("");
+        setTurnstileToken(null);
+        setTurnstileHadError(false);
         setSlots(null);
         setSlotsError(null);
     }, [unitSlug]);
@@ -307,6 +313,10 @@ export default function BookingFlow() {
             setSubmitError("Informe seu WhatsApp.");
             return;
         }
+        if (turnstileSiteKey && !turnstileToken) {
+            setSubmitError("Confirme que você não é um robô.");
+            return;
+        }
 
         setSubmitting(true);
         try {
@@ -331,6 +341,7 @@ export default function BookingFlow() {
                     notes,
                     hp: honeypot,
                     formStartedAtMs: detailsStartedAtMs,
+                    turnstileToken,
                 }),
             });
 
@@ -352,6 +363,10 @@ export default function BookingFlow() {
                 }
                 if (err === "spam_detected") {
                     setSubmitError("Não foi possível enviar. Recarregue a página e tente novamente.");
+                    return;
+                }
+                if (err === "turnstile_failed") {
+                    setSubmitError("Falha na verificação anti-robô. Recarregue a página e tente novamente.");
                     return;
                 }
                 setSubmitError("Não foi possível enviar seu pedido. Tente novamente.");
@@ -415,6 +430,7 @@ export default function BookingFlow() {
     const showSensitiveHint = true;
     const whatsappDigits = whatsapp.replace(/\D/g, "");
     const whatsappSeemsValid = whatsappDigits.length >= 10;
+    const turnstileRequired = !!turnstileSiteKey;
 
     const handleHorizontalScroll = (event: WheelEvent<HTMLDivElement>) => {
         if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
@@ -706,11 +722,15 @@ export default function BookingFlow() {
                                                         setTimeKey(null);
                                                         setStep("pick");
                                                         setDetailsStartedAtMs(null);
+                                                        setTurnstileToken(null);
+                                                        setTurnstileHadError(false);
                                                         return;
                                                     }
                                                     setTimeKey(s.time);
                                                     setStep("details");
                                                     setDetailsStartedAtMs(Date.now());
+                                                    setTurnstileToken(null);
+                                                    setTurnstileHadError(false);
                                                 }}
                                                 style={{
                                                     padding: "12px 12px",
@@ -795,6 +815,21 @@ export default function BookingFlow() {
                                     </div>
                                 ) : null}
 
+                                {turnstileRequired ? (
+                                    <div style={{ display: "grid", gap: 8 }}>
+                                        <TurnstileWidget
+                                            siteKey={turnstileSiteKey}
+                                            onToken={setTurnstileToken}
+                                            onError={() => setTurnstileHadError(true)}
+                                        />
+                                        {!turnstileToken ? (
+                                            <div className="small" style={{ color: turnstileHadError ? "#b91c1c" : "var(--muted)" }}>
+                                                {turnstileHadError ? "Não foi possível carregar a verificação anti-robô." : "Confirme que você não é um robô para enviar."}
+                                            </div>
+                                        ) : null}
+                                    </div>
+                                ) : null}
+
                                 <label style={{ display: "grid", gap: 6 }}>
                                     <span style={{ fontWeight: 700 }}>Observações (opcional)</span>
                                     <textarea
@@ -809,7 +844,7 @@ export default function BookingFlow() {
                                 <button
                                     type="button"
                                     onClick={submit}
-                                    disabled={submitting || !selectedSlot || !whatsappSeemsValid}
+                                    disabled={submitting || !selectedSlot || !whatsappSeemsValid || (turnstileRequired && !turnstileToken)}
                                     style={{
                                         padding: "12px 14px",
                                         borderRadius: 12,

@@ -19,6 +19,7 @@ type Payload = {
     notes?: string;
     hp?: string;
     formStartedAtMs?: number;
+    turnstileToken?: string | null;
 };
 
 type CfCacheStorage = {
@@ -53,6 +54,32 @@ function clientIp(request: Request): string | null {
     const xff = (request.headers.get("x-forwarded-for") ?? "").trim();
     if (xff) return xff.split(",")[0]?.trim() || null;
     return null;
+}
+
+async function verifyTurnstile(params: { secret: string; token: string; ip: string | null }): Promise<{ ok: boolean }> {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3_000);
+
+    try {
+        const body = new URLSearchParams();
+        body.set("secret", params.secret);
+        body.set("response", params.token);
+        if (params.ip) body.set("remoteip", params.ip);
+
+        const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+            method: "POST",
+            headers: { "content-type": "application/x-www-form-urlencoded" },
+            body,
+            signal: controller.signal,
+        });
+
+        const json = (await res.json().catch(() => null)) as { success?: boolean } | null;
+        return { ok: !!res.ok && json?.success === true };
+    } catch {
+        return { ok: false };
+    } finally {
+        clearTimeout(timeout);
+    }
 }
 
 async function tryPostWebhook(payload: unknown) {
@@ -111,6 +138,7 @@ export async function POST(request: Request) {
     const time = sanitizeOneLine(body.time ?? "");
     const hp = sanitizeOneLine(body.hp ?? "");
     const formStartedAtMsRaw = typeof body.formStartedAtMs === "number" ? body.formStartedAtMs : Number(body.formStartedAtMs ?? NaN);
+    const turnstileToken = sanitizeOneLine((body.turnstileToken ?? "").toString());
 
     const patientName = clampText(sanitizeOneLine(body.patientName ?? ""), 80);
     const whatsapp = normalizePhone(body.whatsapp ?? "");
@@ -203,6 +231,18 @@ export async function POST(request: Request) {
             );
         } catch {
             // ignore cache/rate-limit errors
+        }
+    }
+
+    // Optional Cloudflare Turnstile verification (recommended for production).
+    const turnstileSecret = (process.env.TURNSTILE_SECRET_KEY ?? "").trim();
+    if (turnstileSecret) {
+        if (!turnstileToken) {
+            return json({ ok: false, error: "turnstile_failed" }, { status: 403 });
+        }
+        const verify = await verifyTurnstile({ secret: turnstileSecret, token: turnstileToken, ip });
+        if (!verify.ok) {
+            return json({ ok: false, error: "turnstile_failed" }, { status: 403 });
         }
     }
 
