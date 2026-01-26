@@ -117,8 +117,12 @@ export function sanitizeOneLine(value: string): string {
 
 export function normalizePhone(raw: string): string {
     const digits = (raw ?? "").replace(/\D/g, "");
-    // Expect at least country+area+number (e.g. 55 + 11 + 9xxxx xxxx => 12+ digits)
+    // Accept either:
+    // - BR local formats: DDD + number (10-11 digits) -> prefix with country code 55
+    // - E.164-ish digits already including country code (12+ digits) -> keep as-is
     if (digits.length < 10) return "";
+    if (digits.startsWith("55")) return "+" + digits;
+    if (digits.length === 10 || digits.length === 11) return "+55" + digits;
     return "+" + digits;
 }
 

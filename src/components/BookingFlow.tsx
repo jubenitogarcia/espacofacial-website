@@ -116,6 +116,14 @@ function formatDeadline(ms: number): string {
     return `${formatTimeFromMs(ms)} (${pad2(dt.getDate())}/${pad2(dt.getMonth() + 1)})`;
 }
 
+function formatBrPhone(input: string): string {
+    const digits = (input ?? "").replace(/\D/g, "");
+    const d = digits.slice(0, 11);
+    if (d.length <= 2) return d ? `(${d}` : "";
+    if (d.length <= 7) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+    return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}
+
 export default function BookingFlow() {
     const currentUnit = useCurrentUnit();
     const searchParams = useSearchParams();
@@ -386,6 +394,8 @@ export default function BookingFlow() {
     }, [slots?.slots, timeKey]);
 
     const showSensitiveHint = true;
+    const whatsappDigits = whatsapp.replace(/\D/g, "");
+    const whatsappSeemsValid = whatsappDigits.length >= 10;
 
     const handleHorizontalScroll = (event: WheelEvent<HTMLDivElement>) => {
         if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
@@ -727,13 +737,19 @@ export default function BookingFlow() {
                                     <span style={{ fontWeight: 700 }}>WhatsApp</span>
                                     <input
                                         value={whatsapp}
-                                        onChange={(e) => setWhatsapp(e.target.value)}
+                                        onChange={(e) => setWhatsapp(formatBrPhone(e.target.value))}
                                         placeholder="(DDD) 9xxxx-xxxx"
                                         inputMode="tel"
                                         autoComplete="tel"
+                                        aria-invalid={whatsapp.length > 0 && !whatsappSeemsValid}
                                         style={{ padding: "10px 12px", borderRadius: 10, border: "1px solid #ddd" }}
                                     />
                                 </label>
+                                {!whatsappSeemsValid && whatsapp.length > 0 ? (
+                                    <div className="small" style={{ color: "#b91c1c", fontWeight: 700 }}>
+                                        Informe DDD + numero (ex.: (51) 99999-9999).
+                                    </div>
+                                ) : null}
 
                                 <label style={{ display: "grid", gap: 6 }}>
                                     <span style={{ fontWeight: 700 }}>Observações (opcional)</span>
@@ -749,7 +765,7 @@ export default function BookingFlow() {
                                 <button
                                     type="button"
                                     onClick={submit}
-                                    disabled={submitting || !selectedSlot}
+                                    disabled={submitting || !selectedSlot || !whatsappSeemsValid}
                                     style={{
                                         padding: "12px 14px",
                                         borderRadius: 12,
