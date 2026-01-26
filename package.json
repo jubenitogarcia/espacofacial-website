@@ -10,6 +10,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "next lint",
     "smoke": "node scripts/smoke.mjs",
+    "cf:security": "node scripts/cloudflare-sync-security.mjs",
     "tail": "wrangler tail espacofacial-site --format pretty --sampling-rate 0.25",
     "tail:json": "wrangler tail espacofacial-site --format json",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
