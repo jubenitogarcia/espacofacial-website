@@ -105,6 +105,7 @@ export default function UnitHomePage({
     const isIndexable = isIndexableUnitPath(canonicalPath);
     const locality = unitLocality(unit.slug);
     const telephone = normalizeTelephone(unit.whatsappPhone) ?? normalizeTelephone(unit.phone);
+    const email = unit.email ? unit.email.replace(/^mailto:/, "").split("?")[0] : null;
 
     const localBusinessJsonLd =
         isIndexable && locality && unit.addressLine
@@ -116,6 +117,7 @@ export default function UnitHomePage({
                 url: `${siteUrl}/${canonicalPath}`,
                 image: `${siteUrl}/opengraph-image`,
                 telephone: telephone ?? undefined,
+                email: email || undefined,
                 address: {
                     "@type": "PostalAddress",
                     streetAddress: unit.addressLine,
@@ -131,7 +133,7 @@ export default function UnitHomePage({
                             longitude: unit.lng,
                         }
                         : undefined,
-                sameAs: [unit.instagram, unit.facebook].filter(Boolean),
+                sameAs: [unit.instagram, unit.facebook, unit.threads].filter(Boolean),
                 hasMap: unit.maps ?? undefined,
             }
             : null;

@@ -48,8 +48,33 @@ const orgJsonLd = {
   name: "Espaço Facial",
   url: siteUrl,
   logo: `${siteUrl.replace(/\/$/, "")}/icon.svg`,
-  // TODO: adicionar sameAs (Instagram/Facebook oficiais) e contato oficial.
-  sameAs: [],
+  // Unidades operacionais atuais (contas oficiais por unidade).
+  sameAs: [
+    "https://www.instagram.com/espacofacial_barrashoppingsul/",
+    "https://www.facebook.com/espacofacial.barrashoppingsul/",
+    "https://www.threads.com/@espacofacial_barrashoppingsul",
+    "https://www.instagram.com/espacofacial_novohamburgo/",
+    "https://www.facebook.com/espacofacial.novohamburgo/",
+    "https://www.threads.com/@espacofacial_novohamburgo",
+  ],
+  contactPoint: [
+    {
+      "@type": "ContactPoint",
+      contactType: "customer service",
+      telephone: "+5551980882293",
+      email: "barrashoppingsul@espacofacial.com.br",
+      areaServed: "BR",
+      availableLanguage: ["pt-BR"],
+    },
+    {
+      "@type": "ContactPoint",
+      contactType: "customer service",
+      telephone: "+5551995811008",
+      email: "novohamburgo@espacofacial.com.br",
+      areaServed: "BR",
+      availableLanguage: ["pt-BR"],
+    },
+  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

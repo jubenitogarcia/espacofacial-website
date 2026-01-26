@@ -6,6 +6,7 @@ export type Unit = {
   lat?: number;
   lng?: number;
   instagram?: string;
+  threads?: string;
   facebook?: string;
   contactUrl?: string;
   phone?: string;
@@ -25,6 +26,7 @@ export const units: Unit[] = [
     "lat": -30.0713,
     "lng": -51.2452,
     "instagram": "https://www.instagram.com/espacofacial_barrashoppingsul/",
+    "threads": "https://www.threads.com/@espacofacial_barrashoppingsul",
     "facebook": "https://www.facebook.com/espacofacial.barrashoppingsul/",
     "contactUrl": "/barrashoppingsul/faleconosco",
     "phone": "tel:+5551980882293",
@@ -258,7 +260,12 @@ export const units: Unit[] = [
     "lat": -29.688,
     "lng": -51.132,
     "instagram": "https://www.instagram.com/espacofacial_novohamburgo/",
+    "threads": "https://www.threads.com/@espacofacial_novohamburgo",
+    "facebook": "https://www.facebook.com/espacofacial.novohamburgo/",
     "contactUrl": "/novohamburgo/faleconosco",
+    "phone": "tel:+5551995811008",
+    "whatsappPhone": "+5551995811008",
+    "email": "mailto:novohamburgo@espacofacial.com.br?subject=A%2FC%20Espa%C3%A7o%20Facial%20-%20Novo%20Hamburgo",
     "maps": "https://maps.app.goo.gl/3yMDftBGnALP13sU7",
     "placeId": "ChIJhaCsZ9RDGZURe9I0bpIb-CM",
     "gbpLocation": "7339519901965290091"
