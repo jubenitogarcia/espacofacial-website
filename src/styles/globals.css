@@ -363,6 +363,14 @@ button:focus-visible {
   overflow: hidden;
 }
 
+.bookingFlow__cardSub {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.25;
+  color: var(--muted);
+  opacity: 0.8;
+}
+
 .bookingFlow__lockOverlay {
   position: absolute;
   inset: 0;
@@ -370,22 +378,22 @@ button:focus-visible {
   display: grid;
   place-items: center;
   padding: 14px;
-  background: rgba(245, 245, 245, 0.74);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
+  background: rgba(248, 248, 248, 0.64);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   pointer-events: all;
 }
 
 .bookingFlow__lockText {
-  font-weight: 900;
-  color: #111;
+  font-weight: 700;
+  color: rgba(17, 17, 17, 0.75);
   text-align: center;
   max-width: 340px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  background: rgba(255, 255, 255, 0.88);
-  padding: 10px 12px;
-  border-radius: 12px;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.68);
+  padding: 8px 10px;
+  border-radius: 999px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
 }
 
 .bookingFlow__picker {

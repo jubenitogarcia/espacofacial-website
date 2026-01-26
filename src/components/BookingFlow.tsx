@@ -538,9 +538,7 @@ export default function BookingFlow() {
                 <div className="bookingFlow__grid">
                     <div className="card bookingFlow__cardDoctor" style={{ padding: 16 }}>
                         <div style={{ fontWeight: 900 }}>1) Doutor</div>
-                        <div className="small" style={{ marginTop: 6, color: "var(--muted)" }}>
-                            Selecione um(a) profissional (ou sem preferência).
-                        </div>
+                        <div className="bookingFlow__cardSub">Selecione um(a) profissional (ou sem preferência).</div>
                         <div style={{ marginTop: 10 }}>
                             {unitLabel ? null : <div className="small">Selecione BarraShoppingSul ou Novo Hamburgo no topo para ver doutores.</div>}
                             {doctorsForUnit === null ? (
@@ -658,12 +656,10 @@ export default function BookingFlow() {
 
                     <div className={`card bookingFlow__cardProcedure ${canPickProcedure ? "" : "bookingFlow__card--locked"}`.trim()} style={{ padding: 16 }}>
                         <div style={{ fontWeight: 900 }}>2) Procedimento</div>
-                        <div className="small" style={{ marginTop: 6, color: "var(--muted)" }}>
-                            Selecione o procedimento desejado (ou peça orientação).
-                        </div>
+                        <div className="bookingFlow__cardSub">Selecione o procedimento (ou peça orientação).</div>
                         {!canPickProcedure ? (
                             <div className="bookingFlow__lockOverlay" aria-hidden="true">
-                                <div className="bookingFlow__lockText">Primeiro selecione um(a) profissional.</div>
+                                <div className="bookingFlow__lockText">Selecione um(a) profissional para continuar.</div>
                             </div>
                         ) : null}
                         <ScrollPicker ariaLabel="Lista de procedimentos">
@@ -689,23 +685,58 @@ export default function BookingFlow() {
                                         style={{
                                             cursor: "pointer",
                                             textAlign: "left",
-                                            padding: "10px 12px",
-                                            borderRadius: 12,
+                                            padding: 0,
+                                            borderRadius: 14,
                                             border: active ? "2px solid #111" : "1px solid var(--border)",
                                             background: "#fff",
                                             color: "#111",
-                                            display: "grid",
-                                            gap: 2,
                                             width: 220,
                                             minWidth: 220,
                                             flex: "0 0 auto",
                                             scrollSnapAlign: "start",
+                                            overflow: "hidden",
+                                            height: 176,
                                         }}
                                     >
-                                        <div style={{ fontWeight: 850, lineHeight: 1.15, fontSize: 13 }}>{s.name}</div>
-                                        {s.subtitle ? (
-                                            <div style={{ fontSize: 11.5, color: "var(--muted)", lineHeight: 1.2 }}>{s.subtitle}</div>
-                                        ) : null}
+                                        <div
+                                            style={{
+                                                position: "relative",
+                                                height: 96,
+                                                background: "linear-gradient(135deg, rgba(17,17,17,0.92), rgba(17,17,17,0.62))",
+                                            }}
+                                        >
+                                            {s.highlightImage ? (
+                                                <Image
+                                                    src={s.highlightImage}
+                                                    alt=""
+                                                    fill
+                                                    sizes="220px"
+                                                    style={{ objectFit: "cover" }}
+                                                    unoptimized
+                                                />
+                                            ) : (
+                                                <div
+                                                    aria-hidden="true"
+                                                    style={{
+                                                        position: "absolute",
+                                                        inset: 0,
+                                                        display: "grid",
+                                                        placeItems: "center",
+                                                        color: "rgba(255,255,255,0.85)",
+                                                        fontWeight: 900,
+                                                        letterSpacing: "-0.6px",
+                                                    }}
+                                                >
+                                                    EF
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div style={{ padding: "10px 12px", display: "grid", gap: 2 }}>
+                                            <div style={{ fontWeight: 850, lineHeight: 1.15, fontSize: 13 }}>{s.name}</div>
+                                            {s.subtitle ? (
+                                                <div style={{ fontSize: 11.5, color: "var(--muted)", lineHeight: 1.2 }}>{s.subtitle}</div>
+                                            ) : null}
+                                        </div>
                                     </button>
                                 );
                             })}
@@ -729,33 +760,48 @@ export default function BookingFlow() {
                                 style={{
                                     cursor: "pointer",
                                     textAlign: "left",
-                                    padding: "10px 12px",
-                                    borderRadius: 12,
+                                    padding: 0,
+                                    borderRadius: 14,
                                     border: service?.id === "any" ? "2px solid #111" : "1px solid var(--border)",
                                     background: "#fff",
                                     color: "#111",
-                                    display: "grid",
-                                    gap: 2,
                                     width: 220,
                                     minWidth: 220,
                                     flex: "0 0 auto",
                                     scrollSnapAlign: "start",
+                                    overflow: "hidden",
+                                    height: 176,
                                 }}
                             >
-                                <div style={{ fontWeight: 850, lineHeight: 1.15, fontSize: 13 }}>Quero orientação</div>
-                                <div style={{ fontSize: 11.5, color: "var(--muted)", lineHeight: 1.2 }}>Ainda não sei qual procedimento</div>
+                                <div
+                                    aria-hidden="true"
+                                    style={{
+                                        position: "relative",
+                                        height: 96,
+                                        background: "linear-gradient(135deg, rgba(17,17,17,0.92), rgba(17,17,17,0.62))",
+                                        color: "rgba(255,255,255,0.92)",
+                                        display: "grid",
+                                        placeItems: "center",
+                                        fontWeight: 900,
+                                        letterSpacing: "-0.6px",
+                                    }}
+                                >
+                                    EF
+                                </div>
+                                <div style={{ padding: "10px 12px", display: "grid", gap: 2 }}>
+                                    <div style={{ fontWeight: 850, lineHeight: 1.15, fontSize: 13 }}>Quero orientação</div>
+                                    <div style={{ fontSize: 11.5, color: "var(--muted)", lineHeight: 1.2 }}>Ainda não sei qual procedimento</div>
+                                </div>
                             </button>
                         </ScrollPicker>
                     </div>
 
                     <div className={`card bookingFlow__cardServices ${canPickServices ? "" : "bookingFlow__card--locked"}`.trim()} style={{ padding: 16 }}>
                         <div style={{ fontWeight: 900 }}>3) Serviços</div>
-                        <div className="small" style={{ marginTop: 6, color: "var(--muted)" }}>
-                            Selecione um ou mais serviços para calcular o tempo total.
-                        </div>
+                        <div className="bookingFlow__cardSub">Selecione um ou mais serviços para calcular o tempo.</div>
                         {!canPickServices ? (
                             <div className="bookingFlow__lockOverlay" aria-hidden="true">
-                                <div className="bookingFlow__lockText">Selecione um procedimento para liberar.</div>
+                                <div className="bookingFlow__lockText">Selecione um procedimento para continuar.</div>
                             </div>
                         ) : null}
                         <div style={{ marginTop: 10, display: "grid", gap: 10 }}>
@@ -824,12 +870,12 @@ export default function BookingFlow() {
 
                     <div className={`card bookingFlow__cardFull bookingFlow__cardDateTime ${canPick ? "" : "bookingFlow__card--locked"}`.trim()} style={{ padding: 16 }}>
                         <div style={{ fontWeight: 900 }}>4) Data e horário</div>
-                        <div className="small" style={{ marginTop: 6, color: "var(--muted)" }}>
+                        <div className="bookingFlow__cardSub">
                             {upcomingDays.length ? `${formatDatePtBr(upcomingDays[0])} – ${formatDatePtBr(upcomingDays[upcomingDays.length - 1] ?? upcomingDays[0])}` : null}
                         </div>
                         {!canPick ? (
                             <div className="bookingFlow__lockOverlay" aria-hidden="true">
-                                <div className="bookingFlow__lockText">Selecione profissional + procedimento para ver datas e horários.</div>
+                                <div className="bookingFlow__lockText">Selecione profissional + procedimento para ver horários.</div>
                             </div>
                         ) : null}
 
