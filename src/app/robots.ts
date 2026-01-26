@@ -7,18 +7,8 @@ export default function robots(): MetadataRoute.Robots {
         rules: [
             {
                 userAgent: "*",
-                disallow: "/",
-                allow: [
-                    "/$",
-                    "/novohamburgo$",
-                    "/barrashoppingsul$",
-                    "/robots.txt$",
-                    "/sitemap.xml$",
-                    "/_next/",
-                    "/icon.svg$",
-                    "/opengraph-image$",
-                    "/twitter-image$",
-                ],
+                allow: "/",
+                disallow: ["/api/", "/_next/"],
             },
         ],
         sitemap: `${siteUrl.replace(/\/$/, "")}/sitemap.xml`,

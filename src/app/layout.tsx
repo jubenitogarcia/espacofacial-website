@@ -12,8 +12,8 @@ const buildTime = process.env.NEXT_PUBLIC_BUILD_TIME ?? "";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   robots: {
-    index: false,
-    follow: false,
+    index: true,
+    follow: true,
   },
   title: {
     default: "Espaço Facial",

@@ -3,6 +3,10 @@ import SugereAquiForm from "@/components/SugereAquiForm";
 export const metadata = {
     title: "Sugestões e Reclamações | Espaço Facial",
     description: "Canal interno para sugestões e reclamações da equipe.",
+    robots: {
+        index: false,
+        follow: false,
+    },
 };
 
 export default function SugereAquiPage() {

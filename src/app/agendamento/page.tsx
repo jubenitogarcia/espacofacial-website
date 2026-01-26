@@ -5,6 +5,11 @@ import BookingFlow from "@/components/BookingFlow";
 
 export const metadata = {
     title: "Agendamento",
+    description: "Agende seu atendimento escolhendo unidade, doutor, procedimento, data e horario.",
+    robots: {
+        index: false,
+        follow: false,
+    },
 };
 
 export default function AgendamentoPage() {
