@@ -281,17 +281,22 @@ export default function BookingFlow() {
     }, [unitSlug]);
 
     // Load doctors (injectors) from Google Sheet.
+    const [membersError, setMembersError] = useState<string | null>(null);
     useEffect(() => {
         let cancelled = false;
         async function load() {
             try {
                 const res = await fetch("/api/equipe", { cache: "no-store" });
-                const json = (await res.json().catch(() => null)) as { members?: TeamMember[] } | null;
+                const json = (await res.json().catch(() => null)) as
+                    | { ok?: boolean; members?: TeamMember[]; error?: { code?: string; status?: number } }
+                    | null;
                 if (cancelled) return;
                 setMembers(Array.isArray(json?.members) ? json!.members! : []);
+                setMembersError(json && json.ok === false ? json.error?.code ?? "unknown" : null);
             } catch {
                 if (cancelled) return;
                 setMembers([]);
+                setMembersError("exception");
             }
         }
         load();
@@ -349,7 +354,11 @@ export default function BookingFlow() {
 
                 if (!res.ok || !json || !isOkResponse(json)) {
                     const err = (json && !isOkResponse(json) && "error" in json && typeof json.error === "string" && json.error) || "Não foi possível carregar horários.";
-                    setSlotsError(err);
+                    if (err === "doctors_unavailable") {
+                        setSlotsError("Equipe indisponível no momento. Tente novamente mais tarde.");
+                    } else {
+                        setSlotsError(err);
+                    }
                     return;
                 }
 
@@ -433,6 +442,10 @@ export default function BookingFlow() {
                 }
                 if (err === "no_doctors_for_unit") {
                     setSubmitError("Não foi possível selecionar um profissional para esta unidade. Tente escolher um profissional específico.");
+                    return;
+                }
+                if (err === "doctors_unavailable") {
+                    setSubmitError("Equipe indisponível no momento. Tente novamente mais tarde.");
                     return;
                 }
                 if (err === "rate_limited") {
@@ -544,7 +557,9 @@ export default function BookingFlow() {
                             {doctorsForUnit === null ? (
                                 <div className="small">Carregando equipe…</div>
                             ) : doctorsForUnit.length === 0 ? (
-                                <div className="small">Nenhum doutor encontrado para esta unidade.</div>
+                                <div className="small">
+                                    {membersError ? "Equipe indisponível no momento. Tente novamente mais tarde." : "Nenhum doutor encontrado para esta unidade."}
+                                </div>
                             ) : (
                                 <ScrollPicker ariaLabel="Lista de profissionais">
                                     {doctorsForUnit.map((d) => {

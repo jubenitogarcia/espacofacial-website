@@ -65,6 +65,7 @@ export default function UnitDoctorsGrid() {
     const unitLabel = unitLabelFromSlug(unit?.slug);
 
     const [members, setMembers] = useState<TeamMember[] | null>(null);
+    const [membersError, setMembersError] = useState<string | null>(null);
 
     useEffect(() => {
         let cancelled = false;
@@ -72,12 +73,17 @@ export default function UnitDoctorsGrid() {
         async function load() {
             try {
                 const res = await fetch("/api/equipe", { cache: "no-store" });
-                const json = (await res.json()) as { members: TeamMember[] };
+                const json = (await res.json().catch(() => null)) as
+                    | { ok?: boolean; members?: TeamMember[]; error?: { code?: string; status?: number } }
+                    | null;
                 if (cancelled) return;
-                setMembers(Array.isArray(json.members) ? json.members : []);
+                const nextMembers = Array.isArray(json?.members) ? json!.members! : [];
+                setMembers(nextMembers);
+                setMembersError(json && json.ok === false ? json.error?.code ?? "unknown" : null);
             } catch {
                 if (cancelled) return;
                 setMembers([]);
+                setMembersError("exception");
             }
         }
 
@@ -113,7 +119,9 @@ export default function UnitDoctorsGrid() {
         return (
             <>
                 {selectedUnitSubtitle}
-                <div className="card">Nenhum doutor encontrado para {unitLabel}.</div>
+                <div className="card">
+                    {membersError ? "Não foi possível carregar a equipe no momento." : `Nenhum doutor encontrado para ${unitLabel}.`}
+                </div>
             </>
         );
     }

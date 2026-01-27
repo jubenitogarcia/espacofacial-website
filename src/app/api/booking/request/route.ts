@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getBookingDb, nowMs, addMinutes, clampText, normalizePhone, sanitizeOneLine, isValidDateKey, isValidTimeKey, toSaoPauloIso, slugify } from "@/lib/bookingDb";
 import { getServiceById } from "@/data/services";
 import { signBookingDecision } from "@/lib/bookingSecurity";
-import { getUnitDoctors } from "@/lib/injectorsDirectory";
+import { getUnitDoctorsResult } from "@/lib/injectorsDirectory";
 
 export const dynamic = "force-dynamic";
 
@@ -257,7 +257,12 @@ export async function POST(request: Request) {
     let effectiveDoctorSlug = doctorSlug;
     let safeDoctorName = clampText(doctorName || doctorSlug, 120);
     if (wantsAnyDoctor) {
-        const doctors = await getUnitDoctors(unitSlug);
+        const doctorsResult = await getUnitDoctorsResult(unitSlug);
+        if (!doctorsResult.ok) {
+            return json({ ok: false, error: "doctors_unavailable" }, { status: 503 });
+        }
+
+        const doctors = doctorsResult.doctors;
         if (doctors.length === 0) {
             return json({ ok: false, error: "no_doctors_for_unit" }, { status: 400 });
         }

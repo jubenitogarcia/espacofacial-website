@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { fetchActiveInjectors } from "@/lib/injectorsDirectory";
+import { fetchActiveInjectorsResult } from "@/lib/injectorsDirectory";
 
 export async function GET() {
     try {
-        const members = await fetchActiveInjectors();
-        return NextResponse.json({ members }, { status: 200 });
+        const result = await fetchActiveInjectorsResult();
+        return NextResponse.json(result, { status: 200 });
     } catch {
-        return NextResponse.json({ members: [], error: "exception" }, { status: 200 });
+        return NextResponse.json({ ok: false, members: [], error: { code: "exception" } }, { status: 200 });
     }
 }

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getBookingDb, nowMs, addMinutes, isValidDateKey, isValidTimeKey, toSaoPauloIso } from "@/lib/bookingDb";
 import { getServiceById } from "@/data/services";
-import { getUnitDoctors } from "@/lib/injectorsDirectory";
+import { getUnitDoctorsResult } from "@/lib/injectorsDirectory";
 
 export const dynamic = "force-dynamic";
 
@@ -110,7 +110,12 @@ export async function GET(req: Request) {
     const db = await getBookingDb();
 
     const wantsAnyDoctor = doctorSlug === "any";
-    const unitDoctors = wantsAnyDoctor ? await getUnitDoctors(unitSlug) : null;
+    const unitDoctorsResult = wantsAnyDoctor ? await getUnitDoctorsResult(unitSlug) : null;
+    if (wantsAnyDoctor && unitDoctorsResult && !unitDoctorsResult.ok) {
+        return json({ ok: false, error: "doctors_unavailable" }, { status: 503 });
+    }
+
+    const unitDoctors = wantsAnyDoctor ? unitDoctorsResult!.doctors : null;
     const doctorSlugs = wantsAnyDoctor ? unitDoctors!.map((d) => d.slug) : [doctorSlug];
     if (wantsAnyDoctor && doctorSlugs.length === 0) {
         return json({ ok: false, error: "no_doctors_for_unit" }, { status: 400 });
