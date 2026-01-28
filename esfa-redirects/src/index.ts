@@ -1,6 +1,8 @@
 const REDIRECTS: Record<string, string> = {
     "/nh": "https://espacofacial.com/novohamburgo",
+    "/novohamburgo": "https://espacofacial.com/novohamburgo",
     "/bss": "https://espacofacial.com/barrashoppingsul",
+    "/barrashoppingsul": "https://espacofacial.com/barrashoppingsul",
     "/nh/faleconosco": "https://espacofacial.com/novohamburgo/faleconosco",
     "/bss/faleconosco": "https://espacofacial.com/barrashoppingsul/faleconosco",
 };

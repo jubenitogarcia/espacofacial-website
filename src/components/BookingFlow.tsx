@@ -125,6 +125,15 @@ function formatBrPhone(input: string): string {
     return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
 }
 
+function stripPhoneDigits(value?: string | null): string | null {
+    const digits = (value ?? "").replace(/\D/g, "");
+    return digits.length ? digits : null;
+}
+
+function buildClinicWhatsappMessage(opts: { serviceLabel: string; procedureText: string; dateLabel: string; time: string }) {
+    return `Quero agendar um(a) ${opts.serviceLabel} de ${opts.procedureText} para ${opts.dateLabel} às ${opts.time} na Espaço Facial! 📆`;
+}
+
 function ScrollPicker(props: { ariaLabel: string; children: ReactNode; className?: string }) {
     const ref = useRef<HTMLDivElement | null>(null);
     const [canLeft, setCanLeft] = useState(false);
@@ -307,6 +316,10 @@ export default function BookingFlow() {
 
     const unit = useMemo(() => findUnit(unitSlug), [unitSlug]);
     const unitLabel = useMemo(() => unitLabelFromSlug(unitSlug), [unitSlug]);
+    const clinicWhatsappPhone = useMemo(() => stripPhoneDigits(unit?.whatsappPhone ?? unit?.phone), [
+        unit?.phone,
+        unit?.whatsappPhone,
+    ]);
 
     const doctorsForUnit = useMemo(() => {
         if (!members) return null;
@@ -399,6 +412,27 @@ export default function BookingFlow() {
         if (turnstileSiteKey && !turnstileToken) {
             setSubmitError("Confirme que você não é um robô.");
             return;
+        }
+
+        const procedureParts: string[] = [];
+        if (includeAvaliacao) procedureParts.push("Avaliação");
+        if (includeProcedimento) procedureParts.push("Procedimento");
+        if (includeRevisao) procedureParts.push("Revisão");
+        const procedureText = procedureParts.length ? procedureParts.join(" e ") : "atendimento";
+        const serviceLabel = service?.id === "any" ? "orientação" : service?.name ?? "atendimento";
+        const formattedDateLabel = formatDatePtBr(dateKey ?? "") || dateKey;
+        if (clinicWhatsappPhone) {
+            const message = buildClinicWhatsappMessage({
+                serviceLabel,
+                procedureText,
+                dateLabel: formattedDateLabel,
+                time: timeKey,
+            });
+            const waUrl = new URL("https://api.whatsapp.com/send");
+            waUrl.searchParams.set("phone", clinicWhatsappPhone);
+            waUrl.searchParams.set("text", message);
+            const win = window.open(waUrl.toString(), "_blank");
+            if (win) win.focus();
         }
 
         setSubmitting(true);
