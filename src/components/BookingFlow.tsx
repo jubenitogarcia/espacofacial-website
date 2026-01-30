@@ -414,12 +414,12 @@ export default function BookingFlow() {
             return;
         }
 
-        const procedureParts: string[] = [];
-        if (includeAvaliacao) procedureParts.push("Avaliação");
-        if (includeProcedimento) procedureParts.push("Procedimento");
-        if (includeRevisao) procedureParts.push("Revisão");
-        const procedureText = procedureParts.length ? procedureParts.join(" e ") : "atendimento";
-        const serviceLabel = service?.id === "any" ? "orientação" : service?.name ?? "atendimento";
+        const serviceParts: string[] = [];
+        if (includeAvaliacao) serviceParts.push("Avaliação");
+        if (includeProcedimento) serviceParts.push("Procedimento");
+        if (includeRevisao) serviceParts.push("Revisão");
+        const serviceLabel = serviceParts.length ? serviceParts.join(" e ") : "atendimento";
+        const procedureText = service?.id === "any" ? "orientação" : service?.name ?? "atendimento";
         const formattedDateLabel = formatDatePtBr(dateKey ?? "") || dateKey;
         if (clinicWhatsappPhone) {
             const message = buildClinicWhatsappMessage({
