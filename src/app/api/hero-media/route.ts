@@ -75,17 +75,32 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     const debug = url.searchParams.get("debug") === "1";
 
-    const items = (await getFromDriveFolder()) ?? (await getFromManifestUrl()) ?? [];
-    const fallback: HeroMediaItem[] = [
+    const remoteItems = (await getFromDriveFolder()) ?? (await getFromManifestUrl()) ?? [];
+    const localItems: HeroMediaItem[] = [
         {
             type: "image",
-            src: "/images/hero.svg",
-            alt: "Espaço Facial",
+            src: "/images/hero/banner-01.png",
+            alt: "Botox 3 Regiões (40ui) e Botox Full Face",
+        },
+        {
+            type: "image",
+            src: "/images/hero/banner-02.png",
+            alt: "Festival do Preenchimento",
+        },
+        {
+            type: "image",
+            src: "/images/hero/banner-03.png",
+            alt: "Carnaval beleza — Brilhe de dentro para fora",
         },
     ];
 
-    const source = items.length ? "drive_or_manifest" : "fallback";
-    const payload = { items: items.length ? items : fallback } as {
+    const items = [...localItems, ...remoteItems].filter((item, i, arr) => {
+        const firstIdx = arr.findIndex((x) => x.type === item.type && x.src === item.src);
+        return firstIdx === i;
+    });
+
+    const source = remoteItems.length ? "local_and_drive_or_manifest" : "local_only";
+    const payload = { items } as {
         items: HeroMediaItem[];
         debug?: { source: string; count: number };
     };
@@ -100,7 +115,7 @@ export async function GET(req: Request) {
             headers: {
                 "cache-control": "public, max-age=0, s-maxage=300, stale-while-revalidate=3600",
                 "x-hero-source": source,
-                "x-hero-items": String(items.length ? items.length : fallback.length),
+                "x-hero-items": String(payload.items.length),
             },
         },
     );

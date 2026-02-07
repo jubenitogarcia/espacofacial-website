@@ -13,8 +13,18 @@ export default function HeroMedia() {
     const [items, setItems] = useState<HeroMediaItem[]>([
         {
             type: "image",
-            src: "/images/hero.svg",
-            alt: "Espaço Facial",
+            src: "/images/hero/banner-01.png",
+            alt: "Botox 3 Regiões (40ui) e Botox Full Face",
+        },
+        {
+            type: "image",
+            src: "/images/hero/banner-02.png",
+            alt: "Festival do Preenchimento",
+        },
+        {
+            type: "image",
+            src: "/images/hero/banner-03.png",
+            alt: "Carnaval beleza — Brilhe de dentro para fora",
         },
     ]);
 
