@@ -1,105 +1,11 @@
-import { driveListFolderFiles } from "@/lib/googleDrive";
-
-type HeroMediaItem = {
-    type: "image" | "video";
-    src: string;
-    alt?: string;
-};
-
-function inferTypeFromMime(mimeType: string): HeroMediaItem["type"] | null {
-    if (mimeType.startsWith("image/")) return "image";
-    if (mimeType.startsWith("video/")) return "video";
-    return null;
-}
-
-async function getFromDriveFolder(): Promise<HeroMediaItem[] | null> {
-    // Default to the provided folder id, but allow overriding via env.
-    const folderId = process.env.HERO_DRIVE_FOLDER_ID ?? "1jBzRiaBRLZywHChcfT_bUSvO5JGz83BM";
-
-    try {
-        const files = await driveListFolderFiles(folderId);
-        const items: HeroMediaItem[] = [];
-
-        for (const file of files) {
-            const type = inferTypeFromMime(file.mimeType);
-            if (!type) continue;
-
-            // Proxy through our origin so private Drive files work in the browser.
-            items.push({
-                type,
-                src: `/api/drive-media/${encodeURIComponent(file.id)}`,
-                alt: file.name ?? "",
-            });
-        }
-
-        return items.length ? items : null;
-    } catch (err) {
-        // Keep failure silent for users; debug can be read via headers / ?debug=1.
-        const message = err instanceof Error ? err.message : "unknown_error";
-        // eslint-disable-next-line no-console
-        console.warn("hero-media: drive folder load failed", message);
-        return null;
-    }
-}
-
-async function getFromManifestUrl(): Promise<HeroMediaItem[] | null> {
-    const manifestUrl = process.env.HERO_MEDIA_MANIFEST_URL;
-    if (!manifestUrl) return null;
-
-    const resp = await fetch(manifestUrl, { headers: { Accept: "application/json" } });
-    if (!resp.ok) return null;
-
-    const data = (await resp.json()) as unknown;
-    if (!Array.isArray(data)) return null;
-
-    const items: HeroMediaItem[] = [];
-    for (const raw of data) {
-        if (!raw || typeof raw !== "object") continue;
-        const obj = raw as Record<string, unknown>;
-
-        const type = obj.type;
-        const src = obj.src;
-        if ((type !== "image" && type !== "video") || typeof src !== "string") continue;
-
-        items.push({
-            type,
-            src,
-            alt: typeof obj.alt === "string" ? obj.alt : undefined,
-        });
-    }
-
-    return items.length ? items : null;
-}
+import { getHeroMediaItems } from "@/lib/heroMedia.server";
+import type { HeroMediaItem } from "@/lib/heroMediaShared";
 
 export async function GET(req: Request) {
     const url = new URL(req.url);
     const debug = url.searchParams.get("debug") === "1";
 
-    const remoteItems = (await getFromDriveFolder()) ?? (await getFromManifestUrl()) ?? [];
-    const localItems: HeroMediaItem[] = [
-        {
-            type: "image",
-            src: "/images/hero/banner-01.png",
-            alt: "Botox 3 Regiões (40ui) e Botox Full Face",
-        },
-        {
-            type: "image",
-            src: "/images/hero/banner-02.png",
-            alt: "Festival do Preenchimento",
-        },
-        {
-            type: "image",
-            src: "/images/hero/banner-03.png",
-            alt: "Carnaval beleza — Brilhe de dentro para fora",
-        },
-    ];
-
-    const items = [...localItems, ...remoteItems].filter((item, i, arr) => {
-        const firstIdx = arr.findIndex((x) => x.type === item.type && x.src === item.src);
-        return firstIdx === i;
-    });
-
-    const source = remoteItems.length ? "local_and_drive_or_manifest" : "local_only";
+    const { items, source } = await getHeroMediaItems();
     const payload = { items } as {
         items: HeroMediaItem[];
         debug?: { source: string; count: number };

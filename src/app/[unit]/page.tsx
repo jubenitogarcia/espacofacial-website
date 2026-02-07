@@ -7,10 +7,12 @@ import HeroMedia from "@/components/HeroMedia";
 import UnitSelectionSync from "@/components/UnitSelectionSync";
 import AboutUsSection from "@/components/AboutUsSection";
 import { units } from "@/data/units";
+import { getHeroMediaItems } from "@/lib/heroMedia.server";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://espacofacial.com").replace(/\/$/, "");
+export const revalidate = 300;
 
 function normalizeSlug(value: string): string {
     return value.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -79,7 +81,7 @@ export function generateMetadata({ params }: { params: { unit: string } }): Meta
     };
 }
 
-export default function UnitHomePage({
+export default async function UnitHomePage({
     params,
     searchParams,
 }: {
@@ -106,6 +108,7 @@ export default function UnitHomePage({
     const locality = unitLocality(unit.slug);
     const telephone = normalizeTelephone(unit.whatsappPhone) ?? normalizeTelephone(unit.phone);
     const email = unit.email ? unit.email.replace(/^mailto:/, "").split("?")[0] : null;
+    const { items: heroItems } = await getHeroMediaItems();
 
     const localBusinessJsonLd =
         isIndexable && locality && unit.addressLine
@@ -153,7 +156,7 @@ export default function UnitHomePage({
             <h1 className="srOnly">Espaço Facial</h1>
 
             <section className="hero" aria-label="Destaque">
-                <HeroMedia />
+                <HeroMedia initialItems={heroItems} />
                 <div className="heroOverlay" />
             </section>
 

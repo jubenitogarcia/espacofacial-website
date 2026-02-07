@@ -5,9 +5,11 @@ import UnitsMapSection from "@/components/UnitsMapSection";
 import UnitDoctorsGrid from "@/components/UnitDoctorsGrid";
 import HeroMedia from "@/components/HeroMedia";
 import AboutUsSection from "@/components/AboutUsSection";
+import { getHeroMediaItems } from "@/lib/heroMedia.server";
 import type { Metadata } from "next";
 
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://espacofacial.com").replace(/\/$/, "");
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Espaço Facial",
@@ -25,7 +27,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const { items: heroItems } = await getHeroMediaItems();
+
   return (
     <>
       <Header />
@@ -33,7 +37,7 @@ export default function HomePage() {
       <h1 className="srOnly">Espaço Facial</h1>
 
       <section className="hero" aria-label="Destaque">
-        <HeroMedia />
+        <HeroMedia initialItems={heroItems} />
         <div className="heroOverlay" />
       </section>
 

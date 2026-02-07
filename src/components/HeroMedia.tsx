@@ -1,66 +1,28 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
+import { LOCAL_HERO_ITEMS, type HeroMediaItem } from "@/lib/heroMediaShared";
 import Image from "next/image";
+import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
 
-type HeroMediaItem = {
-    type: "image" | "video";
-    src: string;
-    alt?: string;
+type HeroMediaProps = {
+    initialItems?: HeroMediaItem[];
 };
 
-export default function HeroMedia() {
-    const [items, setItems] = useState<HeroMediaItem[]>([
-        {
-            type: "image",
-            src: "/images/hero/banner-01.png",
-            alt: "Botox 3 Regiões (40ui) e Botox Full Face",
-        },
-        {
-            type: "image",
-            src: "/images/hero/banner-02.png",
-            alt: "Festival do Preenchimento",
-        },
-        {
-            type: "image",
-            src: "/images/hero/banner-03.png",
-            alt: "Carnaval beleza — Brilhe de dentro para fora",
-        },
-    ]);
-
+export default function HeroMedia({ initialItems }: HeroMediaProps) {
     const [index, setIndex] = useState(0);
     const [prevIndex, setPrevIndex] = useState<number | null>(null);
-
     const [aspectRatio, setAspectRatio] = useState<string>("16 / 9");
 
     type HeroStyle = CSSProperties & Record<"--hero-ar", string>;
+    const items = useMemo(() => {
+        if (Array.isArray(initialItems) && initialItems.length) return initialItems;
+        return LOCAL_HERO_ITEMS;
+    }, [initialItems]);
 
     useEffect(() => {
-        let cancelled = false;
-
-        async function load() {
-            try {
-                const resp = await fetch("/api/hero-media", { cache: "no-store" });
-                if (!resp.ok) return;
-                if (cancelled) return;
-
-                const data = (await resp.json()) as { items?: HeroMediaItem[] };
-                if (!Array.isArray(data.items) || data.items.length === 0) return;
-
-                // Shuffle so the loop feels fresh on each visit.
-                const shuffled = [...data.items].sort(() => Math.random() - 0.5);
-                setItems(shuffled);
-                setIndex(0);
-            } catch {
-                // ignore; keep fallback
-            }
-        }
-
-        load();
-        return () => {
-            cancelled = true;
-        };
-    }, []);
+        setIndex(0);
+        setPrevIndex(null);
+    }, [items]);
 
     const item = items[index] ?? items[0]!;
     const shouldLoopVideo = item.type === "video" && items.length === 1;
