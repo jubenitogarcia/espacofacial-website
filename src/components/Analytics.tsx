@@ -1,30 +1,67 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Script from "next/script";
-import { hasCookieConsent } from "@/lib/cookieConsent";
+import { COOKIE_CONSENT_EVENT, getCookieConsent, type CookieConsent } from "@/lib/cookieConsent";
 
 const GA4_ID = process.env.NEXT_PUBLIC_GA4_ID;
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
 
+function consentModeParams(consent: CookieConsent) {
+    return {
+        ad_storage: consent.marketing ? "granted" : "denied",
+        analytics_storage: consent.analytics ? "granted" : "denied",
+        ad_user_data: consent.marketing ? "granted" : "denied",
+        ad_personalization: consent.marketing ? "granted" : "denied",
+    } as const;
+}
+
+function updateGtagConsent(consent: CookieConsent) {
+    if (typeof window === "undefined") return;
+    if (typeof window.gtag !== "function") return;
+    try {
+        window.gtag("consent", "update", consentModeParams(consent));
+    } catch {
+        // noop
+    }
+}
+
+function clearAnalyticsCookies() {
+    if (typeof document === "undefined") return;
+    const names = document.cookie
+        .split(";")
+        .map((c) => c.trim().split("=")[0])
+        .filter((name) =>
+            ["_ga", "_gid", "_gat", "_gcl_au"].some((prefix) => name.startsWith(prefix))
+        );
+
+    for (const name of names) {
+        document.cookie = `${name}=; Max-Age=0; Path=/; SameSite=Lax`;
+    }
+}
+
 export default function Analytics() {
-    const [enabled, setEnabled] = useState<boolean>(() => hasCookieConsent());
+    const [consent, setConsent] = useState<CookieConsent>(() => getCookieConsent() ?? { analytics: false, marketing: false });
+    const analyticsEnabled = consent.analytics;
 
     useEffect(() => {
-        if (hasCookieConsent()) {
-            setEnabled(true);
-            return;
+        function onConsent(event: Event) {
+            const detail = (event as CustomEvent<CookieConsent>).detail;
+            if (!detail) return;
+            setConsent(detail);
+            updateGtagConsent(detail);
+            if (!detail.analytics) {
+                clearAnalyticsCookies();
+            }
         }
 
-        function onConsent() {
-            setEnabled(true);
-        }
-
-        window.addEventListener("ef_cookie_consent", onConsent);
-        return () => window.removeEventListener("ef_cookie_consent", onConsent);
+        window.addEventListener(COOKIE_CONSENT_EVENT, onConsent);
+        return () => window.removeEventListener(COOKIE_CONSENT_EVENT, onConsent);
     }, []);
 
-    if (!enabled) return null;
+    const consentParams = useMemo(() => consentModeParams(consent), [consent]);
+
+    if (!analyticsEnabled) return null;
 
     return (
         <>
@@ -32,7 +69,9 @@ export default function Analytics() {
                 id="ef-datalayer"
                 strategy="afterInteractive"
                 dangerouslySetInnerHTML={{
-                    __html: `window.dataLayer = window.dataLayer || [];`,
+                    __html: `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}window.gtag=gtag;
+gtag('consent','default', ${JSON.stringify(consentParams)});`,
                 }}
             />
 
@@ -57,16 +96,12 @@ new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
                         id="ef-ga4"
                         strategy="afterInteractive"
                         dangerouslySetInnerHTML={{
-                            __html: `window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}window.gtag=gtag;
-gtag('js', new Date());
+                            __html: `gtag('js', new Date());
 gtag('config', '${GA4_ID}', { send_page_view: true });`,
                         }}
                     />
                 </>
             ) : null}
-
-            {/* TODO: opcional - adicionar Meta Pixel via env var (NEXT_PUBLIC_META_PIXEL_ID). */}
         </>
     );
 }

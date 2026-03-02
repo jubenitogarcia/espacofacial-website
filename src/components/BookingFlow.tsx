@@ -926,14 +926,16 @@ export default function BookingFlow() {
                                             {slots.slots.map((s) => {
                                                 const active = timeKey === s.time;
                                                 const disabled = !s.available;
-                                                const label =
-                                                    s.reason === "booked"
-                                                        ? "Indisponível"
-                                                        : s.reason === "in_review"
-                                                            ? "Em análise"
-                                                            : s.reason === "past"
-                                                                ? "Passou"
-                                                                : "";
+                                        const label =
+                                            s.reason === "booked"
+                                                ? "Indisponível"
+                                                : s.reason === "agenda"
+                                                    ? "Agenda"
+                                                : s.reason === "in_review"
+                                                    ? "Em análise"
+                                                    : s.reason === "past"
+                                                        ? "Passou"
+                                                        : "";
 
                                                 return (
                                                     <button

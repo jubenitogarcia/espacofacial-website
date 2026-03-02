@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getBookingDb, nowMs, addMinutes, isValidDateKey, isValidTimeKey, toSaoPauloIso } from "@/lib/bookingDb";
+import { getAgendaDb } from "@/lib/agendaDb";
 import { getServiceById } from "@/data/services";
 import { getUnitDoctorsResult } from "@/lib/injectorsDirectory";
 
@@ -108,17 +109,78 @@ export async function GET(req: Request) {
     const daySlots = buildDaySlots(durationMinutes);
 
     const db = await getBookingDb();
-
     const wantsAnyDoctor = doctorSlug === "any";
-    const unitDoctorsResult = wantsAnyDoctor ? await getUnitDoctorsResult(unitSlug) : null;
-    if (wantsAnyDoctor && unitDoctorsResult && !unitDoctorsResult.ok) {
+    const unitDoctorsResult = await getUnitDoctorsResult(unitSlug);
+    if (wantsAnyDoctor && !unitDoctorsResult.ok) {
         return json({ ok: false, error: "doctors_unavailable" }, { status: 503 });
     }
 
-    const unitDoctors = wantsAnyDoctor ? unitDoctorsResult!.doctors : null;
-    const doctorSlugs = wantsAnyDoctor ? unitDoctors!.map((d) => d.slug) : [doctorSlug];
+    const unitDoctors = unitDoctorsResult.ok ? unitDoctorsResult.doctors : [];
+    const doctorSlugs = wantsAnyDoctor ? unitDoctors.map((d) => d.slug) : [doctorSlug];
     if (wantsAnyDoctor && doctorSlugs.length === 0) {
         return json({ ok: false, error: "no_doctors_for_unit" }, { status: 400 });
+    }
+
+    const agendaDb = await getAgendaDb();
+    const agendaRows = await agendaDb
+        .prepare(
+            `SELECT time_key, profissional
+             FROM agenda_appointments
+             WHERE unit_slug = ? AND date_key = ? AND removed_at_ms IS NULL`,
+        )
+        .bind(unitSlug, date)
+        .all<{ time_key: string; profissional: string | null }>();
+    const normalizeKey = (value: string) =>
+        (value ?? "")
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/[^a-z0-9]/g, "");
+    const doctorKeyBySlug = new Map<string, string>();
+    for (const d of unitDoctors) {
+        const key = normalizeKey(d.name) || normalizeKey(d.slug);
+        if (key) doctorKeyBySlug.set(d.slug, key);
+    }
+    const doctorKey = doctorKeyBySlug.get(doctorSlug) ?? normalizeKey(doctorSlug);
+    const blockedTimes = new Set<string>();
+    if (wantsAnyDoctor) {
+        const totalDoctors = new Set(doctorKeyBySlug.values());
+        const occupiedByTime = new Map<string, Set<string>>();
+
+        for (const row of agendaRows.results ?? []) {
+            const time = (row.time_key ?? "").toString().trim();
+            if (!time) continue;
+            const profKey = normalizeKey((row.profissional ?? "").toString());
+            if (!profKey) continue;
+
+            for (const key of totalDoctors) {
+                if (!key) continue;
+                if (profKey === key || profKey.includes(key) || key.includes(profKey)) {
+                    const set = occupiedByTime.get(time) ?? new Set<string>();
+                    set.add(key);
+                    occupiedByTime.set(time, set);
+                }
+            }
+        }
+
+        for (const [time, set] of occupiedByTime.entries()) {
+            if (set.size >= totalDoctors.size && totalDoctors.size > 0) {
+                blockedTimes.add(time);
+            }
+        }
+    } else {
+        for (const row of agendaRows.results ?? []) {
+            const time = (row.time_key ?? "").toString().trim();
+            if (!time) continue;
+            const profKey = normalizeKey((row.profissional ?? "").toString());
+            if (!profKey) {
+                blockedTimes.add(time);
+                continue;
+            }
+            if (profKey === doctorKey || profKey.includes(doctorKey) || doctorKey.includes(profKey)) {
+                blockedTimes.add(time);
+            }
+        }
     }
 
     // Fetch existing bookings for that day (unit + doctor(s))
@@ -179,6 +241,10 @@ export async function GET(req: Request) {
 
         let available = true;
         let reason: string | null = null;
+
+        if (blockedTimes.has(time)) {
+            return { time, available: false, reason: "agenda" };
+        }
 
         if (!wantsAnyDoctor) {
             for (const e of normalizedExisting) {

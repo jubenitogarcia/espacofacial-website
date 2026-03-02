@@ -1,5 +1,6 @@
 import { trackEvent, type AnalyticsEventParams } from "@/lib/analytics";
 import { campaignParamsForEvent } from "@/lib/campaign";
+import { trackContactConversion, trackLeadConversion } from "@/lib/conversions";
 
 export type LeadPlacement =
     | "header"
@@ -38,6 +39,11 @@ export function trackAgendarClick(params: {
     if (params.whatsappUrl) payload.whatsappUrl = params.whatsappUrl;
 
     trackEvent("cta_agendar_click", payload);
+    trackLeadConversion({
+        source: "whatsapp",
+        placement: params.placement,
+        unitSlug: params.unitSlug,
+    });
 }
 
 export function trackBookingStart(params: {
@@ -56,6 +62,11 @@ export function trackBookingStart(params: {
     if (params.bookingUrl) payload.bookingUrl = params.bookingUrl;
 
     trackEvent("cta_booking_start", payload);
+    trackLeadConversion({
+        source: "booking",
+        placement: params.placement,
+        unitSlug: params.unitSlug,
+    });
 }
 
 export function trackDoctorWhatsappClick(params: {
@@ -66,6 +77,11 @@ export function trackDoctorWhatsappClick(params: {
 }) {
     trackEvent("doctor_whatsapp_click", {
         ...withCampaign(params),
+    });
+    trackContactConversion({
+        source: "doctor_whatsapp",
+        unitSlug: params.unitSlug,
+        doctorName: params.doctorName,
     });
 }
 
