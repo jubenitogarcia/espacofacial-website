@@ -72,12 +72,50 @@ async function getFromManifestUrl(): Promise<HeroMediaItem[]> {
     }
 }
 
-export async function getHeroMediaItems(): Promise<{ items: HeroMediaItem[]; source: string }> {
-    const fromDrive = await getFromDriveFolder();
-    const fromManifest = fromDrive.length ? [] : await getFromManifestUrl();
-    const remoteItems = fromDrive.length ? fromDrive : fromManifest;
+type HeroCache = { items: HeroMediaItem[]; source: string; expiresAtMs: number };
+let heroCache: HeroCache | null = null;
+let refreshInFlight: Promise<void> | null = null;
+const HERO_CACHE_TTL_MS = 5 * 60_000;
+const HERO_REMOTE_TIMEOUT_MS = 400;
 
-    const items = dedupeHeroMediaItems([...LOCAL_HERO_ITEMS, ...remoteItems]);
-    const source = remoteItems.length ? "local_and_remote" : "local_only";
-    return { items, source };
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T | null> {
+    return Promise.race([
+        promise,
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs)),
+    ]);
+}
+
+async function refreshHeroMedia(): Promise<void> {
+    if (refreshInFlight) return refreshInFlight;
+    refreshInFlight = (async () => {
+        const fromManifest = (await withTimeout(getFromManifestUrl(), HERO_REMOTE_TIMEOUT_MS)) ?? [];
+        const fromDrive = fromManifest.length ? [] : (await withTimeout(getFromDriveFolder(), HERO_REMOTE_TIMEOUT_MS)) ?? [];
+        const remoteItems = fromManifest.length ? fromManifest : fromDrive;
+        const items = dedupeHeroMediaItems([...LOCAL_HERO_ITEMS, ...remoteItems]);
+        const source = remoteItems.length ? "local_and_remote" : "local_only";
+        heroCache = { items, source, expiresAtMs: Date.now() + HERO_CACHE_TTL_MS };
+    })()
+        .catch(() => {
+            // ignore refresh errors
+        })
+        .finally(() => {
+            refreshInFlight = null;
+        });
+    return refreshInFlight;
+}
+
+export async function getHeroMediaItems(): Promise<{ items: HeroMediaItem[]; source: string }> {
+    const now = Date.now();
+    if (heroCache && heroCache.expiresAtMs > now) {
+        return { items: heroCache.items, source: heroCache.source };
+    }
+
+    if (heroCache) {
+        void refreshHeroMedia();
+        return { items: heroCache.items, source: heroCache.source };
+    }
+
+    heroCache = { items: [...LOCAL_HERO_ITEMS], source: "local_only", expiresAtMs: now + HERO_CACHE_TTL_MS };
+    void refreshHeroMedia();
+    return { items: heroCache.items, source: heroCache.source };
 }

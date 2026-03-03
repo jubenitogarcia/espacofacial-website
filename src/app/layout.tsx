@@ -5,6 +5,7 @@ import CookieBanner from "@/components/CookieBanner";
 import Analytics from "@/components/Analytics";
 import MarketingPixels from "@/components/MarketingPixels";
 import CampaignAttribution from "@/components/CampaignAttribution";
+import WebVitalsReporter from "@/components/WebVitalsReporter";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://espacofacial.com";
 const buildSha = process.env.NEXT_PUBLIC_BUILD_SHA ?? "";
@@ -96,6 +97,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         {children}
         <Analytics />
+        <WebVitalsReporter />
         <MarketingPixels />
         <CookieBanner />
       </body>

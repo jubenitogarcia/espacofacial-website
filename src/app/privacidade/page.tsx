@@ -3,6 +3,9 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Privacidade e Cookies",
   robots: { index: false, follow: false },
+  alternates: {
+    canonical: "/privacidade",
+  },
 };
 
 export default function PrivacyPage() {
