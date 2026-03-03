@@ -54,6 +54,7 @@ async function ensureSchema(db: D1DatabaseLike) {
                 service TEXT,
                 notes TEXT,
                 status TEXT,
+                duration_min INTEGER,
                 created_at_ms INTEGER NOT NULL,
                 updated_at_ms INTEGER NOT NULL,
                 last_seen_at_ms INTEGER NOT NULL,
@@ -92,6 +93,16 @@ async function ensureSchema(db: D1DatabaseLike) {
              ON agenda_changes(unit_slug, created_at_ms);`,
         )
         .run();
+
+    await addColumnIfMissing(db, "agenda_appointments", "duration_min INTEGER");
+}
+
+async function addColumnIfMissing(db: D1DatabaseLike, table: string, definition: string) {
+    try {
+        await db.prepare(`ALTER TABLE ${table} ADD COLUMN ${definition};`).run();
+    } catch {
+        // Ignore if column already exists or ALTER TABLE not supported in runtime.
+    }
 }
 
 export function nowMs(): number {
@@ -133,6 +144,10 @@ export function parseTimeKey(time: string): string {
     const raw = normalizeOneLine(time);
     const match = /^(\d{2}):(\d{2})/.exec(raw);
     if (!match) return "";
+    const hh = Number(match[1]);
+    const mm = Number(match[2]);
+    if (!Number.isFinite(hh) || !Number.isFinite(mm)) return "";
+    if (hh < 0 || hh > 23 || mm < 0 || mm > 59) return "";
     return `${match[1]}:${match[2]}`;
 }
 

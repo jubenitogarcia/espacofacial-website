@@ -272,7 +272,11 @@ export default function BookingFlow() {
         if (prev === unitSlug) return;
         lastUnitSlugRef.current = unitSlug;
 
-        setDoctor(null);
+        if (unitSlug) {
+            setDoctor({ slug: "any", name: "Sem preferência", handle: null });
+        } else {
+            setDoctor(null);
+        }
         setService(null);
         setIncludeAvaliacao(true);
         setIncludeProcedimento(false);
@@ -351,14 +355,14 @@ export default function BookingFlow() {
             setSlots(null);
             setSlotsError(null);
 
-            if (!unitSlug || !doctor?.slug || !service?.id || !dateKey || durationMinutes <= 0) return;
+            if (!unitSlug || !dateKey || durationMinutes <= 0) return;
 
             setSlotsLoading(true);
             try {
                 const url = new URL("/api/booking/slots", window.location.origin);
                 url.searchParams.set("unit", unitSlug);
-                url.searchParams.set("doctor", doctor.slug);
-                url.searchParams.set("service", service.id);
+                url.searchParams.set("doctor", doctor?.slug ?? "any");
+                url.searchParams.set("service", service?.id ?? "any");
                 url.searchParams.set("durationMinutes", String(durationMinutes));
                 url.searchParams.set("date", dateKey);
 
@@ -540,9 +544,9 @@ export default function BookingFlow() {
         };
     }, [submitted]);
 
-    const canPickProcedure = !!unitSlug && !!doctor;
+    const canPickProcedure = !!unitSlug;
     const canPickServices = canPickProcedure && !!service;
-    const canPick = canPickServices && durationMinutes > 0; // date+time
+    const canPick = !!unitSlug && durationMinutes > 0; // date+time
 
     // Auto-select today's date once the required selections are ready.
     useEffect(() => {
@@ -605,11 +609,8 @@ export default function BookingFlow() {
                                                 className="bookingFlow__selectItem bookingFlow__doctorCard"
                                                 data-active={active ? "true" : "false"}
                                                 onClick={() => {
-                                                    if (active) {
-                                                        setDoctor(null);
-                                                    } else {
-                                                        setDoctor({ slug: d.slug, name: d.name, handle: d.handle });
-                                                    }
+                                                    if (active) return;
+                                                    setDoctor({ slug: d.slug, name: d.name, handle: d.handle });
                                                     setDateKey(null);
                                                     setDateTouched(false);
                                                     setTimeKey(null);
@@ -650,12 +651,7 @@ export default function BookingFlow() {
                                         className="bookingFlow__selectItem bookingFlow__doctorCard"
                                         data-active={doctor?.slug === "any" ? "true" : "false"}
                                         onClick={() => {
-                                            const active = doctor?.slug === "any";
-                                            if (active) {
-                                                setDoctor(null);
-                                            } else {
-                                                setDoctor({ slug: "any", name: "Sem preferência", handle: null });
-                                            }
+                                            setDoctor({ slug: "any", name: "Sem preferência", handle: null });
                                             setDateKey(null);
                                             setDateTouched(false);
                                             setTimeKey(null);
@@ -693,7 +689,7 @@ export default function BookingFlow() {
                         <div className="bookingFlow__cardSub">Selecione o procedimento (ou peça orientação).</div>
                         {!canPickProcedure ? (
                             <div className="bookingFlow__lockOverlay" aria-hidden="true">
-                                <div className="bookingFlow__lockText">Selecione um(a) profissional para continuar.</div>
+                                <div className="bookingFlow__lockText">Selecione a unidade no topo para continuar.</div>
                             </div>
                         ) : null}
                         <ScrollPicker ariaLabel="Lista de procedimentos">
@@ -851,7 +847,7 @@ export default function BookingFlow() {
                         </div>
                         {!canPick ? (
                             <div className="bookingFlow__lockOverlay" aria-hidden="true">
-                                <div className="bookingFlow__lockText">Selecione profissional + procedimento para ver horários.</div>
+                                <div className="bookingFlow__lockText">Selecione a unidade no topo para ver horários.</div>
                             </div>
                         ) : null}
 
@@ -905,7 +901,7 @@ export default function BookingFlow() {
                                 </div>
                                 {!canPick ? (
                                     <div className="small" style={{ marginTop: 10 }}>
-                                        {!unitSlug ? "Selecione a unidade no topo para liberar as datas." : "Selecione profissional, procedimento e serviços para liberar as datas."}
+                                        Selecione a unidade no topo para liberar as datas.
                                     </div>
                                 ) : null}
                             </div>
@@ -973,7 +969,7 @@ export default function BookingFlow() {
                                             })}
                                         </div>
                                     ) : (
-                                        <div className="small">Selecione os passos acima para ver horários.</div>
+                                        <div className="small">Escolha um procedimento para filtrar horários ou selecione uma data.</div>
                                     )}
                                 </div>
                             </div>

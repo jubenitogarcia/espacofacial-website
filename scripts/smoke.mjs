@@ -22,6 +22,8 @@ async function run() {
     console.log(`Smoke base URL: ${baseUrl}`);
 
     const isLocal = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(baseUrl);
+    const agendaToken = (process.env.SMOKE_AGENDA_TOKEN ?? "").trim();
+    const agendaUnit = (process.env.SMOKE_AGENDA_UNIT ?? "barrashoppingsul").trim();
 
     const now = new Date();
     const tomorrow = new Date(now);
@@ -30,6 +32,8 @@ async function run() {
     const mm = String(tomorrow.getMonth() + 1).padStart(2, "0");
     const dd = String(tomorrow.getDate()).padStart(2, "0");
     const tomorrowKey = `${yyyy}-${mm}-${dd}`;
+    const agendaFrom = (process.env.SMOKE_AGENDA_FROM ?? tomorrowKey).trim();
+    const agendaTo = (process.env.SMOKE_AGENDA_TO ?? tomorrowKey).trim();
 
     // Core pages
     for (const path of ["/", "/unidades", "/doutores", "/sobre", "/termos", "/privacidade", "/agendamento"]) {
@@ -56,6 +60,18 @@ async function run() {
             assert(res.status === 200, `${url} expected 200, got ${res.status}`);
             assert(/\"ok\"\s*:\s*true/.test(text), `${url} should return ok:true`);
         }
+    }
+
+    if (agendaToken) {
+        const url = `/api/agenda?unit_slug=${encodeURIComponent(agendaUnit)}&date_from=${encodeURIComponent(agendaFrom)}&date_to=${encodeURIComponent(agendaTo)}`;
+        const res = await fetch(`${baseUrl}${url}`, {
+            headers: { "x-agenda-sync-token": agendaToken },
+        });
+        const text = await res.text();
+        assert(res.status === 200, `${url} expected 200, got ${res.status}`);
+        assert(/\"ok\"\s*:\s*true/.test(text), `${url} should return ok:true`);
+    } else {
+        console.warn("WARN: SMOKE_AGENDA_TOKEN not set; skipping /api/agenda check");
     }
 
     // 404 (some edge adapters return 200 for the not-found document; verify via body markers)

@@ -24,6 +24,7 @@ type AppointmentPayload = {
     servico?: string;
     observacoes?: string;
     status?: string;
+    duration_min?: number | string;
 };
 
 type RemovalPayload = {
@@ -39,6 +40,7 @@ type Payload = {
     added?: AppointmentPayload[];
     removed?: RemovalPayload[];
     runId?: string;
+    schema_version?: number | string;
 };
 
 function json(data: unknown, init?: ResponseInit) {
@@ -55,8 +57,27 @@ function readToken(request: Request): string {
 
 function assertToken(request: Request): boolean {
     const secret = (process.env.AGENDA_SYNC_TOKEN ?? "").trim();
+    if (process.env.NODE_ENV === "production" && !secret) {
+        return false;
+    }
     if (!secret) return true;
     return readToken(request) === secret;
+}
+
+function parseSchemaVersion(value: number | string | undefined): number | null {
+    if (value === undefined || value === null) return null;
+    const v = typeof value === "string" ? Number(value.trim()) : value;
+    if (!Number.isFinite(v)) return null;
+    return Math.round(v);
+}
+
+function parseDurationMin(value: number | string | undefined): number | null {
+    if (value === undefined || value === null) return null;
+    const v = typeof value === "string" ? Number(value.trim()) : value;
+    if (!Number.isFinite(v)) return null;
+    const out = Math.round(v);
+    if (out <= 0 || out > 24 * 60) return null;
+    return out;
 }
 
 export async function POST(request: Request) {
@@ -69,6 +90,11 @@ export async function POST(request: Request) {
         body = (await request.json()) as Payload;
     } catch {
         return json({ ok: false, error: "invalid_json" }, { status: 400 });
+    }
+
+    const schemaVersion = parseSchemaVersion(body.schema_version);
+    if (schemaVersion !== null && schemaVersion !== 1) {
+        return json({ ok: false, error: "invalid_schema_version" }, { status: 400 });
     }
 
     const unitSlug = toUnitSlug(body.unit ?? "");
@@ -96,6 +122,7 @@ export async function POST(request: Request) {
         const client = normalizeOneLine(item.cliente ?? "");
         const tipo = normalizeOneLine(item.tipo ?? "");
         const profissional = normalizeOneLine(item.profissional ?? "");
+        const durationMin = parseDurationMin(item.duration_min);
         if (!dateKey || !timeKey || !client || !tipo || !profissional) {
             addedSkipped += 1;
             continue;
@@ -126,11 +153,12 @@ export async function POST(request: Request) {
                     service,
                     notes,
                     status,
+                    duration_min,
                     created_at_ms,
                     updated_at_ms,
                     last_seen_at_ms,
                     removed_at_ms
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
                 ON CONFLICT(appointment_id) DO UPDATE SET
                     unit_slug = excluded.unit_slug,
                     date_key = excluded.date_key,
@@ -144,6 +172,7 @@ export async function POST(request: Request) {
                     service = excluded.service,
                     notes = excluded.notes,
                     status = excluded.status,
+                    duration_min = excluded.duration_min,
                     updated_at_ms = excluded.updated_at_ms,
                     last_seen_at_ms = excluded.last_seen_at_ms,
                     removed_at_ms = NULL;`,
@@ -162,6 +191,7 @@ export async function POST(request: Request) {
                 normalizeOneLine(item.servico ?? ""),
                 normalizeOneLine(item.observacoes ?? ""),
                 normalizeOneLine(item.status ?? ""),
+                durationMin,
                 now,
                 now,
                 now,
@@ -232,6 +262,16 @@ export async function POST(request: Request) {
         removedOk += 1;
     }
 
+    logSyncSummary({
+        unit: unitSlug,
+        added: addedOk,
+        removed: removedOk,
+        addedSkipped,
+        removedSkipped,
+        runId: body.runId ?? null,
+        schemaVersion: schemaVersion ?? 1,
+    });
+
     return json({
         ok: true,
         unit: unitSlug,
@@ -240,5 +280,22 @@ export async function POST(request: Request) {
         added_skipped: addedSkipped,
         removed_skipped: removedSkipped,
         runId: body.runId ?? null,
+        schema_version: schemaVersion ?? 1,
     });
+}
+
+function logSyncSummary(params: {
+    unit: string;
+    added: number;
+    removed: number;
+    addedSkipped: number;
+    removedSkipped: number;
+    runId: string | null;
+    schemaVersion: number;
+}) {
+    try {
+        console.info("agenda.sync", params);
+    } catch {
+        // noop
+    }
 }

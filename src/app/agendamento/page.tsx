@@ -10,6 +10,9 @@ export const metadata = {
         index: false,
         follow: false,
     },
+    alternates: {
+        canonical: "/agendamento",
+    },
 };
 
 export default function AgendamentoPage() {

@@ -6,6 +6,12 @@ import { getUnitDoctorsResult } from "@/lib/injectorsDirectory";
 
 export const dynamic = "force-dynamic";
 
+type AgendaRange = { start: number; end: number };
+type AgendaCacheEntry = { expiresAtMs: number; ranges: AgendaRange[]; count: number };
+
+const agendaCache = new Map<string, AgendaCacheEntry>();
+const AGENDA_CACHE_TTL_MS = 60_000;
+
 function json(data: unknown, init?: ResponseInit) {
     return NextResponse.json(data, init);
 }
@@ -110,77 +116,54 @@ export async function GET(req: Request) {
 
     const db = await getBookingDb();
     const wantsAnyDoctor = doctorSlug === "any";
-    const unitDoctorsResult = await getUnitDoctorsResult(unitSlug);
-    if (wantsAnyDoctor && !unitDoctorsResult.ok) {
+    const unitDoctorsResult = wantsAnyDoctor ? await getUnitDoctorsResult(unitSlug) : null;
+    if (wantsAnyDoctor && unitDoctorsResult && !unitDoctorsResult.ok) {
         return json({ ok: false, error: "doctors_unavailable" }, { status: 503 });
     }
 
-    const unitDoctors = unitDoctorsResult.ok ? unitDoctorsResult.doctors : [];
+    const unitDoctors = wantsAnyDoctor ? unitDoctorsResult!.doctors : [];
     const doctorSlugs = wantsAnyDoctor ? unitDoctors.map((d) => d.slug) : [doctorSlug];
     if (wantsAnyDoctor && doctorSlugs.length === 0) {
         return json({ ok: false, error: "no_doctors_for_unit" }, { status: 400 });
     }
 
-    const agendaDb = await getAgendaDb();
-    const agendaRows = await agendaDb
-        .prepare(
-            `SELECT time_key, profissional
-             FROM agenda_appointments
-             WHERE unit_slug = ? AND date_key = ? AND removed_at_ms IS NULL`,
-        )
-        .bind(unitSlug, date)
-        .all<{ time_key: string; profissional: string | null }>();
-    const normalizeKey = (value: string) =>
-        (value ?? "")
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .replace(/[^a-z0-9]/g, "");
-    const doctorKeyBySlug = new Map<string, string>();
-    for (const d of unitDoctors) {
-        const key = normalizeKey(d.name) || normalizeKey(d.slug);
-        if (key) doctorKeyBySlug.set(d.slug, key);
-    }
-    const doctorKey = doctorKeyBySlug.get(doctorSlug) ?? normalizeKey(doctorSlug);
-    const blockedTimes = new Set<string>();
-    if (wantsAnyDoctor) {
-        const totalDoctors = new Set(doctorKeyBySlug.values());
-        const occupiedByTime = new Map<string, Set<string>>();
-
-        for (const row of agendaRows.results ?? []) {
-            const time = (row.time_key ?? "").toString().trim();
-            if (!time) continue;
-            const profKey = normalizeKey((row.profissional ?? "").toString());
-            if (!profKey) continue;
-
-            for (const key of totalDoctors) {
-                if (!key) continue;
-                if (profKey === key || profKey.includes(key) || key.includes(profKey)) {
-                    const set = occupiedByTime.get(time) ?? new Set<string>();
-                    set.add(key);
-                    occupiedByTime.set(time, set);
-                }
-            }
-        }
-
-        for (const [time, set] of occupiedByTime.entries()) {
-            if (set.size >= totalDoctors.size && totalDoctors.size > 0) {
-                blockedTimes.add(time);
-            }
-        }
+    const cacheKey = `${unitSlug}|${date}`;
+    const cached = agendaCache.get(cacheKey);
+    const nowTs = Date.now();
+    let agendaRanges: AgendaRange[] = [];
+    let agendaRowsCount = 0;
+    let agendaCacheHit = false;
+    if (cached && cached.expiresAtMs > nowTs) {
+        agendaRanges = cached.ranges;
+        agendaRowsCount = cached.count;
+        agendaCacheHit = true;
     } else {
+        const agendaDb = await getAgendaDb();
+        const agendaRows = await agendaDb
+            .prepare(
+                `SELECT time_key, duration_min
+                 FROM agenda_appointments
+                 WHERE unit_slug = ? AND date_key = ? AND removed_at_ms IS NULL`,
+            )
+            .bind(unitSlug, date)
+            .all<{ time_key: string; duration_min: number | null }>();
+        agendaRanges = [];
         for (const row of agendaRows.results ?? []) {
             const time = (row.time_key ?? "").toString().trim();
-            if (!time) continue;
-            const profKey = normalizeKey((row.profissional ?? "").toString());
-            if (!profKey) {
-                blockedTimes.add(time);
-                continue;
-            }
-            if (profKey === doctorKey || profKey.includes(doctorKey) || doctorKey.includes(profKey)) {
-                blockedTimes.add(time);
-            }
+            if (!time || !isValidTimeKey(time)) continue;
+            const startIso = toSaoPauloIso(date, time);
+            const startMs = Date.parse(startIso);
+            if (!Number.isFinite(startMs)) continue;
+            const durationMin = Number(row.duration_min ?? 0);
+            const durationMs = Number.isFinite(durationMin) && durationMin > 0 ? durationMin * 60_000 : 1;
+            agendaRanges.push({ start: startMs, end: startMs + durationMs });
         }
+        agendaRowsCount = agendaRows.results?.length ?? 0;
+        agendaCache.set(cacheKey, {
+            expiresAtMs: nowTs + AGENDA_CACHE_TTL_MS,
+            ranges: agendaRanges,
+            count: agendaRowsCount,
+        });
     }
 
     // Fetch existing bookings for that day (unit + doctor(s))
@@ -229,6 +212,7 @@ export async function GET(req: Request) {
         if (!byDoctor.has(key)) byDoctor.set(key, list);
     }
 
+    let agendaBlockedCount = 0;
     const out = daySlots.map((s) => {
         const time = s.time;
         if (!isValidTimeKey(time)) {
@@ -242,7 +226,8 @@ export async function GET(req: Request) {
         let available = true;
         let reason: string | null = null;
 
-        if (blockedTimes.has(time)) {
+        if (agendaRanges.some((r) => r.start < endMs && r.end > startMs)) {
+            agendaBlockedCount += 1;
             return { time, available: false, reason: "agenda" };
         }
 
@@ -291,5 +276,35 @@ export async function GET(req: Request) {
         };
     });
 
+    logSlotsSummary({
+        unit: unitSlug,
+        date,
+        doctor: doctorSlug,
+        service: serviceId,
+        durationMinutes,
+        agendaRows: agendaRowsCount,
+        agendaBlocked: agendaBlockedCount,
+        totalSlots: out.length,
+        agendaCacheHit,
+    });
+
     return json({ ok: true, unitSlug, doctorSlug, serviceId, durationMinutes, date, slots: out }, { status: 200 });
+}
+
+function logSlotsSummary(params: {
+    unit: string;
+    date: string;
+    doctor: string;
+    service: string;
+    durationMinutes: number;
+    agendaRows: number;
+    agendaBlocked: number;
+    totalSlots: number;
+    agendaCacheHit: boolean;
+}) {
+    try {
+        console.info("booking.slots", params);
+    } catch {
+        // noop
+    }
 }

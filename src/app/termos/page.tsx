@@ -3,6 +3,9 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Termos de Uso",
   robots: { index: false, follow: false },
+  alternates: {
+    canonical: "/termos",
+  },
 };
 
 export default function TermsPage() {
@@ -44,4 +47,3 @@ export default function TermsPage() {
     </main>
   );
 }
-
