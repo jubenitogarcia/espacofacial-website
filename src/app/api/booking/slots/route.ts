@@ -261,8 +261,8 @@ export async function GET(req: Request) {
             }
         }
 
-        // Prevent booking in the past.
-        if (available && startMs < now) {
+        // Prevent booking in the past (always wins over other reasons).
+        if (startMs < now) {
             available = false;
             reason = "past";
         }
