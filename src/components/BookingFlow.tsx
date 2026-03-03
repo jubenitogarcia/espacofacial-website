@@ -841,7 +841,19 @@ export default function BookingFlow() {
                     </div>
 
                     <div className={`card bookingFlow__cardFull bookingFlow__cardDateTime ${canPick ? "" : "bookingFlow__card--locked"}`.trim()} style={{ padding: 16 }}>
-                        <div style={{ fontWeight: 900 }}>4) Data e horário</div>
+                        <div className="bookingFlow__cardHeader">
+                            <div style={{ fontWeight: 900 }}>4) Data e horário</div>
+                            <div className="bookingFlow__legend" aria-hidden="true">
+                                <div className="bookingFlow__legendItem">
+                                    <span className="bookingFlow__legendSwatch bookingFlow__legendSwatch--past" />
+                                    Passou
+                                </div>
+                                <div className="bookingFlow__legendItem">
+                                    <span className="bookingFlow__legendSwatch bookingFlow__legendSwatch--occupied" />
+                                    Ocupado
+                                </div>
+                            </div>
+                        </div>
                         <div className="bookingFlow__cardSub">
                             {upcomingDays.length ? `${formatDatePtBr(upcomingDays[0])} – ${formatDatePtBr(upcomingDays[upcomingDays.length - 1] ?? upcomingDays[0])}` : null}
                         </div>
@@ -921,26 +933,34 @@ export default function BookingFlow() {
                                         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: 10 }}>
                                             {slots.slots.map((s) => {
                                                 const active = timeKey === s.time;
-                                                const disabled = !s.available;
-                                        const label =
-                                            s.reason === "booked"
-                                                ? "Indisponível"
-                                                : s.reason === "agenda"
-                                                    ? "Agenda"
-                                                : s.reason === "in_review"
-                                                    ? "Em análise"
-                                                    : s.reason === "past"
-                                                        ? "Passou"
-                                                        : "";
+                                                const isPast = s.reason === "past";
+                                                const isAgenda = s.reason === "agenda";
+                                                const hasTooltip = isPast || isAgenda;
+                                                const tooltip = isPast ? "horário já passou" : isAgenda ? "horário ocupado" : "";
+                                                const ariaDisabled = !s.available;
+                                                const nativeDisabled = !s.available && !hasTooltip;
+                                                const label =
+                                                    isPast || isAgenda
+                                                        ? ""
+                                                        : s.reason === "booked"
+                                                            ? "Indisponível"
+                                                            : s.reason === "in_review"
+                                                                ? "Em análise"
+                                                                : "";
 
                                                 return (
                                                     <button
                                                         key={s.time}
                                                         type="button"
-                                                        disabled={disabled}
+                                                        disabled={nativeDisabled}
+                                                        aria-disabled={ariaDisabled ? "true" : "false"}
+                                                        data-reason={s.reason ?? ""}
+                                                        data-locked={hasTooltip ? "true" : "false"}
+                                                        data-tooltip={hasTooltip ? tooltip : undefined}
                                                         className="bookingFlow__selectItem bookingFlow__timeBtn"
                                                         data-active={active ? "true" : "false"}
                                                         onClick={() => {
+                                                            if (ariaDisabled) return;
                                                             if (active) {
                                                                 setTimeKey(null);
                                                                 setStep("pick");
@@ -955,6 +975,7 @@ export default function BookingFlow() {
                                                             setTurnstileToken(null);
                                                             setTurnstileHadError(false);
                                                         }}
+                                                        tabIndex={ariaDisabled ? -1 : 0}
                                                         style={{
                                                             padding: "12px 12px",
                                                             borderRadius: 12,

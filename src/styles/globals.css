@@ -371,6 +371,42 @@ button:focus-visible {
   opacity: 0.8;
 }
 
+.bookingFlow__cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bookingFlow__legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  color: var(--muted);
+  opacity: 0.85;
+}
+
+.bookingFlow__legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.bookingFlow__legendSwatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #f3f4f6;
+}
+
+.bookingFlow__legendSwatch--occupied {
+  background: #e5e7eb;
+  border-color: #d1d5db;
+}
+
 .bookingFlow__selectItem {
   appearance: none;
   background: #fff;
@@ -541,6 +577,86 @@ button:focus-visible {
   color: #777;
   box-shadow: none;
   transform: scale(.98);
+}
+
+.bookingFlow__timeBtn[data-reason="past"] {
+  background: #f3f4f6;
+  color: #9ca3af;
+  border-color: #e5e7eb;
+  box-shadow: none;
+}
+
+.bookingFlow__timeBtn[data-reason="agenda"] {
+  background: #e5e7eb;
+  color: #6b7280;
+  border-color: #d1d5db;
+  box-shadow: none;
+}
+
+.bookingFlow__timeBtn[data-locked="true"] {
+  cursor: default;
+  transform: scale(.98);
+}
+
+.bookingFlow__timeBtn[data-locked="true"]:hover {
+  transform: scale(.98);
+  box-shadow: none;
+}
+
+.bookingFlow__timeBtn[data-locked="true"][data-reason="past"]:hover {
+  background: #f3f4f6;
+  color: #9ca3af;
+  border-color: #e5e7eb;
+}
+
+.bookingFlow__timeBtn[data-locked="true"][data-reason="agenda"]:hover {
+  background: #e5e7eb;
+  color: #6b7280;
+  border-color: #d1d5db;
+}
+
+.bookingFlow__timeBtn[data-tooltip] {
+  position: relative;
+}
+
+.bookingFlow__timeBtn[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%) translateY(4px);
+  padding: 6px 8px;
+  font-size: 11px;
+  line-height: 1.2;
+  color: #fff;
+  background: rgba(17, 17, 17, 0.92);
+  border-radius: 8px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms ease, transform 140ms ease;
+  z-index: 2;
+}
+
+.bookingFlow__timeBtn[data-tooltip]::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 2px);
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background: rgba(17, 17, 17, 0.92);
+  border-radius: 2px;
+  opacity: 0;
+  transition: opacity 140ms ease;
+  z-index: 1;
+}
+
+.bookingFlow__timeBtn[data-tooltip]:hover::after,
+.bookingFlow__timeBtn[data-tooltip]:hover::before {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 .bookingFlow__timeBtn:hover:not(:disabled),
