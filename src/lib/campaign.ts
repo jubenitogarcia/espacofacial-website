@@ -1,3 +1,5 @@
+import { getCookieConsent } from "@/lib/cookieConsent";
+
 export const CAMPAIGN_PARAM_KEYS = [
     // Google Ads / analytics
     "gclid",
@@ -22,6 +24,12 @@ export type CampaignParams = Partial<Record<CampaignParamKey, string>>;
 const STORAGE_KEY = "ef_campaign_params_v1";
 const MAX_AGE_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
 
+function isCampaignTrackingAllowed(): boolean {
+    if (typeof window === "undefined") return false;
+    const consent = getCookieConsent();
+    return Boolean(consent?.analytics || consent?.marketing);
+}
+
 function isBrowser(): boolean {
     return typeof window !== "undefined";
 }
@@ -41,6 +49,7 @@ export function extractCampaignParamsFromSearchParams(searchParams: URLSearchPar
 
 export function persistCampaignParams(params: CampaignParams): void {
     if (!isBrowser()) return;
+    if (!isCampaignTrackingAllowed()) return;
 
     const entries = Object.entries(params).filter(([, v]) => typeof v === "string" && v.trim().length > 0);
     if (entries.length === 0) return;
@@ -66,6 +75,7 @@ export function persistCampaignParams(params: CampaignParams): void {
 
 export function readPersistedCampaignParams(): CampaignParams {
     if (!isBrowser()) return {};
+    if (!isCampaignTrackingAllowed()) return {};
 
     const raw =
         (() => {
@@ -111,6 +121,7 @@ export function readPersistedCampaignParams(): CampaignParams {
 
 export function readCurrentCampaignParams(): CampaignParams {
     if (!isBrowser()) return {};
+    if (!isCampaignTrackingAllowed()) return {};
 
     try {
         return extractCampaignParamsFromSearchParams(new URLSearchParams(window.location.search));
@@ -120,6 +131,7 @@ export function readCurrentCampaignParams(): CampaignParams {
 }
 
 export function campaignParamsForEvent(): Record<string, string> {
+    if (!isCampaignTrackingAllowed()) return {};
     const persisted = readPersistedCampaignParams();
     const current = readCurrentCampaignParams();
     const merged = { ...persisted, ...current };

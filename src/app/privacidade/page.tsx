@@ -11,27 +11,94 @@ export default function PrivacyPage() {
       <h1 style={{ marginTop: 0 }}>Privacidade e Cookies</h1>
 
       <p style={{ color: "var(--muted)" }}>
-        Este site usa cookies essenciais para funcionamento e, com seu consentimento, cookies de
-        análise para entender o uso do site e melhorar a experiência.
+        Esta politica descreve como coletamos e usamos dados pessoais e cookies no site Espaco Facial,
+        em conformidade com a LGPD (Lei 13.709/2018).
       </p>
 
       <div className="card" style={{ padding: 18 }}>
-        <h2 style={{ marginTop: 0, fontSize: 18 }}>Cookies essenciais</h2>
+        <h2 style={{ marginTop: 0, fontSize: 18 }}>Controladores</h2>
         <p>
-          Necessários para recursos como lembrar preferências básicas e manter o site operando
-          corretamente. Eles não podem ser desativados.
+          Skincare &amp; Cosmetics Ltda. (CNPJ 50.090.741/0001-89)
+          <br />
+          Skincare &amp; Cosmetics POA Ltda. (CNPJ 54.425.741/0001-43)
+          <br />
+          Endereco: Av. Doutor Mauricio Cardoso, 1126, Novo Hamburgo/RS, 93548-515.
         </p>
 
-        <h2 style={{ fontSize: 18 }}>Cookies de análise (opcional)</h2>
+        <h2 style={{ fontSize: 18 }}>Responsavel / Encarregado</h2>
         <p>
-          Se você aceitar, podemos usar ferramentas como Google Tag Manager / Google Analytics para
-          medir acesso e navegação (ex.: páginas visitadas e cliques).
+          Julian Benito Garcia
+          <br />
+          jubenitogarcia@skincos.com.br • (51) 99510-3563
         </p>
 
-        <h2 style={{ fontSize: 18 }}>Dados enviados no agendamento</h2>
+        <h2 style={{ fontSize: 18 }}>Dados que podemos coletar</h2>
+        <ul>
+          <li>Identificacao e contato: nome, telefone/WhatsApp, unidade de interesse.</li>
+          <li>Dados de agendamento e atendimento: horarios, unidade, profissional, observacoes.</li>
+          <li>Dados de navegacao: paginas visitadas, cliques, origem de trafego e campanhas.</li>
+          <li>Dados tecnicos: IP, dispositivo, navegador, sistema operacional, fuso horario.</li>
+          <li>Cookies e IDs de publicidade, quando houver consentimento.</li>
+        </ul>
+
+        <h2 style={{ fontSize: 18 }}>Finalidades de uso</h2>
+        <ul>
+          <li>Atendimento, agendamento e confirmacoes de contato.</li>
+          <li>Analise de uso do site, desempenho e melhoria de experiencia.</li>
+          <li>Marketing, remarketing e medicao de campanhas (com consentimento).</li>
+          <li>Seguranca, prevencao a fraudes e garantia de funcionamento.</li>
+        </ul>
+
+        <h2 style={{ fontSize: 18 }}>Bases legais</h2>
+        <ul>
+          <li>Consentimento: cookies e tecnologias de analise/marketing.</li>
+          <li>Execucao de contrato ou procedimentos preliminares: agendamentos e atendimentos.</li>
+          <li>Legitimo interesse: seguranca, estatisticas agregadas e melhoria do servico.</li>
+          <li>Cumprimento de obrigacao legal e regulatoria, quando aplicavel.</li>
+        </ul>
+
+        <h2 style={{ fontSize: 18 }} id="cookies">Cookies e tecnologias</h2>
         <p>
-          Ao solicitar um agendamento, você informa nome e WhatsApp para retorno da confirmação.
-          Evite inserir informações sensíveis em “Observações”.
+          Usamos cookies essenciais para funcionamento do site. Cookies de analise e marketing so
+          sao ativados com seu consentimento. Voce pode aceitar, rejeitar ou personalizar suas
+          preferencias a qualquer momento.
+        </p>
+        <p>Para ajustar suas escolhas, use o link “Gerenciar cookies” no rodape.</p>
+        <ul>
+          <li>Essenciais: funcionamento e preferencias basicas.</li>
+          <li>Analise: medir acessos e navegacao (ex.: Google Analytics 4).</li>
+          <li>Marketing/Remarketing: medir campanhas e audiencias (ex.: Google Ads, Meta).</li>
+        </ul>
+
+        <h2 style={{ fontSize: 18 }}>Fornecedores e compartilhamento</h2>
+        <p>
+          Utilizamos Google Ads, Google Analytics, Google Tag Manager e Meta Business Suite (Meta
+          Pixel) para medicao e marketing. Esses fornecedores podem tratar dados para prestacao
+          dos servicos, nos limites da LGPD e de seus proprios termos.
+        </p>
+
+        <h2 style={{ fontSize: 18 }}>Transferencia internacional</h2>
+        <p>
+          Alguns fornecedores podem armazenar ou processar dados fora do Brasil. Quando aplicavel,
+          adotamos medidas contratuais e tecnicas para garantir nivel adequado de protecao.
+        </p>
+
+        <h2 style={{ fontSize: 18 }}>Retencao</h2>
+        <p>
+          Mantemos dados apenas pelo tempo necessario para as finalidades acima e para cumprir
+          obrigacoes legais e regulatórias.
+        </p>
+
+        <h2 style={{ fontSize: 18 }}>Direitos do titular</h2>
+        <p>
+          Voce pode solicitar confirmacao de tratamento, acesso, correcao, anonimização, portabilidade,
+          revogacao de consentimento e exclusao de dados, conforme a LGPD, pelo contato do encarregado.
+        </p>
+
+        <h2 style={{ fontSize: 18 }}>Seguranca</h2>
+        <p>
+          Aplicamos medidas tecnicas e administrativas razoaveis para proteger os dados pessoais contra
+          acessos nao autorizados, perda, alteracao ou destruicao.
         </p>
 
         <h2 style={{ fontSize: 18 }}>Contato</h2>
@@ -43,10 +110,11 @@ export default function PrivacyPage() {
       </div>
 
       <p className="small" style={{ marginTop: 14 }}>
+        Ultima atualizacao: 02/03/2026.
+        <br />
         Nota: este texto e um resumo operacional e deve ser revisado/ajustado pelo responsavel
         juridico do projeto.
       </p>
     </main>
   );
 }
-

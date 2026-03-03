@@ -1,4 +1,5 @@
 import Brand from "@/components/Brand";
+import CookiePreferencesLink from "@/components/CookiePreferencesLink";
 import Link from "next/link";
 
 export default function Footer() {
@@ -19,6 +20,8 @@ export default function Footer() {
             </div>
             <div className="footerSmall" style={{ marginTop: 10 }}>
               <Link href="/privacidade" style={{ textDecoration: "underline" }}>Privacidade e Cookies</Link>
+              {" · "}
+              <CookiePreferencesLink />
               {" · "}
               <Link href="/termos" style={{ textDecoration: "underline" }}>Termos de Uso</Link>
             </div>

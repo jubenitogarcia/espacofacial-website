@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import CookieBanner from "@/components/CookieBanner";
 import Analytics from "@/components/Analytics";
+import MarketingPixels from "@/components/MarketingPixels";
 import CampaignAttribution from "@/components/CampaignAttribution";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://espacofacial.com";
@@ -95,6 +96,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         {children}
         <Analytics />
+        <MarketingPixels />
         <CookieBanner />
       </body>
     </html>
