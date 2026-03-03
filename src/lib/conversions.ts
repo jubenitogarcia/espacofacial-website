@@ -25,10 +25,11 @@ function fireGoogleAdsConversion(sendTo: string | undefined, params: Record<stri
 
 function fireMetaEvent(eventName: string, params: Record<string, unknown> = {}) {
     if (typeof window === "undefined") return;
-    if (typeof (window as any).fbq !== "function") return;
+    const fbq = (window as { fbq?: unknown }).fbq;
+    if (typeof fbq !== "function") return;
 
     try {
-        (window as any).fbq("track", eventName, params);
+        (fbq as (...args: unknown[]) => void)("track", eventName, params);
     } catch {
         // noop
     }

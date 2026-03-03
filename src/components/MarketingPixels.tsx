@@ -26,6 +26,15 @@ function updateGtagConsent(consent: CookieConsent) {
     }
 }
 
+type FbqFn = (...args: unknown[]) => void;
+
+function getFbq(): FbqFn | null {
+    if (typeof window === "undefined") return null;
+    const fbq = (window as { fbq?: unknown }).fbq;
+    if (typeof fbq !== "function") return null;
+    return fbq as FbqFn;
+}
+
 function clearMarketingCookies() {
     if (typeof document === "undefined") return;
     const names = document.cookie
@@ -59,12 +68,12 @@ export default function MarketingPixels() {
             updateGtagConsent(detail);
             if (!detail.marketing) {
                 clearMarketingCookies();
-                if (typeof window !== "undefined" && typeof (window as any).fbq === "function") {
-                    try {
-                        (window as any).fbq("consent", "revoke");
-                    } catch {
-                        // noop
-                    }
+                const fbq = getFbq();
+                if (!fbq) return;
+                try {
+                    fbq("consent", "revoke");
+                } catch {
+                    // noop
                 }
             }
         }
