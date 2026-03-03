@@ -226,6 +226,11 @@ export async function GET(req: Request) {
         let available = true;
         let reason: string | null = null;
 
+        // Past times always win over other reasons.
+        if (startMs < now) {
+            return { time, startAtMs: startMs, endAtMs: endMs, available: false, reason: "past" };
+        }
+
         if (agendaRanges.some((r) => r.start < endMs && r.end > startMs)) {
             agendaBlockedCount += 1;
             return { time, available: false, reason: "agenda" };
@@ -259,12 +264,6 @@ export async function GET(req: Request) {
                 available = false;
                 reason = hasPending ? "in_review" : hasConfirmed ? "booked" : "booked";
             }
-        }
-
-        // Prevent booking in the past (always wins over other reasons).
-        if (startMs < now) {
-            available = false;
-            reason = "past";
         }
 
         return {
