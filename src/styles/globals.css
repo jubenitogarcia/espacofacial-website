@@ -1214,20 +1214,114 @@ video.heroMediaEl {
   gap: 12px;
 }
 
-.instagramFrame {
-  width: 100%;
-  height: 520px;
-  border: 0;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.04);
-}
-
 .instagramFallback {
   padding: 16px;
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.06);
   font-size: 14px;
+}
+
+.instagramGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.instagramMediaBtn {
+  position: relative;
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 12px;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+}
+
+.instagramMediaBtn--active {
+  border-color: rgba(255, 255, 255, 0.65);
+}
+
+.instagramMediaThumb {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.instagramMediaBadge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.58);
+}
+
+.instagramViewer {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.instagramViewerTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.instagramViewerNav {
+  display: flex;
+  gap: 8px;
+}
+
+.instagramViewerBack,
+.instagramViewerStep,
+.instagramLoadMoreBtn {
+  appearance: none;
+  cursor: pointer;
+}
+
+.instagramViewerStep:disabled,
+.instagramLoadMoreBtn:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.instagramViewerMediaWrap {
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.instagramViewerMedia {
+  display: block;
+  width: 100%;
+  max-height: 64vh;
+  object-fit: contain;
+  background: #0c0c0d;
+}
+
+.instagramViewerCaption {
+  margin: 10px 2px 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.86);
+  white-space: pre-wrap;
+}
+
+.instagramInlineError {
+  font-size: 13px;
+  color: rgba(255, 210, 210, 0.95);
 }
 
 .modalActions {
@@ -1287,8 +1381,8 @@ video.heroMediaEl {
     height: 300px;
   }
 
-  .instagramFrame {
-    height: 420px;
+  .instagramGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -1970,62 +2064,59 @@ video.heroMediaEl {
 }
 
 .unitsFeatured {
-  border-radius: 18px;
-  padding: 14px;
-  background: linear-gradient(135deg, rgba(22, 163, 74, .16), rgba(22, 163, 74, .04));
-  border: 1px solid rgba(22, 163, 74, .35);
-  box-shadow: 0 12px 26px rgba(22, 163, 74, .18);
+  border: 1px solid rgba(0, 0, 0, .08);
+  border-radius: 16px;
+  padding: 10px;
+  background: #fafafa;
   margin-bottom: 12px;
 }
 
 .unitsFeaturedTitle {
   font-weight: 900;
-  font-size: 14px;
-  letter-spacing: 0.02em;
-  color: #0b0b0b;
-  margin-bottom: 10px;
+  font-size: 13px;
+  padding: 6px 8px;
+  margin-bottom: 8px;
 }
 
 .unitsFeaturedList {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .unitsFeaturedItem {
   appearance: none;
-  border: 0;
-  background: linear-gradient(140deg, #16a34a, #22c55e);
-  color: #fff;
-  border-radius: 999px;
-  padding: 12px 14px;
+  border: 1px solid rgba(0, 0, 0, .10);
+  background: #fff;
+  color: var(--text);
+  border-radius: 12px;
+  padding: 9px 10px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-weight: 900;
-  font-size: 14px;
-  letter-spacing: 0.02em;
-  justify-content: flex-start;
-  box-shadow: 0 12px 26px rgba(22, 163, 74, .3);
+  gap: 8px;
+  font-weight: 800;
+  font-size: 13px;
+  text-align: left;
 }
 
 .unitsFeaturedItem:hover {
-  background: linear-gradient(140deg, #0f172a, #16a34a);
+  background: #f3f3f3;
 }
 
 .unitsFeaturedItemTag {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 44px;
-  padding: 6px 10px;
+  min-width: 32px;
+  padding: 3px 7px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, .22);
-  color: #fff;
-  font-size: 12px;
-  letter-spacing: 0.14em;
-  border: 1px solid rgba(255, 255, 255, .5);
+  border: 1px solid rgba(0, 0, 0, .12);
+  background: #fff;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
 }
 
 .unitsFeaturedItemName {
