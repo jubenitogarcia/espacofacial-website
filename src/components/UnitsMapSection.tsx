@@ -89,6 +89,12 @@ const STATE_NAME_BY_UF: Record<string, string> = {
     TO: "Tocantins",
 };
 
+const FEATURED_UNIT_SLUGS = ["novo-hamburgo", "barrashoppingsul"] as const;
+const FEATURED_UNIT_TAGS: Record<(typeof FEATURED_UNIT_SLUGS)[number], string> = {
+    "novo-hamburgo": "NH",
+    barrashoppingsul: "BSS",
+};
+
 const UF_TO_SVG_ID: Record<string, string> = {
     AC: "ac",
     AL: "al",
@@ -422,6 +428,13 @@ export default function UnitsMapSection() {
     const activeGroup = openState ? stateGroups.find((g) => g.uf === openState.uf) ?? null : null;
     const activeTitle = activeGroup ? STATE_NAME_BY_UF[activeGroup.uf] ?? activeGroup.uf : "";
     const activeCount = activeGroup ? formatUnitCount(activeGroup.units.length) : "";
+    const featuredUnits = useMemo(
+        () =>
+            FEATURED_UNIT_SLUGS.map((slug) => units.find((u) => u.slug === slug)).filter(
+                (u): u is (typeof units)[number] => Boolean(u),
+            ),
+        [],
+    );
 
     return (
         <div className="unitsMapLayout">
@@ -539,6 +552,27 @@ export default function UnitsMapSection() {
 
                 <div className="unitsMapRight" aria-label="Lista de unidades por estado">
                     <div className="unitsStatesPanel">
+                        {featuredUnits.length ? (
+                            <div className="unitsFeatured" aria-label="Nossas unidades">
+                                <div className="unitsFeaturedTitle">Nossas unidades</div>
+                                <div className="unitsFeaturedList">
+                                    {featuredUnits.map((u) => (
+                                        <button
+                                            key={u.slug}
+                                            className="unitsFeaturedItem"
+                                            onClick={() => {
+                                                const dest = getUnitDestination(u);
+                                                trackEvent("unit_map_click", { unitSlug: u.slug, placement: "featured_list", destination: dest });
+                                                window.location.assign(dest);
+                                            }}
+                                        >
+                                            <span className="unitsFeaturedItemTag">{FEATURED_UNIT_TAGS[u.slug as (typeof FEATURED_UNIT_SLUGS)[number]]}</span>
+                                            <span className="unitsFeaturedItemName">{u.name}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : null}
                         <div className="unitsStatesTitle">Unidades por estado</div>
                         <div className="unitsStatesList">
                             {stateGroups.map((g) => (

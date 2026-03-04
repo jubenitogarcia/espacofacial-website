@@ -1,6 +1,6 @@
 "use client";
 
-import { LOCAL_HERO_ITEMS, type HeroMediaItem } from "@/lib/heroMediaShared";
+import { getLocalHeroItems, type HeroMediaItem, type HeroMediaVariant } from "@/lib/heroMediaShared";
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
 
@@ -12,12 +12,27 @@ export default function HeroMedia({ initialItems }: HeroMediaProps) {
     const [index, setIndex] = useState(0);
     const [prevIndex, setPrevIndex] = useState<number | null>(null);
     const [aspectRatio, setAspectRatio] = useState<string>("16 / 9");
+    const [variant, setVariant] = useState<HeroMediaVariant>("desktop");
 
     type HeroStyle = CSSProperties & Record<"--hero-ar", string>;
+    useEffect(() => {
+        if (Array.isArray(initialItems) && initialItems.length) return;
+        if (typeof window === "undefined") return;
+        const mql = window.matchMedia("(max-width: 900px)");
+        const update = () => setVariant(mql.matches ? "mobile" : "desktop");
+        update();
+        if (typeof mql.addEventListener === "function") {
+            mql.addEventListener("change", update);
+            return () => mql.removeEventListener("change", update);
+        }
+        mql.addListener(update);
+        return () => mql.removeListener(update);
+    }, [initialItems]);
+
     const items = useMemo(() => {
         if (Array.isArray(initialItems) && initialItems.length) return initialItems;
-        return LOCAL_HERO_ITEMS;
-    }, [initialItems]);
+        return getLocalHeroItems(variant);
+    }, [initialItems, variant]);
 
     useEffect(() => {
         setIndex(0);

@@ -179,6 +179,36 @@ button:focus-visible {
   font-size: 12px;
 }
 
+.unitQuickButtons {
+  display: none;
+  margin-top: 14px;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.unitQuickButton {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .08);
+}
+
+.unitQuickButton:hover {
+  background: #f3f3f3;
+}
+
+.unitQuickButton:active {
+  transform: translateY(1px);
+}
+
 .navLeft {
   display: flex;
   align-items: center;
@@ -405,6 +435,120 @@ button:focus-visible {
 .bookingFlow__legendSwatch--occupied {
   background: #e5e7eb;
   border-color: #d1d5db;
+}
+
+.bookingFlow__modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 15, 15, 0.45);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  z-index: 60;
+}
+
+.bookingFlow__modalCard {
+  width: min(640px, 100%);
+  background: #fff;
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.25);
+  max-height: min(90vh, 760px);
+  overflow-y: auto;
+}
+
+.bookingFlow__modalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bookingFlow__modalClose {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.bookingFlow__modalBody {
+  margin-top: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.bookingFlow__modalHint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.bookingFlow__formGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.bookingFlow__field {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #111;
+}
+
+.bookingFlow__input,
+.bookingFlow__textarea {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+}
+
+.bookingFlow__textarea {
+  resize: vertical;
+}
+
+.bookingFlow__fieldError {
+  font-size: 12px;
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+.bookingFlow__modalActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bookingFlow__primaryBtn {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #111;
+  background: #111;
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.bookingFlow__primaryBtn:disabled {
+  cursor: not-allowed;
+  background: #222;
+}
+
+.bookingFlow__ghostBtn {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #fff;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .bookingFlow__selectItem {
@@ -1060,6 +1204,32 @@ video.heroMediaEl {
   background: rgba(255, 255, 255, 0.04);
 }
 
+.instagramModalCard {
+  width: min(860px, 100%);
+}
+
+.instagramModalBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.instagramFrame {
+  width: 100%;
+  height: 520px;
+  border: 0;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.instagramFallback {
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 14px;
+}
+
 .modalActions {
   display: flex;
   gap: 10px;
@@ -1094,9 +1264,31 @@ video.heroMediaEl {
   opacity: 0.7;
 }
 
+.photoModalCard {
+  width: min(1040px, 100%);
+}
+
+.photoModalBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.photoModalImage {
+  width: 100%;
+  max-height: 72vh;
+  object-fit: contain;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
 @media (max-width: 640px) {
   .mapsFrame {
     height: 300px;
+  }
+
+  .instagramFrame {
+    height: 420px;
   }
 }
 
@@ -1181,6 +1373,19 @@ video.heroMediaEl {
   background: #fff;
   border: 1px solid rgba(0, 0, 0, .08);
   box-shadow: 0 10px 26px rgba(0, 0, 0, .06);
+}
+
+.aboutPhotoButton {
+  appearance: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-in;
+}
+
+.aboutPhotoButton:focus-visible {
+  outline: 3px solid rgba(12, 99, 245, 0.65);
+  outline-offset: 3px;
 }
 
 .aboutPhotoItem {
@@ -1764,6 +1969,77 @@ video.heroMediaEl {
   flex-direction: column;
 }
 
+.unitsFeatured {
+  border-radius: 18px;
+  padding: 14px;
+  background: linear-gradient(135deg, rgba(22, 163, 74, .16), rgba(22, 163, 74, .04));
+  border: 1px solid rgba(22, 163, 74, .35);
+  box-shadow: 0 12px 26px rgba(22, 163, 74, .18);
+  margin-bottom: 12px;
+}
+
+.unitsFeaturedTitle {
+  font-weight: 900;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  color: #0b0b0b;
+  margin-bottom: 10px;
+}
+
+.unitsFeaturedList {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.unitsFeaturedItem {
+  appearance: none;
+  border: 0;
+  background: linear-gradient(140deg, #16a34a, #22c55e);
+  color: #fff;
+  border-radius: 999px;
+  padding: 12px 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  justify-content: flex-start;
+  box-shadow: 0 12px 26px rgba(22, 163, 74, .3);
+}
+
+.unitsFeaturedItem:hover {
+  background: linear-gradient(140deg, #0f172a, #16a34a);
+}
+
+.unitsFeaturedItemTag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .22);
+  color: #fff;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  border: 1px solid rgba(255, 255, 255, .5);
+}
+
+.unitsFeaturedItemName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width:520px) {
+  .unitsFeaturedList {
+    grid-template-columns: 1fr;
+  }
+}
+
 .unitsStatesTitle {
   font-weight: 900;
   font-size: 14px;
@@ -1869,6 +2145,14 @@ video.heroMediaEl {
 
 .doctorCardMainLink:hover {
   text-decoration: underline;
+}
+
+.doctorCardMainButton {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
 }
 
 .footer {
@@ -2046,6 +2330,10 @@ video.heroMediaEl {
 @media (max-width:900px) {
   .grid {
     grid-template-columns: repeat(2, 1fr)
+  }
+
+  .unitQuickButtons {
+    display: flex;
   }
 
   .unitsMapSplit {

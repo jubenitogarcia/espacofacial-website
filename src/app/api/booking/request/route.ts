@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { getBookingDb, nowMs, addMinutes, clampText, normalizePhone, sanitizeOneLine, isValidDateKey, isValidTimeKey, toSaoPauloIso, slugify } from "@/lib/bookingDb";
+import { getBookingDb, nowMs, addMinutes, clampText, normalizePhone, normalizeEmail, normalizeCpf, sanitizeOneLine, isValidDateKey, isValidTimeKey, toSaoPauloIso, slugify } from "@/lib/bookingDb";
 import { getServiceById } from "@/data/services";
-import { signBookingDecision } from "@/lib/bookingSecurity";
 import { getUnitDoctorsResult } from "@/lib/injectorsDirectory";
+import { sendBookingNotifications } from "@/lib/bookingNotifications";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +16,10 @@ type Payload = {
     date?: string; // YYYY-MM-DD
     time?: string; // HH:MM
     patientName?: string;
+    email?: string;
     whatsapp?: string;
+    cpf?: string;
+    address?: string;
     notes?: string;
     hp?: string;
     formStartedAtMs?: number;
@@ -35,13 +38,6 @@ function uuid(): string {
     const anyCrypto = globalThis as unknown as { crypto?: { randomUUID?: () => string } };
     if (anyCrypto.crypto?.randomUUID) return anyCrypto.crypto.randomUUID();
     return `req_${Math.random().toString(16).slice(2)}_${Date.now()}`;
-}
-
-function getSiteUrl(request: Request): string {
-    const fromEnv = (process.env.NEXT_PUBLIC_SITE_URL ?? "").trim();
-    if (fromEnv) return fromEnv.replace(/\/$/, "");
-    const url = new URL(request.url);
-    return url.origin;
 }
 
 function getCloudflareCache(): Cache | null {
@@ -122,6 +118,35 @@ async function expireStaleOverlaps(db: Awaited<ReturnType<typeof getBookingDb>>,
     }
 }
 
+async function upsertCustomer(
+    db: Awaited<ReturnType<typeof getBookingDb>>,
+    params: { name: string; email: string; whatsapp: string; cpf: string; address: string; now: number },
+) {
+    const existing = await db
+        .prepare("SELECT id FROM booking_customers WHERE email = ? OR (cpf IS NOT NULL AND cpf = ?) LIMIT 1")
+        .bind(params.email, params.cpf)
+        .first<{ id: string }>();
+
+    if (existing?.id) {
+        await db
+            .prepare(
+                "UPDATE booking_customers SET name = ?, email = ?, whatsapp = ?, cpf = ?, address = ?, updated_at_ms = ? WHERE id = ?",
+            )
+            .bind(params.name, params.email, params.whatsapp, params.cpf, params.address, params.now, existing.id)
+            .run();
+        return existing.id;
+    }
+
+    const id = uuid();
+    await db
+        .prepare(
+            "INSERT INTO booking_customers (id, name, email, whatsapp, cpf, address, created_at_ms, updated_at_ms) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        )
+        .bind(id, params.name, params.email, params.whatsapp, params.cpf, params.address, params.now, params.now)
+        .run();
+    return id;
+}
+
 export async function POST(request: Request) {
     let body: Payload;
     try {
@@ -142,7 +167,10 @@ export async function POST(request: Request) {
     const turnstileToken = sanitizeOneLine((body.turnstileToken ?? "").toString());
 
     const patientName = clampText(sanitizeOneLine(body.patientName ?? ""), 80);
+    const email = normalizeEmail(body.email ?? "");
     const whatsapp = normalizePhone(body.whatsapp ?? "");
+    const cpf = normalizeCpf(body.cpf ?? "");
+    const address = clampText(sanitizeOneLine(body.address ?? ""), 160);
 
     // Optional field, but avoid sensitive prompts.
     const notes = clampText((body.notes ?? "").trim(), 300) || null;
@@ -163,8 +191,20 @@ export async function POST(request: Request) {
         return json({ ok: false, error: "missing_name" }, { status: 400 });
     }
 
+    if (!email) {
+        return json({ ok: false, error: "invalid_email" }, { status: 400 });
+    }
+
     if (!whatsapp) {
         return json({ ok: false, error: "invalid_whatsapp" }, { status: 400 });
+    }
+
+    if (!cpf) {
+        return json({ ok: false, error: "invalid_cpf" }, { status: 400 });
+    }
+
+    if (!address) {
+        return json({ ok: false, error: "missing_address" }, { status: 400 });
     }
 
     const service =
@@ -335,27 +375,29 @@ export async function POST(request: Request) {
         return json({ ok: false, error: "slot_in_review" }, { status: 409 });
     }
 
-    const status = hasConfirmedConflict ? "needs_approval" : "pending";
+    if (hasConfirmedConflict) {
+        return json({ ok: false, error: "no_availability" }, { status: 409 });
+    }
+
+    const status = "confirmed";
 
     const id = uuid();
 
-    const siteUrl = getSiteUrl(request);
-    const decisionSecret = (process.env.BOOKING_DECISION_SECRET ?? "").trim();
-    const decisionExpMs = confirmByMs;
+    const decisionLinks = null;
 
-    const decisionLinks = decisionSecret
-        ? {
-            confirm: `${siteUrl}/api/booking/decision?id=${encodeURIComponent(id)}&action=confirm&exp=${decisionExpMs}&override=0&sig=${encodeURIComponent(
-                await signBookingDecision({ secret: decisionSecret, id, action: "confirm", expMs: decisionExpMs, overrideConflict: false }),
-            )}`,
-            confirmOverride: `${siteUrl}/api/booking/decision?id=${encodeURIComponent(id)}&action=confirm&exp=${decisionExpMs}&override=1&sig=${encodeURIComponent(
-                await signBookingDecision({ secret: decisionSecret, id, action: "confirm", expMs: decisionExpMs, overrideConflict: true }),
-            )}`,
-            decline: `${siteUrl}/api/booking/decision?id=${encodeURIComponent(id)}&action=decline&exp=${decisionExpMs}&override=0&sig=${encodeURIComponent(
-                await signBookingDecision({ secret: decisionSecret, id, action: "decline", expMs: decisionExpMs, overrideConflict: false }),
-            )}`,
-        }
-        : null;
+    let customerId: string | null = null;
+    try {
+        customerId = await upsertCustomer(db, {
+            name: patientName,
+            email,
+            whatsapp,
+            cpf,
+            address,
+            now: createdAtMs,
+        });
+    } catch {
+        // Best-effort: avoid blocking booking if customer upsert fails.
+    }
 
     // Optional: notify external automation via webhook (WhatsApp integration etc.)
     void tryPostWebhook({
@@ -373,7 +415,11 @@ export async function POST(request: Request) {
             endAtMs,
             confirmByMs,
             patientName,
+            email,
             whatsapp,
+            cpf,
+            address,
+            customerId,
             notes,
         },
         decisionLinks,
@@ -382,7 +428,7 @@ export async function POST(request: Request) {
     try {
         await db
             .prepare(
-                "INSERT INTO booking_requests (id, unit_slug, doctor_slug, service_id, start_at_ms, end_at_ms, status, patient_name, whatsapp, notes, created_at_ms, confirm_by_ms, decided_at_ms, decided_by, decision_note, override_conflict) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, NULL, 0)",
+                "INSERT INTO booking_requests (id, unit_slug, doctor_slug, service_id, start_at_ms, end_at_ms, status, patient_name, whatsapp, customer_email, customer_cpf, customer_address, customer_id, notes, created_at_ms, confirm_by_ms, decided_at_ms, decided_by, decision_note, override_conflict) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, NULL, 0)",
             )
             .bind(
                 id,
@@ -394,6 +440,10 @@ export async function POST(request: Request) {
                 status,
                 patientName,
                 whatsapp,
+                email,
+                cpf,
+                address,
+                customerId,
                 notes,
                 createdAtMs,
                 confirmByMs,
@@ -403,6 +453,20 @@ export async function POST(request: Request) {
         const msg = e instanceof Error ? e.message : "insert_failed";
         return json({ ok: false, error: "db_error", message: msg }, { status: 500 });
     }
+
+    const notifications =
+        status === "confirmed"
+            ? await sendBookingNotifications({
+                id,
+                unitSlug,
+                serviceName: service.name,
+                date,
+                time,
+                patientName,
+                email,
+                whatsapp,
+            })
+            : { email: { ok: false, status: "skipped", error: "not_confirmed" }, whatsapp: { ok: false, status: "skipped", error: "not_confirmed" } };
 
     return json(
         {
@@ -418,6 +482,7 @@ export async function POST(request: Request) {
             startAtMs,
             endAtMs,
             decisionLinks,
+            notifications,
         },
         { status: 200 },
     );

@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { units } from "@/data/units";
 import { services, type Service } from "@/data/services";
 import { useCurrentUnit } from "@/hooks/useCurrentUnit";
+import { doctorSlugFromTeamMember, normalizeDoctorSlug } from "@/lib/doctorSlug";
 import { setStoredUnitSlug } from "@/lib/unitSelection";
 import TurnstileWidget from "@/components/TurnstileWidget";
 
@@ -29,8 +30,10 @@ type SlotsPayload = {
     slots: Array<{ time: string; startAtMs: number; endAtMs: number; available: boolean; reason: string | null }>;
 };
 
+type NotificationResult = { ok: boolean; status: string; provider?: string; error?: string };
+
 type RequestResponse =
-    | { ok: true; id: string; status: string; confirmByMs: number; startAtMs: number; endAtMs: number; unitSlug: string; doctorSlug: string; doctorName: string; service: { id: string; name: string } }
+    | { ok: true; id: string; status: string; confirmByMs: number; startAtMs: number; endAtMs: number; unitSlug: string; doctorSlug: string; doctorName: string; service: { id: string; name: string }; notifications?: { email: NotificationResult; whatsapp: NotificationResult } }
     | { ok: false; error: string; message?: string };
 
 type BookingStatus = {
@@ -125,13 +128,12 @@ function formatBrPhone(input: string): string {
     return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
 }
 
-function stripPhoneDigits(value?: string | null): string | null {
-    const digits = (value ?? "").replace(/\D/g, "");
-    return digits.length ? digits : null;
-}
-
-function buildClinicWhatsappMessage(opts: { serviceLabel: string; procedureText: string; dateLabel: string; time: string }) {
-    return `Quero agendar um(a) ${opts.serviceLabel} de ${opts.procedureText} para ${opts.dateLabel} às ${opts.time} na Espaço Facial! 📆`;
+function formatCpf(input: string): string {
+    const digits = (input ?? "").replace(/\D/g, "").slice(0, 11);
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+    if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
 }
 
 function ScrollPicker(props: { ariaLabel: string; children: ReactNode; className?: string }) {
@@ -232,7 +234,10 @@ export default function BookingFlow() {
     const [slotsError, setSlotsError] = useState<string | null>(null);
 
     const [patientName, setPatientName] = useState("");
+    const [email, setEmail] = useState("");
     const [whatsapp, setWhatsapp] = useState("");
+    const [cpf, setCpf] = useState("");
+    const [address, setAddress] = useState("");
     const [notes, setNotes] = useState("");
 
     const [detailsStartedAtMs, setDetailsStartedAtMs] = useState<number | null>(null);
@@ -243,7 +248,7 @@ export default function BookingFlow() {
     const [submitting, setSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
 
-    const [submitted, setSubmitted] = useState<{ id: string; status: string; confirmByMs: number } | null>(null);
+    const [submitted, setSubmitted] = useState<{ id: string; status: string; confirmByMs: number; notifications?: { email: NotificationResult; whatsapp: NotificationResult } } | null>(null);
     const [status, setStatus] = useState<BookingStatus | null>(null);
 
     const allowedUnitSlugs = useMemo(() => new Set(["barrashoppingsul", "novo-hamburgo"]), []);
@@ -267,10 +272,12 @@ export default function BookingFlow() {
     }, [includeAvaliacao, includeProcedimento, includeRevisao]);
 
     const lastUnitSlugRef = useRef<string | null>(null);
+    const appliedDoctorQueryRef = useRef<string | null>(null);
     useEffect(() => {
         const prev = lastUnitSlugRef.current;
         if (prev === unitSlug) return;
         lastUnitSlugRef.current = unitSlug;
+        appliedDoctorQueryRef.current = null;
 
         if (unitSlug) {
             setDoctor({ slug: "any", name: "Sem preferência", handle: null });
@@ -291,6 +298,12 @@ export default function BookingFlow() {
         setTurnstileHadError(false);
         setSlots(null);
         setSlotsError(null);
+        setPatientName("");
+        setEmail("");
+        setWhatsapp("");
+        setCpf("");
+        setAddress("");
+        setNotes("");
     }, [unitSlug]);
 
     // Load doctors (injectors) from Google Sheet.
@@ -320,11 +333,6 @@ export default function BookingFlow() {
 
     const unit = useMemo(() => findUnit(unitSlug), [unitSlug]);
     const unitLabel = useMemo(() => unitLabelFromSlug(unitSlug), [unitSlug]);
-    const clinicWhatsappPhone = useMemo(() => stripPhoneDigits(unit?.whatsappPhone ?? unit?.phone), [
-        unit?.phone,
-        unit?.whatsappPhone,
-    ]);
-
     const doctorsForUnit = useMemo(() => {
         if (!members) return null;
         if (!unitLabel) return [];
@@ -333,11 +341,29 @@ export default function BookingFlow() {
             .filter((m) => m.units.map((u) => u.toLowerCase()).includes(unitLabel.toLowerCase()))
             .map((m) => ({
                 name: m.name,
-                slug: (m.instagramHandle ?? "").trim() || m.name.toLowerCase().replace(/\s+/g, "").slice(0, 50),
+                slug: doctorSlugFromTeamMember(m),
                 handle: m.instagramHandle,
                 nickname: m.nickname,
             }));
     }, [members, unitLabel]);
+
+    const doctorQuery = useMemo(() => normalizeDoctorSlug(searchParams?.get("doctor") ?? ""), [searchParams]);
+
+    useEffect(() => {
+        if (!unitSlug || !doctorsForUnit || doctorsForUnit.length === 0) return;
+        if (!doctorQuery || doctorQuery === "any") return;
+        if (appliedDoctorQueryRef.current === doctorQuery) return;
+
+        const match = doctorsForUnit.find((d) => {
+            if (normalizeDoctorSlug(d.slug) === doctorQuery) return true;
+            if (normalizeDoctorSlug(d.handle ?? "") === doctorQuery) return true;
+            return normalizeDoctorSlug(d.name) === doctorQuery;
+        });
+
+        if (!match) return;
+        setDoctor({ slug: match.slug, name: match.name, handle: match.handle });
+        appliedDoctorQueryRef.current = doctorQuery;
+    }, [doctorQuery, doctorsForUnit, unitSlug]);
 
     const upcomingDays = useMemo(() => {
         const out: string[] = [];
@@ -409,34 +435,25 @@ export default function BookingFlow() {
             setSubmitError("Informe seu nome.");
             return;
         }
+        if (!emailValue || !emailSeemsValid) {
+            setSubmitError("Informe um e-mail válido.");
+            return;
+        }
         if (!whatsapp.trim()) {
             setSubmitError("Informe seu WhatsApp.");
+            return;
+        }
+        if (!cpfDigits || !cpfSeemsValid) {
+            setSubmitError("Informe um CPF válido.");
+            return;
+        }
+        if (!address.trim()) {
+            setSubmitError("Informe seu endereço completo.");
             return;
         }
         if (turnstileSiteKey && !turnstileToken) {
             setSubmitError("Confirme que você não é um robô.");
             return;
-        }
-
-        const serviceParts: string[] = [];
-        if (includeAvaliacao) serviceParts.push("Avaliação");
-        if (includeProcedimento) serviceParts.push("Procedimento");
-        if (includeRevisao) serviceParts.push("Revisão");
-        const serviceLabel = serviceParts.length ? serviceParts.join(" e ") : "atendimento";
-        const procedureText = service?.id === "any" ? "orientação" : service?.name ?? "atendimento";
-        const formattedDateLabel = formatDatePtBr(dateKey ?? "") || dateKey;
-        if (clinicWhatsappPhone) {
-            const message = buildClinicWhatsappMessage({
-                serviceLabel,
-                procedureText,
-                dateLabel: formattedDateLabel,
-                time: timeKey,
-            });
-            const waUrl = new URL("https://api.whatsapp.com/send");
-            waUrl.searchParams.set("phone", clinicWhatsappPhone);
-            waUrl.searchParams.set("text", message);
-            const win = window.open(waUrl.toString(), "_blank");
-            if (win) win.focus();
         }
 
         setSubmitting(true);
@@ -458,7 +475,10 @@ export default function BookingFlow() {
                     date: dateKey,
                     time: timeKey,
                     patientName,
+                    email: emailValue,
                     whatsapp,
+                    cpf: cpfDigits,
+                    address: address.trim(),
                     notes,
                     hp: honeypot,
                     formStartedAtMs: detailsStartedAtMs,
@@ -498,6 +518,18 @@ export default function BookingFlow() {
                     setSubmitError("Não foi possível enviar. Recarregue a página e tente novamente.");
                     return;
                 }
+                if (err === "invalid_email") {
+                    setSubmitError("Informe um e-mail válido.");
+                    return;
+                }
+                if (err === "invalid_cpf") {
+                    setSubmitError("Informe um CPF válido.");
+                    return;
+                }
+                if (err === "missing_address") {
+                    setSubmitError("Informe seu endereço completo.");
+                    return;
+                }
                 if (err === "turnstile_failed") {
                     setSubmitError("Falha na verificação anti-robô. Recarregue a página e tente novamente.");
                     return;
@@ -506,7 +538,7 @@ export default function BookingFlow() {
                 return;
             }
 
-            setSubmitted({ id: json.id, status: json.status, confirmByMs: json.confirmByMs });
+            setSubmitted({ id: json.id, status: json.status, confirmByMs: json.confirmByMs, notifications: json.notifications });
             setStep("submitted");
         } catch {
             setSubmitError("Falha de rede ao enviar.");
@@ -563,16 +595,54 @@ export default function BookingFlow() {
     }, [slots?.slots, timeKey]);
 
     const showSensitiveHint = true;
+    const emailValue = email.trim().toLowerCase();
+    const emailSeemsValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue);
     const whatsappDigits = whatsapp.replace(/\D/g, "");
     const whatsappSeemsValid = whatsappDigits.length >= 10;
+    const cpfDigits = cpf.replace(/\D/g, "");
+    const cpfSeemsValid = cpfDigits.length === 11;
+    const addressSeemsValid = address.trim().length >= 6;
     const turnstileRequired = !!turnstileSiteKey;
+    const canSubmit =
+        !!selectedSlot &&
+        !!patientName.trim() &&
+        emailSeemsValid &&
+        whatsappSeemsValid &&
+        cpfSeemsValid &&
+        addressSeemsValid &&
+        (!turnstileRequired || !!turnstileToken);
+
+    const showDetailsModal = step === "details" && !!unitSlug && !!doctor && !!service && !!dateKey && !!timeKey;
+
+    useEffect(() => {
+        if (!showDetailsModal) return;
+        const previous = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = previous;
+        };
+    }, [showDetailsModal]);
+
+    useEffect(() => {
+        if (!showDetailsModal) return;
+        const onKey = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                setStep("pick");
+                setSubmitError(null);
+                setTurnstileToken(null);
+                setTurnstileHadError(false);
+            }
+        };
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+    }, [showDetailsModal]);
 
     return (
         <div className="bookingFlow">
             <div className="bookingFlow__intro">
                 <h1>Agendamento</h1>
                 <p>
-                    Escolha um(a) profissional (ou sem preferência), o procedimento (ou quero orientação), os serviços e o horário. Você recebe a confirmação por WhatsApp em até 1 hora.
+                    Escolha um(a) profissional (ou sem preferência), o procedimento (ou quero orientação), os serviços e o horário. A confirmação é enviada por e-mail e WhatsApp.
                 </p>
                 {unit ? (
                     <div className="small bookingFlow__unitStatus">
@@ -962,11 +1032,20 @@ export default function BookingFlow() {
                                                         onClick={() => {
                                                             if (ariaDisabled) return;
                                                             if (active) {
+                                                                if (step !== "details") {
+                                                                    setStep("details");
+                                                                    setDetailsStartedAtMs(Date.now());
+                                                                    setTurnstileToken(null);
+                                                                    setTurnstileHadError(false);
+                                                                    setSubmitError(null);
+                                                                    return;
+                                                                }
                                                                 setTimeKey(null);
                                                                 setStep("pick");
                                                                 setDetailsStartedAtMs(null);
                                                                 setTurnstileToken(null);
                                                                 setTurnstileHadError(false);
+                                                                setSubmitError(null);
                                                                 return;
                                                             }
                                                             setTimeKey(s.time);
@@ -974,6 +1053,7 @@ export default function BookingFlow() {
                                                             setDetailsStartedAtMs(Date.now());
                                                             setTurnstileToken(null);
                                                             setTurnstileHadError(false);
+                                                            setSubmitError(null);
                                                         }}
                                                         tabIndex={ariaDisabled ? -1 : 0}
                                                         style={{
@@ -997,136 +1077,28 @@ export default function BookingFlow() {
                         </div>
                     </div>
 
-                    {step === "details" && unitSlug && doctor && service && dateKey && timeKey ? (
-                        <div className="card bookingFlow__cardFull" style={{ padding: 16 }}>
-                            <div style={{ fontWeight: 900 }}>5) Seus dados</div>
-                            <div className="small" style={{ marginTop: 8 }}>
-                                {service.name} ({durationMinutes} min) · {formatDatePtBr(dateKey)} às {timeKey}
-                            </div>
-
-                            <div style={{ display: "grid", gap: 10, marginTop: 12 }}>
-                                <div
-                                    aria-hidden="true"
-                                    style={{
-                                        position: "absolute",
-                                        left: "-10000px",
-                                        top: "auto",
-                                        width: 1,
-                                        height: 1,
-                                        overflow: "hidden",
-                                    }}
-                                >
-                                    <label>
-                                        Empresa
-                                        <input
-                                            value={honeypot}
-                                            onChange={(e) => setHoneypot(e.target.value)}
-                                            tabIndex={-1}
-                                            autoComplete="off"
-                                            inputMode="text"
-                                        />
-                                    </label>
-                                </div>
-
-                                <label style={{ display: "grid", gap: 6 }}>
-                                    <span style={{ fontWeight: 700 }}>Nome</span>
-                                    <input
-                                        value={patientName}
-                                        onChange={(e) => setPatientName(e.target.value)}
-                                        placeholder="Seu nome"
-                                        autoComplete="name"
-                                        style={{ padding: "10px 12px", borderRadius: 10, border: "1px solid #ddd" }}
-                                    />
-                                </label>
-
-                                <label style={{ display: "grid", gap: 6 }}>
-                                    <span style={{ fontWeight: 700 }}>WhatsApp</span>
-                                    <input
-                                        value={whatsapp}
-                                        onChange={(e) => setWhatsapp(formatBrPhone(e.target.value))}
-                                        placeholder="(DDD) 9xxxx-xxxx"
-                                        inputMode="tel"
-                                        autoComplete="tel"
-                                        aria-invalid={whatsapp.length > 0 && !whatsappSeemsValid}
-                                        style={{ padding: "10px 12px", borderRadius: 10, border: "1px solid #ddd" }}
-                                    />
-                                </label>
-                                {!whatsappSeemsValid && whatsapp.length > 0 ? (
-                                    <div className="small" style={{ color: "#b91c1c", fontWeight: 700 }}>
-                                        Informe DDD + numero (ex.: (51) 99999-9999).
-                                    </div>
-                                ) : null}
-
-                                {turnstileRequired ? (
-                                    <div style={{ display: "grid", gap: 8 }}>
-                                        <TurnstileWidget
-                                            siteKey={turnstileSiteKey}
-                                            onToken={setTurnstileToken}
-                                            onError={() => setTurnstileHadError(true)}
-                                        />
-                                        {!turnstileToken ? (
-                                            <div className="small" style={{ color: turnstileHadError ? "#b91c1c" : "var(--muted)" }}>
-                                                {turnstileHadError ? "Não foi possível carregar a verificação anti-robô." : "Confirme que você não é um robô para enviar."}
-                                            </div>
-                                        ) : null}
-                                    </div>
-                                ) : null}
-
-                                <label style={{ display: "grid", gap: 6 }}>
-                                    <span style={{ fontWeight: 700 }}>Observações (opcional)</span>
-                                    <textarea
-                                        value={notes}
-                                        onChange={(e) => setNotes(e.target.value)}
-                                        placeholder={showSensitiveHint ? "Opcional. Evite informações sensíveis; use apenas preferências (ex.: melhor horário)." : "Opcional"}
-                                        rows={3}
-                                        style={{ padding: "10px 12px", borderRadius: 10, border: "1px solid #ddd" }}
-                                    />
-                                </label>
-
-                                <button
-                                    type="button"
-                                    onClick={submit}
-                                    disabled={submitting || !selectedSlot || !whatsappSeemsValid || (turnstileRequired && !turnstileToken)}
-                                    style={{
-                                        padding: "12px 14px",
-                                        borderRadius: 12,
-                                        border: "1px solid #111",
-                                        background: submitting ? "#222" : "#111",
-                                        color: "white",
-                                        fontWeight: 900,
-                                        cursor: submitting ? "not-allowed" : "pointer",
-                                    }}
-                                >
-                                    {submitting ? "Enviando…" : "Solicitar confirmação"}
-                                </button>
-
-                                {submitError ? (
-                                    <div role="status" style={{ color: "#b91c1c", fontWeight: 700 }}>
-                                        {submitError}
-                                    </div>
-                                ) : null}
-
-                                {unit?.contactUrl ? (
-                                    <div className="small">
-                                        Preferiu falar agora? Você também pode chamar a unidade no WhatsApp: <a href={unit.contactUrl} target="_blank" rel="noreferrer" style={{ textDecoration: "underline" }}>abrir WhatsApp</a>.
-                                    </div>
-                                ) : null}
-                            </div>
-                        </div>
-                    ) : null}
                 </div>
             ) : (
                 <div className="bookingFlow__grid">
                     <div className="card bookingFlow__cardFull" style={{ padding: 18 }}>
-                        <div style={{ fontWeight: 900, fontSize: 18 }}>Pedido enviado</div>
+                        <div style={{ fontWeight: 900, fontSize: 18 }}>
+                            {submitted?.status === "confirmed" ? "Reserva confirmada" : "Pedido enviado"}
+                        </div>
                         {submitted ? (
                             <>
                                 <div className="small" style={{ marginTop: 8 }}>
                                     Protocolo: <span style={{ fontWeight: 900 }}>{submitted.id}</span>
                                 </div>
                                 <div style={{ marginTop: 10 }}>
-                                    Você receberá a confirmação por WhatsApp em até 1 hora. Prazo: <strong>{formatDeadline(submitted.confirmByMs)}</strong>.
+                                    {submitted.status === "confirmed"
+                                        ? "Enviamos a confirmação para seu e-mail e WhatsApp."
+                                        : `Seu pedido entrou na fila. Prazo: ${formatDeadline(submitted.confirmByMs)}.`}
                                 </div>
+                                {submitted.notifications && submitted.status === "confirmed" ? (
+                                    <div className="small" style={{ marginTop: 6 }}>
+                                        E-mail: {submitted.notifications.email.status} · WhatsApp: {submitted.notifications.whatsapp.status}
+                                    </div>
+                                ) : null}
                             </>
                         ) : null}
 
@@ -1168,11 +1140,15 @@ export default function BookingFlow() {
                                     setDateTouched(false);
                                     setTimeKey(null);
                                     setPatientName("");
+                                    setEmail("");
                                     setWhatsapp("");
+                                    setCpf("");
+                                    setAddress("");
                                     setNotes("");
                                     setSlots(null);
                                     setSubmitted(null);
                                     setStatus(null);
+                                    setSubmitError(null);
                                 }}
                                 style={{ cursor: "pointer" }}
                             >
@@ -1182,6 +1158,206 @@ export default function BookingFlow() {
                     </div>
                 </div>
             )}
+
+            {showDetailsModal && unitSlug && doctor && service && dateKey && timeKey ? (
+                <div
+                    className="bookingFlow__modalBackdrop"
+                    role="dialog"
+                    aria-modal="true"
+                    onClick={(event) => {
+                        if (event.target !== event.currentTarget) return;
+                        setStep("pick");
+                        setSubmitError(null);
+                        setTurnstileToken(null);
+                        setTurnstileHadError(false);
+                    }}
+                >
+                    <div className="bookingFlow__modalCard">
+                        <div className="bookingFlow__modalHeader">
+                            <div>
+                                <div style={{ fontWeight: 900 }}>Finalizar agendamento</div>
+                                <div className="small" style={{ marginTop: 4 }}>
+                                    {service.name} ({durationMinutes} min) · {formatDatePtBr(dateKey)} às {timeKey}
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                className="bookingFlow__modalClose"
+                                aria-label="Fechar"
+                                onClick={() => {
+                                    setStep("pick");
+                                    setSubmitError(null);
+                                    setTurnstileToken(null);
+                                    setTurnstileHadError(false);
+                                }}
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        <div className="bookingFlow__modalBody">
+                            <div
+                                aria-hidden="true"
+                                style={{
+                                    position: "absolute",
+                                    left: "-10000px",
+                                    top: "auto",
+                                    width: 1,
+                                    height: 1,
+                                    overflow: "hidden",
+                                }}
+                            >
+                                <label>
+                                    Empresa
+                                    <input
+                                        value={honeypot}
+                                        onChange={(e) => setHoneypot(e.target.value)}
+                                        tabIndex={-1}
+                                        autoComplete="off"
+                                        inputMode="text"
+                                    />
+                                </label>
+                            </div>
+
+                            <div className="bookingFlow__modalHint">
+                                Esses dados criam sua conta para futuros agendamentos.
+                            </div>
+
+                            <div className="bookingFlow__formGrid">
+                                <label className="bookingFlow__field">
+                                    <span>Nome</span>
+                                    <input
+                                        value={patientName}
+                                        onChange={(e) => setPatientName(e.target.value)}
+                                        placeholder="Seu nome"
+                                        autoComplete="name"
+                                        className="bookingFlow__input"
+                                    />
+                                </label>
+
+                                <label className="bookingFlow__field">
+                                    <span>E-mail</span>
+                                    <input
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        placeholder="voce@email.com"
+                                        autoComplete="email"
+                                        inputMode="email"
+                                        className="bookingFlow__input"
+                                        aria-invalid={email.length > 0 && !emailSeemsValid}
+                                    />
+                                </label>
+                            </div>
+                            {email.length > 0 && !emailSeemsValid ? (
+                                <div className="bookingFlow__fieldError">Informe um e-mail válido.</div>
+                            ) : null}
+
+                            <div className="bookingFlow__formGrid">
+                                <label className="bookingFlow__field">
+                                    <span>WhatsApp</span>
+                                    <input
+                                        value={whatsapp}
+                                        onChange={(e) => setWhatsapp(formatBrPhone(e.target.value))}
+                                        placeholder="(DDD) 9xxxx-xxxx"
+                                        inputMode="tel"
+                                        autoComplete="tel"
+                                        aria-invalid={whatsapp.length > 0 && !whatsappSeemsValid}
+                                        className="bookingFlow__input"
+                                    />
+                                </label>
+
+                                <label className="bookingFlow__field">
+                                    <span>CPF</span>
+                                    <input
+                                        value={cpf}
+                                        onChange={(e) => setCpf(formatCpf(e.target.value))}
+                                        placeholder="000.000.000-00"
+                                        inputMode="numeric"
+                                        autoComplete="off"
+                                        aria-invalid={cpf.length > 0 && !cpfSeemsValid}
+                                        className="bookingFlow__input"
+                                    />
+                                </label>
+                            </div>
+                            {!whatsappSeemsValid && whatsapp.length > 0 ? (
+                                <div className="bookingFlow__fieldError">Informe DDD + número (ex.: (51) 99999-9999).</div>
+                            ) : null}
+                            {!cpfSeemsValid && cpf.length > 0 ? (
+                                <div className="bookingFlow__fieldError">Informe um CPF válido.</div>
+                            ) : null}
+
+                            <label className="bookingFlow__field">
+                                <span>Endereço completo</span>
+                                <textarea
+                                    value={address}
+                                    onChange={(e) => setAddress(e.target.value)}
+                                    placeholder="Rua, número, bairro, cidade e CEP"
+                                    rows={2}
+                                    className="bookingFlow__textarea"
+                                />
+                            </label>
+                            {!addressSeemsValid && address.length > 0 ? (
+                                <div className="bookingFlow__fieldError">Informe o endereço completo.</div>
+                            ) : null}
+
+                            {turnstileRequired ? (
+                                <div style={{ display: "grid", gap: 8 }}>
+                                    <TurnstileWidget
+                                        siteKey={turnstileSiteKey}
+                                        onToken={setTurnstileToken}
+                                        onError={() => setTurnstileHadError(true)}
+                                    />
+                                    {!turnstileToken ? (
+                                        <div className="small" style={{ color: turnstileHadError ? "#b91c1c" : "var(--muted)" }}>
+                                            {turnstileHadError ? "Não foi possível carregar a verificação anti-robô." : "Confirme que você não é um robô para enviar."}
+                                        </div>
+                                    ) : null}
+                                </div>
+                            ) : null}
+
+                            <label className="bookingFlow__field">
+                                <span>Observações (opcional)</span>
+                                <textarea
+                                    value={notes}
+                                    onChange={(e) => setNotes(e.target.value)}
+                                    placeholder={showSensitiveHint ? "Opcional. Evite informações sensíveis; use apenas preferências (ex.: melhor horário)." : "Opcional"}
+                                    rows={3}
+                                    className="bookingFlow__textarea"
+                                />
+                            </label>
+
+                            <div className="bookingFlow__modalActions">
+                                <button
+                                    type="button"
+                                    onClick={submit}
+                                    disabled={submitting || !canSubmit}
+                                    className="bookingFlow__primaryBtn"
+                                >
+                                    {submitting ? "Confirmando…" : "Confirmar reserva"}
+                                </button>
+                                <button
+                                    type="button"
+                                    className="bookingFlow__ghostBtn"
+                                    onClick={() => {
+                                        setStep("pick");
+                                        setSubmitError(null);
+                                        setTurnstileToken(null);
+                                        setTurnstileHadError(false);
+                                    }}
+                                >
+                                    Voltar
+                                </button>
+                            </div>
+
+                            {submitError ? (
+                                <div role="status" className="bookingFlow__fieldError">
+                                    {submitError}
+                                </div>
+                            ) : null}
+                        </div>
+                    </div>
+                </div>
+            ) : null}
         </div>
     );
 }

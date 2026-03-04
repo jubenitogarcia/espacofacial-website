@@ -1,7 +1,7 @@
 import "server-only";
 
 import { driveListFolderFiles } from "@/lib/googleDrive";
-import { dedupeHeroMediaItems, LOCAL_HERO_ITEMS, type HeroMediaItem } from "@/lib/heroMediaShared";
+import { dedupeHeroMediaItems, getLocalHeroItems, type HeroMediaItem, type HeroMediaVariant } from "@/lib/heroMediaShared";
 
 function inferTypeFromMime(mimeType: string): HeroMediaItem["type"] | null {
     if (mimeType.startsWith("image/")) return "image";
@@ -9,8 +9,28 @@ function inferTypeFromMime(mimeType: string): HeroMediaItem["type"] | null {
     return null;
 }
 
-async function getFromDriveFolder(): Promise<HeroMediaItem[]> {
-    const folderId = process.env.HERO_DRIVE_FOLDER_ID ?? "1jBzRiaBRLZywHChcfT_bUSvO5JGz83BM";
+function getDriveFolderIdForVariant(variant: HeroMediaVariant): string {
+    const base = process.env.HERO_DRIVE_FOLDER_ID ?? "1jBzRiaBRLZywHChcfT_bUSvO5JGz83BM";
+    if (variant === "mobile") return process.env.HERO_DRIVE_FOLDER_ID_MOBILE ?? base;
+    return base;
+}
+
+function getManifestUrlForVariant(variant: HeroMediaVariant): string | null {
+    const base = process.env.HERO_MEDIA_MANIFEST_URL ?? null;
+    if (variant === "mobile") return process.env.HERO_MEDIA_MANIFEST_URL_MOBILE ?? base;
+    return base;
+}
+
+export function heroVariantFromUserAgent(ua: string | null | undefined): HeroMediaVariant {
+    const value = (ua ?? "").toLowerCase();
+    if (!value) return "desktop";
+    if (/(iphone|ipod|ipad|android|mobile|windows phone|iemobile|blackberry)/i.test(value)) {
+        return "mobile";
+    }
+    return "desktop";
+}
+
+async function getFromDriveFolder(folderId: string): Promise<HeroMediaItem[]> {
     const hasServiceAccount =
         Boolean(process.env.GOOGLE_SERVICE_ACCOUNT_JSON) ||
         Boolean(process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL && process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY);
@@ -40,8 +60,7 @@ async function getFromDriveFolder(): Promise<HeroMediaItem[]> {
     }
 }
 
-async function getFromManifestUrl(): Promise<HeroMediaItem[]> {
-    const manifestUrl = process.env.HERO_MEDIA_MANIFEST_URL;
+async function getFromManifestUrl(manifestUrl: string | null): Promise<HeroMediaItem[]> {
     if (!manifestUrl) return [];
 
     try {
@@ -73,8 +92,8 @@ async function getFromManifestUrl(): Promise<HeroMediaItem[]> {
 }
 
 type HeroCache = { items: HeroMediaItem[]; source: string; expiresAtMs: number };
-let heroCache: HeroCache | null = null;
-let refreshInFlight: Promise<void> | null = null;
+const heroCacheByVariant: Partial<Record<HeroMediaVariant, HeroCache>> = {};
+const refreshInFlightByVariant: Partial<Record<HeroMediaVariant, Promise<void>>> = {};
 const HERO_CACHE_TTL_MS = 5 * 60_000;
 const HERO_REMOTE_TIMEOUT_MS = 400;
 
@@ -85,37 +104,44 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T
     ]);
 }
 
-async function refreshHeroMedia(): Promise<void> {
-    if (refreshInFlight) return refreshInFlight;
-    refreshInFlight = (async () => {
-        const fromManifest = (await withTimeout(getFromManifestUrl(), HERO_REMOTE_TIMEOUT_MS)) ?? [];
-        const fromDrive = fromManifest.length ? [] : (await withTimeout(getFromDriveFolder(), HERO_REMOTE_TIMEOUT_MS)) ?? [];
+async function refreshHeroMedia(variant: HeroMediaVariant): Promise<void> {
+    if (refreshInFlightByVariant[variant]) return refreshInFlightByVariant[variant]!;
+    refreshInFlightByVariant[variant] = (async () => {
+        const manifestUrl = getManifestUrlForVariant(variant);
+        const folderId = getDriveFolderIdForVariant(variant);
+        const fromManifest = (await withTimeout(getFromManifestUrl(manifestUrl), HERO_REMOTE_TIMEOUT_MS)) ?? [];
+        const fromDrive = fromManifest.length ? [] : (await withTimeout(getFromDriveFolder(folderId), HERO_REMOTE_TIMEOUT_MS)) ?? [];
         const remoteItems = fromManifest.length ? fromManifest : fromDrive;
-        const items = dedupeHeroMediaItems([...LOCAL_HERO_ITEMS, ...remoteItems]);
+        const items = dedupeHeroMediaItems([...getLocalHeroItems(variant), ...remoteItems]);
         const source = remoteItems.length ? "local_and_remote" : "local_only";
-        heroCache = { items, source, expiresAtMs: Date.now() + HERO_CACHE_TTL_MS };
+        heroCacheByVariant[variant] = { items, source, expiresAtMs: Date.now() + HERO_CACHE_TTL_MS };
     })()
         .catch(() => {
             // ignore refresh errors
         })
         .finally(() => {
-            refreshInFlight = null;
+            delete refreshInFlightByVariant[variant];
         });
-    return refreshInFlight;
+    return refreshInFlightByVariant[variant]!;
 }
 
-export async function getHeroMediaItems(): Promise<{ items: HeroMediaItem[]; source: string }> {
+export async function getHeroMediaItems(
+    options: { variant?: HeroMediaVariant } = {},
+): Promise<{ items: HeroMediaItem[]; source: string }> {
+    const variant = options.variant ?? "desktop";
     const now = Date.now();
-    if (heroCache && heroCache.expiresAtMs > now) {
-        return { items: heroCache.items, source: heroCache.source };
+    const existing = heroCacheByVariant[variant] ?? null;
+    if (existing && existing.expiresAtMs > now) {
+        return { items: existing.items, source: existing.source };
     }
 
-    if (heroCache) {
-        void refreshHeroMedia();
-        return { items: heroCache.items, source: heroCache.source };
+    if (existing) {
+        void refreshHeroMedia(variant);
+        return { items: existing.items, source: existing.source };
     }
 
-    heroCache = { items: [...LOCAL_HERO_ITEMS], source: "local_only", expiresAtMs: now + HERO_CACHE_TTL_MS };
-    void refreshHeroMedia();
-    return { items: heroCache.items, source: heroCache.source };
+    const baseItems = getLocalHeroItems(variant);
+    heroCacheByVariant[variant] = { items: [...baseItems], source: "local_only", expiresAtMs: now + HERO_CACHE_TTL_MS };
+    void refreshHeroMedia(variant);
+    return { items: baseItems, source: "local_only" };
 }

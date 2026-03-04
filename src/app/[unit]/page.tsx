@@ -7,9 +7,10 @@ import HeroMedia from "@/components/HeroMedia";
 import UnitSelectionSync from "@/components/UnitSelectionSync";
 import AboutUsSection from "@/components/AboutUsSection";
 import { units } from "@/data/units";
-import { getHeroMediaItems } from "@/lib/heroMedia.server";
+import { getHeroMediaItems, heroVariantFromUserAgent } from "@/lib/heroMedia.server";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://espacofacial.com").replace(/\/$/, "");
 export const revalidate = 300;
@@ -108,7 +109,9 @@ export default async function UnitHomePage({
     const locality = unitLocality(unit.slug);
     const telephone = normalizeTelephone(unit.whatsappPhone) ?? normalizeTelephone(unit.phone);
     const email = unit.email ? unit.email.replace(/^mailto:/, "").split("?")[0] : null;
-    const { items: heroItems } = await getHeroMediaItems();
+    const ua = headers().get("user-agent");
+    const variant = heroVariantFromUserAgent(ua);
+    const { items: heroItems } = await getHeroMediaItems({ variant });
 
     const localBusinessJsonLd =
         isIndexable && locality && unit.addressLine

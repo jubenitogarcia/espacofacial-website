@@ -5,8 +5,9 @@ import UnitsMapSection from "@/components/UnitsMapSection";
 import UnitDoctorsGrid from "@/components/UnitDoctorsGrid";
 import HeroMedia from "@/components/HeroMedia";
 import AboutUsSection from "@/components/AboutUsSection";
-import { getHeroMediaItems } from "@/lib/heroMedia.server";
+import { getHeroMediaItems, heroVariantFromUserAgent } from "@/lib/heroMedia.server";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://espacofacial.com").replace(/\/$/, "");
 export const revalidate = 300;
@@ -28,7 +29,9 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const { items: heroItems } = await getHeroMediaItems();
+  const ua = headers().get("user-agent");
+  const variant = heroVariantFromUserAgent(ua);
+  const { items: heroItems } = await getHeroMediaItems({ variant });
 
   return (
     <>

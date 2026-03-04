@@ -1,11 +1,13 @@
 import { getHeroMediaItems } from "@/lib/heroMedia.server";
-import type { HeroMediaItem } from "@/lib/heroMediaShared";
+import type { HeroMediaItem, HeroMediaVariant } from "@/lib/heroMediaShared";
 
 export async function GET(req: Request) {
     const url = new URL(req.url);
     const debug = url.searchParams.get("debug") === "1";
+    const variantParam = (url.searchParams.get("variant") ?? "").toLowerCase();
+    const variant: HeroMediaVariant | undefined = variantParam === "mobile" || variantParam === "desktop" ? (variantParam as HeroMediaVariant) : undefined;
 
-    const { items, source } = await getHeroMediaItems();
+    const { items, source } = await getHeroMediaItems({ variant });
     const payload = { items } as {
         items: HeroMediaItem[];
         debug?: { source: string; count: number };

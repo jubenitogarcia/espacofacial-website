@@ -2,8 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useCurrentUnit } from "@/hooks/useCurrentUnit";
-import { trackDoctorInstagramClick, trackDoctorWhatsappClick } from "@/lib/leadTracking";
+import { doctorSlugFromTeamMember } from "@/lib/doctorSlug";
+import { trackBookingStart, trackDoctorInstagramClick } from "@/lib/leadTracking";
+import UnitQuickButtons from "@/components/UnitQuickButtons";
 
 type TeamMember = {
     name: string;
@@ -26,12 +29,12 @@ function instagramIcon() {
     );
 }
 
-function whatsappIcon() {
+function bookingIcon() {
     return (
         <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <path
                 fill="currentColor"
-                d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.92.55 3.78 1.6 5.38L2 22l4.86-1.67a9.77 9.77 0 0 0 5.18 1.45h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2Zm0 17.98h-.01a8.06 8.06 0 0 1-4.11-1.12l-.3-.18-2.88.99.97-2.8-.2-.3a8.05 8.05 0 1 1 6.53 3.41Zm4.65-6.03c-.26-.13-1.53-.76-1.77-.85-.24-.09-.41-.13-.58.13-.17.26-.67.85-.82 1.02-.15.17-.3.2-.56.07-.26-.13-1.08-.4-2.06-1.27-.76-.67-1.27-1.5-1.42-1.76-.15-.26-.02-.4.11-.53.12-.12.26-.3.39-.45.13-.15.17-.26.26-.43.09-.17.04-.32-.02-.45-.07-.13-.58-1.39-.8-1.91-.21-.5-.42-.43-.58-.44h-.5c-.17 0-.45.06-.68.32-.24.26-.89.87-.89 2.12 0 1.25.91 2.46 1.04 2.63.13.17 1.79 2.73 4.34 3.83.61.26 1.08.42 1.45.54.61.19 1.16.16 1.6.1.49-.07 1.53-.62 1.74-1.22.22-.6.22-1.12.15-1.22-.06-.1-.24-.16-.5-.29Z"
+                d="M7 2a1 1 0 0 1 1 1v1h8V3a1 1 0 1 1 2 0v1h1.5A2.5 2.5 0 0 1 22 6.5v13A2.5 2.5 0 0 1 19.5 22h-15A2.5 2.5 0 0 1 2 19.5v-13A2.5 2.5 0 0 1 4.5 4H6V3a1 1 0 0 1 1-1Zm12.5 6H4.5a.5.5 0 0 0-.5.5v11a.5.5 0 0 0 .5.5h15a.5.5 0 0 0 .5-.5v-11a.5.5 0 0 0-.5-.5Z"
             />
         </svg>
     );
@@ -50,14 +53,21 @@ function avatarUrl(handle: string, name: string) {
     return `/api/instagram-avatar?handle=${h}&name=${n}`;
 }
 
-function whatsappUrl(sigla: "bss" | "nh", handle: string) {
-    return `https://esfa.co/${sigla}/${encodeURIComponent(handle)}`;
+function extractInstagramHandle(url: string | null): string | null {
+    if (!url) return null;
+    try {
+        const { pathname } = new URL(url);
+        const handle = pathname.split("/").filter(Boolean)[0];
+        return handle ? handle.replace(/^@/, "") : null;
+    } catch {
+        return null;
+    }
 }
 
-function unitSiglaFromSlug(slug: string | null | undefined): "bss" | "nh" | null {
-    if (slug === "barrashoppingsul") return "bss";
-    if (slug === "novo-hamburgo") return "nh";
-    return null;
+function instagramEmbedUrl(handle: string | null, url: string | null): string | null {
+    const resolved = handle || extractInstagramHandle(url);
+    if (!resolved) return null;
+    return `https://www.instagram.com/${resolved}/embed`;
 }
 
 export default function UnitDoctorsGrid() {
@@ -66,6 +76,11 @@ export default function UnitDoctorsGrid() {
 
     const [members, setMembers] = useState<TeamMember[] | null>(null);
     const [membersError, setMembersError] = useState<string | null>(null);
+    const [activeInstagram, setActiveInstagram] = useState<{
+        name: string;
+        handle: string | null;
+        url: string;
+    } | null>(null);
 
     useEffect(() => {
         let cancelled = false;
@@ -93,6 +108,17 @@ export default function UnitDoctorsGrid() {
         };
     }, []);
 
+    useEffect(() => {
+        if (!activeInstagram) return;
+
+        function onKeyDown(e: KeyboardEvent) {
+            if (e.key === "Escape") setActiveInstagram(null);
+        }
+
+        document.addEventListener("keydown", onKeyDown);
+        return () => document.removeEventListener("keydown", onKeyDown);
+    }, [activeInstagram]);
+
     const filtered = useMemo(() => {
         if (!members) return null;
         if (!unitLabel) return [];
@@ -100,8 +126,18 @@ export default function UnitDoctorsGrid() {
         return members.filter((m) => m.units.map((u) => u.toLowerCase()).includes(unitLabel.toLowerCase()));
     }, [members, unitLabel]);
 
+    const activeInstagramEmbed = useMemo(() => {
+        if (!activeInstagram) return null;
+        return instagramEmbedUrl(activeInstagram.handle, activeInstagram.url);
+    }, [activeInstagram]);
+
     if (!unitLabel) {
-        return <p className="sectionSub">Selecione a unidade para conhecer nossos doutores.</p>;
+        return (
+            <>
+                <p className="sectionSub">Selecione a unidade para conhecer nossos doutores.</p>
+                <UnitQuickButtons placement="doctors_quick" />
+            </>
+        );
     }
 
     const selectedUnitSubtitle = <p className="sectionSub">Conheça nossos doutores, veja seus perfis e procedimentos realizados.</p>;
@@ -135,9 +171,20 @@ export default function UnitDoctorsGrid() {
                     const nickname = d.nickname;
                     const handle = d.instagramHandle;
                     const href = d.instagramUrl;
-                    const selectedSigla = unitSiglaFromSlug(unit?.slug);
-                    const selectedCode = selectedSigla === "bss" ? "BSS" : selectedSigla === "nh" ? "NH" : null;
-                    const waHref = handle && selectedSigla ? whatsappUrl(selectedSigla, handle) : null;
+                    const instagramHandle = handle || extractInstagramHandle(href);
+                    const doctorSlug = doctorSlugFromTeamMember({ name: fullName, instagramHandle: handle });
+                    const bookingHref = unit?.slug
+                        ? `/agendamento?unit=${encodeURIComponent(unit.slug)}&doctor=${encodeURIComponent(doctorSlug)}`
+                        : "/agendamento";
+                    const openInstagram = () => {
+                        if (!href) return;
+                        setActiveInstagram({ name: fullName, handle: instagramHandle, url: href });
+                        trackDoctorInstagramClick({
+                            unitSlug: unit?.slug ?? null,
+                            doctorName: fullName,
+                            instagramUrl: href,
+                        });
+                    };
 
                     return (
                         <article
@@ -147,18 +194,10 @@ export default function UnitDoctorsGrid() {
                         >
                             <div style={{ display: "flex", gap: 12, alignItems: "center", justifyContent: "space-between" }}>
                                 {href ? (
-                                    <a
-                                        className="doctorCardMainLink"
-                                        href={href}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        onClick={() => {
-                                            trackDoctorInstagramClick({
-                                                unitSlug: unit?.slug ?? null,
-                                                doctorName: fullName,
-                                                instagramUrl: href,
-                                            });
-                                        }}
+                                    <button
+                                        className="doctorCardMainLink doctorCardMainButton"
+                                        type="button"
+                                        onClick={openInstagram}
                                         aria-label={`Abrir Instagram de ${fullName}`}
                                         title="Abrir Instagram"
                                     >
@@ -173,7 +212,7 @@ export default function UnitDoctorsGrid() {
                                                 {nickname || unitLabel}
                                             </p>
                                         </div>
-                                    </a>
+                                    </button>
                                 ) : (
                                     <div className="doctorCardMainLink" aria-label={fullName}>
                                         <div style={{ width: 56, height: 56, borderRadius: 14, overflow: "hidden", background: "white" }}>
@@ -192,45 +231,79 @@ export default function UnitDoctorsGrid() {
 
                                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
                                     {href ? (
-                                        <a
+                                        <button
                                             className="iconBtn"
-                                            href={href}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            onClick={() => trackDoctorInstagramClick({ unitSlug: unit?.slug ?? null, doctorName: fullName, instagramUrl: href })}
+                                            type="button"
+                                            onClick={openInstagram}
                                             aria-label="Instagram"
                                             title="Instagram"
                                         >
                                             {instagramIcon()}
-                                        </a>
+                                        </button>
                                     ) : null}
 
-                                    {waHref && selectedSigla && selectedCode ? (
-                                        <a
-                                            className="iconBtn"
-                                            href={waHref}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            onClick={() =>
-                                                trackDoctorWhatsappClick({
-                                                    unitSlug: unit?.slug ?? null,
-                                                    doctorName: fullName,
-                                                    unitSigla: selectedSigla,
-                                                    whatsappUrl: waHref,
-                                                })
-                                            }
-                                            aria-label={`WhatsApp ${selectedCode}`}
-                                            title={`WhatsApp ${selectedCode}`}
-                                        >
-                                            {whatsappIcon()}
-                                        </a>
-                                    ) : null}
+                                    <Link
+                                        className="iconBtn"
+                                        href={bookingHref}
+                                        onClick={() =>
+                                            trackBookingStart({
+                                                placement: "doctor_grid",
+                                                unitSlug: unit?.slug ?? null,
+                                                doctorName: fullName,
+                                                bookingUrl: bookingHref,
+                                            })
+                                        }
+                                        aria-label={`Agendar com ${fullName}`}
+                                        title="Agendar"
+                                    >
+                                        {bookingIcon()}
+                                    </Link>
                                 </div>
                             </div>
                         </article>
                     );
                 })}
             </div>
+
+            {activeInstagram ? (
+                <div
+                    className="modalOverlay"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label={`Instagram de ${activeInstagram.name}`}
+                    onMouseDown={(e) => {
+                        if (e.target === e.currentTarget) setActiveInstagram(null);
+                    }}
+                >
+                    <div className="modalCard instagramModalCard">
+                        <div className="modalHeader">
+                            <div>
+                                <div className="modalTitle">{activeInstagram.name}</div>
+                                {activeInstagram.handle ? <div className="modalSubtitle">@{activeInstagram.handle}</div> : null}
+                            </div>
+                            <button className="modalClose" type="button" onClick={() => setActiveInstagram(null)} aria-label="Fechar">
+                                ×
+                            </button>
+                        </div>
+                        <div className="modalBody instagramModalBody">
+                            {activeInstagramEmbed ? (
+                                <iframe
+                                    className="instagramFrame"
+                                    title={`Instagram - ${activeInstagram.name}`}
+                                    src={activeInstagramEmbed}
+                                    loading="lazy"
+                                    referrerPolicy="no-referrer"
+                                />
+                            ) : (
+                                <div className="instagramFallback">
+                                    Não foi possível carregar o Instagram aqui. Tente novamente mais tarde.
+                                </div>
+                            )}
+                            <div className="modalNote">O conteúdo é exibido em uma janela interna para manter você no site.</div>
+                        </div>
+                    </div>
+                </div>
+            ) : null}
         </>
     );
 }

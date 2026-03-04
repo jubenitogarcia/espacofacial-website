@@ -24,6 +24,10 @@ export type BookingRequestRow = {
     status: BookingStatus;
     patient_name: string;
     whatsapp: string;
+    customer_email: string | null;
+    customer_cpf: string | null;
+    customer_address: string | null;
+    customer_id: string | null;
     notes: string | null;
     created_at_ms: number;
     confirm_by_ms: number;
@@ -73,6 +77,10 @@ async function ensureSchema(db: D1DatabaseLike) {
                 status TEXT NOT NULL,
                 patient_name TEXT NOT NULL,
                 whatsapp TEXT NOT NULL,
+                customer_email TEXT,
+                customer_cpf TEXT,
+                customer_address TEXT,
+                customer_id TEXT,
                 notes TEXT,
                 created_at_ms INTEGER NOT NULL,
                 confirm_by_ms INTEGER NOT NULL,
@@ -81,6 +89,38 @@ async function ensureSchema(db: D1DatabaseLike) {
                 decision_note TEXT,
                 override_conflict INTEGER NOT NULL DEFAULT 0
             );`,
+        )
+        .run();
+
+    await tryAddColumn(db, "booking_requests", "customer_email TEXT");
+    await tryAddColumn(db, "booking_requests", "customer_cpf TEXT");
+    await tryAddColumn(db, "booking_requests", "customer_address TEXT");
+    await tryAddColumn(db, "booking_requests", "customer_id TEXT");
+
+    await db
+        .prepare(
+            `CREATE TABLE IF NOT EXISTS booking_customers (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL,
+                whatsapp TEXT NOT NULL,
+                cpf TEXT,
+                address TEXT,
+                created_at_ms INTEGER NOT NULL,
+                updated_at_ms INTEGER NOT NULL
+            );`,
+        )
+        .run();
+
+    await db
+        .prepare(
+            "CREATE UNIQUE INDEX IF NOT EXISTS idx_booking_customers_email ON booking_customers(email);",
+        )
+        .run();
+
+    await db
+        .prepare(
+            "CREATE UNIQUE INDEX IF NOT EXISTS idx_booking_customers_cpf ON booking_customers(cpf);",
         )
         .run();
 
@@ -95,6 +135,14 @@ async function ensureSchema(db: D1DatabaseLike) {
             "CREATE INDEX IF NOT EXISTS idx_booking_status_confirmby ON booking_requests(status, confirm_by_ms);",
         )
         .run();
+}
+
+async function tryAddColumn(db: D1DatabaseLike, table: string, columnDef: string) {
+    try {
+        await db.prepare(`ALTER TABLE ${table} ADD COLUMN ${columnDef};`).run();
+    } catch {
+        // Column already exists or ALTER not supported.
+    }
 }
 
 export function nowMs(): number {
@@ -124,6 +172,20 @@ export function normalizePhone(raw: string): string {
     if (digits.startsWith("55")) return "+" + digits;
     if (digits.length === 10 || digits.length === 11) return "+55" + digits;
     return "+" + digits;
+}
+
+export function normalizeEmail(raw: string): string {
+    const value = (raw ?? "").trim().toLowerCase();
+    if (!value) return "";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return "";
+    return value;
+}
+
+export function normalizeCpf(raw: string): string {
+    const digits = (raw ?? "").replace(/\D/g, "");
+    if (digits.length !== 11) return "";
+    if (/^(\d)\1{10}$/.test(digits)) return "";
+    return digits;
 }
 
 export function slugify(value: string): string {

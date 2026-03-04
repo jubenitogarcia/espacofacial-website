@@ -7,6 +7,7 @@ import type { Unit } from "@/data/units";
 import Image from "next/image";
 import { trackEvent } from "@/lib/analytics";
 import { trackBookingStart } from "@/lib/leadTracking";
+import UnitQuickButtons from "@/components/UnitQuickButtons";
 
 type PlaceDetailsPayload = {
     available: boolean;
@@ -153,6 +154,19 @@ export default function AboutUsSection() {
     const [gbpReviewsLoading, setGbpReviewsLoading] = useState<boolean>(false);
     const [gbpForceFallback, setGbpForceFallback] = useState<boolean>(false);
 
+    const [activePhoto, setActivePhoto] = useState<{ src: string; alt: string; googleUrl?: string | null } | null>(null);
+
+    useEffect(() => {
+        if (!activePhoto) return;
+
+        function onKeyDown(e: KeyboardEvent) {
+            if (e.key === "Escape") setActivePhoto(null);
+        }
+
+        document.addEventListener("keydown", onKeyDown);
+        return () => document.removeEventListener("keydown", onKeyDown);
+    }, [activePhoto]);
+
     useEffect(() => {
         let cancelled = false;
 
@@ -227,6 +241,10 @@ export default function AboutUsSection() {
         return getGoogleMapsEmbedUrl(query);
     }, [data, unit, query]);
 
+    const buildPlacePhotoUrl = useCallback((ref: string, maxwidth = 1200) => {
+        return `/api/places/photo?ref=${encodeURIComponent(ref)}&maxwidth=${maxwidth}`;
+    }, []);
+
     const allPhotos = useMemo(() => (hasSelectedUnit ? data?.photos ?? [] : []), [data?.photos, hasSelectedUnit]);
     const photos = useMemo(() => allPhotos.slice(0, visiblePhotosCount), [allPhotos, visiblePhotosCount]);
 
@@ -272,6 +290,10 @@ export default function AboutUsSection() {
 
     useEffect(() => {
         setVisiblePhotosCount(8);
+    }, [hasSelectedUnit, selectedPlaceId]);
+
+    useEffect(() => {
+        setActivePhoto(null);
     }, [hasSelectedUnit, selectedPlaceId]);
 
     useEffect(() => {
@@ -515,6 +537,7 @@ export default function AboutUsSection() {
                     ? "Conheça nossa unidade, veja avaliações e algumas fotos."
                     : "Selecione uma unidade para conhecer mais sobre nós."}
             </p>
+            {!hasSelectedUnit ? <UnitQuickButtons placement="about_us_quick" /> : null}
 
             {!hasSelectedUnit ? null : (
                 <div className="aboutGrid">
@@ -554,12 +577,12 @@ export default function AboutUsSection() {
 
                                     <div className="aboutPhotosScroller" ref={photosScrollRef}>
                                         {gbpPhotos.map((p) => {
+                                            const alt = "Foto da unidade";
                                             const photo = (
                                                 <Image
-                                                    key={p.thumbnailUrl}
                                                     className="aboutPhotoItem"
                                                     src={p.thumbnailUrl}
-                                                    alt="Foto da unidade"
+                                                    alt={alt}
                                                     width={520}
                                                     height={488}
                                                     sizes="25vw"
@@ -568,20 +591,22 @@ export default function AboutUsSection() {
                                                 />
                                             );
 
-                                            return p.googleUrl ? (
-                                                <a
+                                            return (
+                                                <button
                                                     key={p.thumbnailUrl}
-                                                    className="aboutPhotoLink"
-                                                    href={p.googleUrl}
-                                                    target="_blank"
-                                                    rel="noreferrer"
+                                                    type="button"
+                                                    className="aboutPhotoLink aboutPhotoButton"
+                                                    aria-label="Ampliar foto da unidade"
+                                                    onClick={() =>
+                                                        setActivePhoto({
+                                                            src: p.thumbnailUrl,
+                                                            alt,
+                                                            googleUrl: p.googleUrl,
+                                                        })
+                                                    }
                                                 >
                                                     {photo}
-                                                </a>
-                                            ) : (
-                                                <div key={p.thumbnailUrl} className="aboutPhotoLink" aria-hidden="true">
-                                                    {photo}
-                                                </div>
+                                                </button>
                                             );
                                         })}
 
@@ -626,19 +651,34 @@ export default function AboutUsSection() {
                                 </button>
 
                                 <div className="aboutPhotosScroller" ref={photosScrollRef}>
-                                    {photos.map((p) => (
-                                        <Image
-                                            key={p.photoReference}
-                                            className="aboutPhotoItem"
-                                            src={`/api/places/photo?ref=${encodeURIComponent(p.photoReference)}&maxwidth=1200`}
-                                            alt="Foto da unidade"
-                                            width={520}
-                                            height={488}
-                                            sizes="25vw"
-                                            unoptimized
-                                            style={{ objectFit: "cover" }}
-                                        />
-                                    ))}
+                                    {photos.map((p) => {
+                                        const alt = "Foto da unidade";
+                                        return (
+                                            <button
+                                                key={p.photoReference}
+                                                type="button"
+                                                className="aboutPhotoLink aboutPhotoButton"
+                                                aria-label="Ampliar foto da unidade"
+                                                onClick={() =>
+                                                    setActivePhoto({
+                                                        src: buildPlacePhotoUrl(p.photoReference, 1600),
+                                                        alt,
+                                                    })
+                                                }
+                                            >
+                                                <Image
+                                                    className="aboutPhotoItem"
+                                                    src={buildPlacePhotoUrl(p.photoReference, 1200)}
+                                                    alt={alt}
+                                                    width={520}
+                                                    height={488}
+                                                    sizes="25vw"
+                                                    unoptimized
+                                                    style={{ objectFit: "cover" }}
+                                                />
+                                            </button>
+                                        );
+                                    })}
 
                                     {photos.length < allPhotos.length ? <div className="aboutPhotosTail">Mais fotos →</div> : null}
                                 </div>
@@ -817,6 +857,40 @@ export default function AboutUsSection() {
                     </div>
                 </div>
             )}
+
+            {activePhoto ? (
+                <div
+                    className="modalOverlay"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Foto da unidade"
+                    onMouseDown={(e) => {
+                        if (e.target === e.currentTarget) setActivePhoto(null);
+                    }}
+                >
+                    <div className="modalCard photoModalCard">
+                        <div className="modalHeader">
+                            <div>
+                                <div className="modalTitle">Foto da unidade</div>
+                                {activePhoto.googleUrl ? <div className="modalSubtitle">Google Maps</div> : null}
+                            </div>
+                            <button className="modalClose" type="button" onClick={() => setActivePhoto(null)} aria-label="Fechar">
+                                ×
+                            </button>
+                        </div>
+                        <div className="modalBody photoModalBody">
+                            <img className="photoModalImage" src={activePhoto.src} alt={activePhoto.alt} loading="lazy" />
+                            {activePhoto.googleUrl ? (
+                                <div className="modalActions">
+                                    <a className="btn btnPrimary" href={activePhoto.googleUrl} target="_blank" rel="noreferrer">
+                                        Abrir no Google Maps
+                                    </a>
+                                </div>
+                            ) : null}
+                        </div>
+                    </div>
+                </div>
+            ) : null}
         </section>
     );
 }

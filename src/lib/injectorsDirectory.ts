@@ -1,4 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { doctorSlugFromTeamMember } from "@/lib/doctorSlug";
 
 type TeamMember = {
     name: string;
@@ -303,11 +304,7 @@ function normalizeRoles(value: string): string[] {
         .filter(Boolean);
 }
 
-export function doctorSlugFromTeamMember(member: Pick<TeamMember, "name" | "instagramHandle">): string {
-    const handle = (member.instagramHandle ?? "").trim();
-    if (handle) return handle;
-    return member.name.toLowerCase().replace(/\s+/g, "").slice(0, 50);
-}
+export { doctorSlugFromTeamMember };
 
 export function unitLabelFromBookingUnitSlug(unitSlug: string): string | null {
     if (unitSlug === "barrashoppingsul") return "BarraShoppingSul";
