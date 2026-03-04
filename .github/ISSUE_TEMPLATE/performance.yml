@@ -1,0 +1,26 @@
+name: "Performance"
+description: "Reportar regressão de desempenho e plano de correção"
+title: "[Performance] "
+labels: ["performance", "tech-debt"]
+body:
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Contexto
+      description: Página/fluxo impactado e cenário de reprodução.
+    validations:
+      required: true
+  - type: textarea
+    id: evidencias
+    attributes:
+      label: Evidências
+      description: Link para artifacts (Lighthouse/trace/screenshot), métricas e run do Actions.
+    validations:
+      required: true
+  - type: textarea
+    id: plano
+    attributes:
+      label: Plano acionável
+      description: Itens de correção com ordem de execução e estimativa.
+    validations:
+      required: true

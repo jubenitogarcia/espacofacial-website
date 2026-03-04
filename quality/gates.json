@@ -1,0 +1,28 @@
+{
+  "pr": {
+    "minScores": {
+      "performance": 0.55,
+      "accessibility": 0.82,
+      "bestPractices": 0.78,
+      "seo": 0.82
+    },
+    "maxBrokenLinks": 12,
+    "maxAxeCritical": 8,
+    "maxAxeSerious": 30,
+    "maxHighClsPages": 2,
+    "clsHighThreshold": 0.1
+  },
+  "nightly": {
+    "minScores": {
+      "performance": 0.72,
+      "accessibility": 0.9,
+      "bestPractices": 0.88,
+      "seo": 0.9
+    },
+    "maxBrokenLinks": 2,
+    "maxAxeCritical": 0,
+    "maxAxeSerious": 8,
+    "maxHighClsPages": 1,
+    "clsHighThreshold": 0.1
+  }
+}

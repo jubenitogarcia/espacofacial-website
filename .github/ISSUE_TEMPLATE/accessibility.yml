@@ -1,0 +1,26 @@
+name: "Acessibilidade"
+description: "Reportar violações de acessibilidade e correções"
+title: "[A11Y] "
+labels: ["a11y", "tech-debt"]
+body:
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Contexto
+      description: URL(s), componente e tecnologia assistiva afetada.
+    validations:
+      required: true
+  - type: textarea
+    id: violacoes
+    attributes:
+      label: Violações
+      description: Regras axe/Lighthouse afetadas e severidade.
+    validations:
+      required: true
+  - type: textarea
+    id: correcoes
+    attributes:
+      label: Correções propostas
+      description: Mudanças de marcação, contraste, navegação por teclado e testes de validação.
+    validations:
+      required: true

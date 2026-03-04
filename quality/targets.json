@@ -1,0 +1,20 @@
+{
+  "baseUrlProd": "https://espacofacial.com",
+  "baseUrlPreview": "",
+  "sitemapUrl": "/sitemap.xml",
+  "pathsCriticos": [
+    "/",
+    "/agendamento",
+    "/unidades",
+    "/doutores",
+    "/sobre",
+    "/privacidade"
+  ],
+  "sampleSizes": {
+    "prSitemap": 3,
+    "nightlySitemap": 10
+  },
+  "todo": [
+    "Definir baseUrlPreview (ex.: Cloudflare Pages preview URL por PR) via QUALITY_BASE_URL_PREVIEW ou editar este arquivo."
+  ]
+}
