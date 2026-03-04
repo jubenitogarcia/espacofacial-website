@@ -3,9 +3,11 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 const INSTAGRAM_APP_ID = "936619743392459";
-const FEED_PAGE_SIZE = 12;
+const FEED_PAGE_SIZE = 9;
 const MAX_FETCH_ATTEMPTS = 3;
 const RETRY_BASE_DELAY_MS = 250;
+const MIN_FEED_PAGE_SIZE = 1;
+const MAX_FEED_PAGE_SIZE = 24;
 
 type InstagramProfileResponse = {
     data?: {
@@ -76,6 +78,12 @@ function sanitizeUserId(input: string): string {
 
 function sanitizeCursor(input: string): string {
     return (input ?? "").trim().slice(0, 500);
+}
+
+function sanitizeCount(input: string): number {
+    const parsed = Number.parseInt((input ?? "").trim(), 10);
+    if (!Number.isFinite(parsed)) return FEED_PAGE_SIZE;
+    return Math.min(MAX_FEED_PAGE_SIZE, Math.max(MIN_FEED_PAGE_SIZE, parsed));
 }
 
 function instagramRequestHeaders(): HeadersInit {
@@ -214,6 +222,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const handle = sanitizeHandle(searchParams.get("handle") ?? "");
     const cursor = sanitizeCursor(searchParams.get("cursor") ?? "");
+    const count = sanitizeCount(searchParams.get("count") ?? "");
     let userId = sanitizeUserId(searchParams.get("userId") ?? "");
 
     if (!handle) {
@@ -223,7 +232,7 @@ export async function GET(req: Request) {
     try {
         const cache = getCloudflareCache();
         const cacheKey = new Request(
-            `https://espacofacial.com/__cache/instagram-feed?handle=${encodeURIComponent(handle)}&userId=${encodeURIComponent(userId)}&cursor=${encodeURIComponent(cursor)}`,
+            `https://espacofacial.com/__cache/instagram-feed?handle=${encodeURIComponent(handle)}&userId=${encodeURIComponent(userId)}&cursor=${encodeURIComponent(cursor)}&count=${count}`,
         );
         if (cache) {
             const cached = await cache.match(cacheKey);
@@ -250,7 +259,7 @@ export async function GET(req: Request) {
             return NextResponse.json({ ok: false, error: "profile_not_found" }, { status: 404 });
         }
 
-        const feed = await fetchFeed({ userId, cursor: cursor || null, count: FEED_PAGE_SIZE });
+        const feed = await fetchFeed({ userId, cursor: cursor || null, count });
         if (!feed) {
             return NextResponse.json({ ok: false, error: "feed_unavailable" }, { status: 502 });
         }

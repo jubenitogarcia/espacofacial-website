@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCurrentUnit } from "@/hooks/useCurrentUnit";
@@ -39,6 +39,8 @@ type InstagramFeedResponse =
       }
     | { ok: false; error: string };
 
+const INSTAGRAM_PAGE_SIZE = 9;
+
 async function sleep(ms: number): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -47,6 +49,7 @@ async function fetchInstagramFeed(params: {
     handle: string;
     userId?: string | null;
     cursor?: string | null;
+    count?: number;
     attempts?: number;
 }): Promise<InstagramFeedResponse | null> {
     const attempts = Math.max(1, params.attempts ?? 3);
@@ -55,6 +58,9 @@ async function fetchInstagramFeed(params: {
             const qs = new URLSearchParams({ handle: params.handle });
             if (params.userId) qs.set("userId", params.userId);
             if (params.cursor) qs.set("cursor", params.cursor);
+            if (typeof params.count === "number" && Number.isFinite(params.count)) {
+                qs.set("count", String(Math.max(1, Math.floor(params.count))));
+            }
             const res = await fetch(`/api/instagram-feed?${qs.toString()}`, { cache: "no-store" });
             const json = (await res.json().catch(() => null)) as InstagramFeedResponse | null;
             if (json && json.ok) return json;
@@ -140,6 +146,8 @@ export default function UnitDoctorsGrid() {
     const [instagramError, setInstagramError] = useState<string | null>(null);
     const [activeInstagramMediaId, setActiveInstagramMediaId] = useState<string | null>(null);
     const [instagramReloadToken, setInstagramReloadToken] = useState(0);
+    const instagramScrollRef = useRef<HTMLDivElement | null>(null);
+    const instagramInfiniteSentinelRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         let cancelled = false;
@@ -190,6 +198,38 @@ export default function UnitDoctorsGrid() {
         return members.filter((m) => m.units.map((u) => u.toLowerCase()).includes(unitLabel.toLowerCase()));
     }, [members, unitLabel]);
 
+    const loadMoreInstagram = useCallback(async () => {
+        if (!activeInstagram || !instagramUserId || !instagramNextCursor || instagramLoadingMore) return;
+
+        setInstagramLoadingMore(true);
+        setInstagramError(null);
+        try {
+            const json = await fetchInstagramFeed({
+                handle: activeInstagram.handle,
+                userId: instagramUserId,
+                cursor: instagramNextCursor,
+                count: INSTAGRAM_PAGE_SIZE,
+                attempts: 3,
+            });
+            if (!json || !json.ok) {
+                setInstagramError("Não foi possível carregar mais publicações.");
+                return;
+            }
+
+            setInstagramItems((prev) => {
+                const seen = new Set(prev.map((item) => item.id));
+                const nextItems = json.items.filter((item) => !seen.has(item.id));
+                return [...prev, ...nextItems];
+            });
+            setInstagramNextCursor(json.nextCursor ?? null);
+            setInstagramHasMore(Boolean(json.hasMore && json.nextCursor));
+        } catch {
+            setInstagramError("Falha de rede ao carregar mais publicações.");
+        } finally {
+            setInstagramLoadingMore(false);
+        }
+    }, [activeInstagram, instagramLoadingMore, instagramNextCursor, instagramUserId]);
+
     useEffect(() => {
         if (!activeInstagram) return;
         const currentInstagram = activeInstagram;
@@ -204,9 +244,14 @@ export default function UnitDoctorsGrid() {
             setInstagramNextCursor(null);
             setInstagramHasMore(false);
             setActiveInstagramMediaId(null);
+            if (instagramScrollRef.current) instagramScrollRef.current.scrollTop = 0;
 
             try {
-                const json = await fetchInstagramFeed({ handle: currentInstagram.handle, attempts: 3 });
+                const json = await fetchInstagramFeed({
+                    handle: currentInstagram.handle,
+                    count: INSTAGRAM_PAGE_SIZE,
+                    attempts: 3,
+                });
                 if (cancelled) return;
                 if (!json || !json.ok) {
                     setInstagramError("Não foi possível carregar as publicações agora.");
@@ -244,36 +289,28 @@ export default function UnitDoctorsGrid() {
     const hasPrevInstagramMedia = activeInstagramMediaIndex > 0;
     const hasNextInstagramMedia = activeInstagramMediaIndex >= 0 && activeInstagramMediaIndex < instagramItems.length - 1;
 
-    async function loadMoreInstagram() {
-        if (!activeInstagram || !instagramUserId || !instagramNextCursor || instagramLoadingMore) return;
+    useEffect(() => {
+        if (!activeInstagram || !instagramHasMore || instagramLoading || instagramLoadingMore) return;
+        const root = instagramScrollRef.current;
+        const sentinel = instagramInfiniteSentinelRef.current;
+        if (!root || !sentinel) return;
 
-        setInstagramLoadingMore(true);
-        setInstagramError(null);
-        try {
-            const json = await fetchInstagramFeed({
-                handle: activeInstagram.handle,
-                userId: instagramUserId,
-                cursor: instagramNextCursor,
-                attempts: 3,
-            });
-            if (!json || !json.ok) {
-                setInstagramError("Não foi possível carregar mais publicações.");
-                return;
-            }
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries.some((entry) => entry.isIntersecting)) {
+                    void loadMoreInstagram();
+                }
+            },
+            {
+                root,
+                rootMargin: "300px 0px 300px 0px",
+                threshold: 0.01,
+            },
+        );
 
-            setInstagramItems((prev) => {
-                const seen = new Set(prev.map((item) => item.id));
-                const nextItems = json.items.filter((item) => !seen.has(item.id));
-                return [...prev, ...nextItems];
-            });
-            setInstagramNextCursor(json.nextCursor ?? null);
-            setInstagramHasMore(Boolean(json.hasMore && json.nextCursor));
-        } catch {
-            setInstagramError("Falha de rede ao carregar mais publicações.");
-        } finally {
-            setInstagramLoadingMore(false);
-        }
-    }
+        observer.observe(sentinel);
+        return () => observer.disconnect();
+    }, [activeInstagram, instagramHasMore, instagramItems.length, instagramLoading, instagramLoadingMore, loadMoreInstagram]);
 
     if (!unitLabel) {
         return (
@@ -429,7 +466,7 @@ export default function UnitDoctorsGrid() {
                                 ×
                             </button>
                         </div>
-                        <div className="modalBody instagramModalBody">
+                        <div className="modalBody instagramModalBody" ref={instagramScrollRef}>
                             {instagramLoading && instagramItems.length === 0 ? (
                                 <div className="instagramFallback">
                                     Carregando publicações e reels…
@@ -541,13 +578,8 @@ export default function UnitDoctorsGrid() {
                                 </div>
                             ) : null}
 
-                            {instagramHasMore ? (
-                                <div className="modalActions">
-                                    <button className="btn btnGhost instagramLoadMoreBtn" type="button" onClick={loadMoreInstagram} disabled={instagramLoadingMore}>
-                                        {instagramLoadingMore ? "Carregando…" : "Carregar mais"}
-                                    </button>
-                                </div>
-                            ) : null}
+                            {instagramHasMore ? <div className="instagramInfiniteSentinel" ref={instagramInfiniteSentinelRef} aria-hidden="true" /> : null}
+                            {instagramLoadingMore ? <div className="instagramLoadingMoreInline">Carregando mais publicações…</div> : null}
                             <div className="modalNote">Posts e reels são exibidos dentro desta janela para manter você no site.</div>
                         </div>
                     </div>
