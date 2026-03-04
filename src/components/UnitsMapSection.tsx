@@ -560,6 +560,16 @@ export default function UnitsMapSection() {
                                         <button
                                             key={u.slug}
                                             className="unitsFeaturedItem"
+                                            onMouseEnter={() => {
+                                                if (!u.state) return;
+                                                setHoverUfDebounced(u.state);
+                                            }}
+                                            onMouseLeave={() => clearHoverUfSoon()}
+                                            onFocus={() => {
+                                                if (!u.state) return;
+                                                setHoverUfDebounced(u.state);
+                                            }}
+                                            onBlur={() => clearHoverUfSoon()}
                                             onClick={() => {
                                                 const dest = getUnitDestination(u);
                                                 trackEvent("unit_map_click", { unitSlug: u.slug, placement: "featured_list", destination: dest });
