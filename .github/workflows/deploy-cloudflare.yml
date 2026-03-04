@@ -49,6 +49,7 @@ jobs:
         run: npm run lint
 
       - name: Sync worker secrets (optional)
+        continue-on-error: true
         if: ${{ env.TURNSTILE_SECRET_KEY != '' || env.TITAN_SMTP_HOST != '' || env.TITAN_SMTP_PORT != '' || env.TITAN_SMTP_USER_BARRA != '' || env.TITAN_SMTP_PASS_BARRA != '' || env.TITAN_SMTP_USER_NH != '' || env.TITAN_SMTP_PASS_NH != '' }}
         run: |
           put_secret() {
