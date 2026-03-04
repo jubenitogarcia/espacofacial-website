@@ -1,0 +1,26 @@
+name: "SEO"
+description: "Reportar regressão de SEO técnico/on-page"
+title: "[SEO] "
+labels: ["seo", "tech-debt"]
+body:
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Contexto
+      description: URL(s), tipo de regressão e impacto estimado.
+    validations:
+      required: true
+  - type: textarea
+    id: evidencias
+    attributes:
+      label: Evidências
+      description: Scores, metadados ausentes, estrutura de headings, robots/sitemap, links quebrados.
+    validations:
+      required: true
+  - type: textarea
+    id: plano
+    attributes:
+      label: Plano de melhoria
+      description: Ações on-page/técnicas com prioridade.
+    validations:
+      required: true

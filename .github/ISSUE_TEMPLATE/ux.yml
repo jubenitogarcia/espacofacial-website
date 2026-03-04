@@ -1,0 +1,26 @@
+name: "UX/UI"
+description: "Reportar inconsistências visuais e regressões de UI"
+title: "[UX] "
+labels: ["ux", "tech-debt"]
+body:
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Contexto
+      description: URL(s), viewport (desktop/mobile) e cenário.
+    validations:
+      required: true
+  - type: textarea
+    id: snapshots
+    attributes:
+      label: Snapshots e métricas
+      description: Links para UI Pack, métricas de CLS/overflow e comparação com baseline.
+    validations:
+      required: true
+  - type: textarea
+    id: plano
+    attributes:
+      label: Plano de correção
+      description: Ajustes de layout/estilos/componentes e critérios de aceite.
+    validations:
+      required: true

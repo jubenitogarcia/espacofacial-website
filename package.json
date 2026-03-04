@@ -16,7 +16,11 @@
     "tail:json": "wrangler tail espacofacial-site --format json",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "deploy:esfa": "wrangler deploy -c workers/esfa-redirector/wrangler.toml"
+    "deploy:esfa": "wrangler deploy -c workers/esfa-redirector/wrangler.toml",
+    "quality:pr": "node scripts/run_quality_suite.mjs --mode=pr --serve-local=true --enforce-gate=true",
+    "quality:prod": "node scripts/run_quality_suite.mjs --mode=nightly --enforce-gate=true",
+    "quality:urls": "node scripts/select_audit_urls.mjs --mode=pr",
+    "quality:nightly": "node scripts/run_quality_suite.mjs --mode=nightly --enforce-gate=true"
   },
   "dependencies": {
     "@svg-maps/brazil": "^2.0.0",
@@ -25,12 +29,17 @@
     "react-dom": "18.3.1"
   },
   "devDependencies": {
+    "@axe-core/cli": "^4.11.1",
+    "@lhci/cli": "^0.15.1",
     "@opennextjs/cloudflare": "^1.15.1",
     "@types/node": "20.14.10",
     "@types/react": "18.3.3",
     "@types/react-dom": "18.3.0",
+    "axe-core": "^4.11.1",
     "eslint": "8.57.0",
     "eslint-config-next": "14.2.35",
+    "linkinator": "^7.6.1",
+    "playwright": "^1.58.2",
     "tsx": "^4.19.2",
     "typescript": "5.5.4",
     "wrangler": "^4.60.0"

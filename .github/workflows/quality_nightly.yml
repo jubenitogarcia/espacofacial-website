@@ -1,0 +1,91 @@
+name: Quality Nightly Audit
+
+on:
+  schedule:
+    - cron: "20 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  quality-nightly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run quality suite (nightly profile)
+        id: quality
+        continue-on-error: true
+        run: node scripts/run_quality_suite.mjs --mode=nightly
+
+      - name: Upload quality artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-reports-nightly
+          path: quality/reports
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Evaluate nightly gate
+        if: always()
+        id: gate
+        run: node scripts/quality_gate.mjs --mode=nightly
+
+      - name: Create backlog issue on regression
+        if: always() && steps.gate.outputs.relevant_regression == 'true'
+        uses: actions/github-script@v7
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const { owner, repo } = context.repo;
+            const today = new Date().toISOString().slice(0, 10);
+            const title = `[Quality Regression] ${today}`;
+            const bodyBase = fs.existsSync('quality/reports/nightly_issue.md')
+              ? fs.readFileSync('quality/reports/nightly_issue.md', 'utf8')
+              : 'Nightly quality regression detected.';
+
+            const body = `${bodyBase}\n\nRun: ${process.env.RUN_URL}`;
+
+            const desiredLabels = ['performance', 'a11y', 'seo', 'ux', 'tech-debt'];
+            const existingLabels = await github.paginate(github.rest.issues.listLabelsForRepo, {
+              owner,
+              repo,
+              per_page: 100,
+            });
+            const available = new Set(existingLabels.map((label) => label.name));
+            const labels = desiredLabels.filter((name) => available.has(name));
+
+            await github.rest.issues.create({
+              owner,
+              repo,
+              title,
+              body,
+              labels,
+            });
+
+      - name: Fail workflow when regression is detected
+        if: always() && steps.gate.outputs.relevant_regression == 'true'
+        run: |
+          echo "Nightly quality regression detected"
+          exit 1
