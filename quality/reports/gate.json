@@ -1,0 +1,38 @@
+{
+  "generatedAt": "2026-03-04T20:06:25.308Z",
+  "mode": "pr",
+  "profile": "pr",
+  "relevantRegression": false,
+  "failureCount": 0,
+  "failures": [],
+  "topIssues": [
+    {
+      "rank": 1,
+      "area": "links",
+      "severity": 3,
+      "title": "2 links quebrados detectados",
+      "details": "Priorizar links de navegação, CTAs e páginas com status >= 400."
+    },
+    {
+      "rank": 2,
+      "area": "a11y",
+      "severity": 3,
+      "title": "6 violações críticas de acessibilidade",
+      "details": "Corrigir primeiro regras com maior recorrência (axe top rules)."
+    },
+    {
+      "rank": 3,
+      "area": "a11y",
+      "severity": 2,
+      "title": "14 violações sérias de acessibilidade",
+      "details": "Revisar contraste, labels, landmarks e navegação por teclado."
+    },
+    {
+      "rank": 4,
+      "area": "lighthouse",
+      "severity": 2,
+      "title": "Performance médio em 78%",
+      "details": "Revisar pages com score baixo na categoria Performance."
+    }
+  ]
+}

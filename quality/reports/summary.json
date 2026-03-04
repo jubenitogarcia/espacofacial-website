@@ -1,0 +1,589 @@
+{
+  "generatedAt": "2026-03-04T20:06:25.276Z",
+  "mode": "pr",
+  "profile": "pr",
+  "baseUrl": "http://127.0.0.1:3000",
+  "urls": [
+    "http://127.0.0.1:3000/",
+    "http://127.0.0.1:3000/agendamento",
+    "http://127.0.0.1:3000/unidades",
+    "http://127.0.0.1:3000/doutores",
+    "http://127.0.0.1:3000/sobre",
+    "http://127.0.0.1:3000/privacidade",
+    "http://127.0.0.1:3000/novohamburgo",
+    "http://127.0.0.1:3000/barrashoppingsul"
+  ],
+  "lighthouse": {
+    "totalReports": 8,
+    "perUrl": [
+      {
+        "url": "http://127.0.0.1:3000/",
+        "performance": 0.72,
+        "accessibility": 0.87,
+        "bestPractices": 1,
+        "seo": 1,
+        "lcpMs": 81313.01440000001,
+        "cls": 0.10958951313144105,
+        "tbtMs": 44
+      },
+      {
+        "url": "http://127.0.0.1:3000/agendamento",
+        "performance": 0.8,
+        "accessibility": 0.95,
+        "bestPractices": 1,
+        "seo": 0.69,
+        "lcpMs": 5526.400799999999,
+        "cls": 0.008238241681664302,
+        "tbtMs": 0
+      },
+      {
+        "url": "http://127.0.0.1:3000/barrashoppingsul",
+        "performance": 0.69,
+        "accessibility": 0.88,
+        "bestPractices": 0.96,
+        "seo": 1,
+        "lcpMs": 81611.87000000001,
+        "cls": 0.12091612790829862,
+        "tbtMs": 0
+      },
+      {
+        "url": "http://localhost:3000/#doutores",
+        "performance": null,
+        "accessibility": 0.87,
+        "bestPractices": 1,
+        "seo": 1,
+        "lcpMs": null,
+        "cls": 0,
+        "tbtMs": null
+      },
+      {
+        "url": "http://127.0.0.1:3000/novohamburgo",
+        "performance": 0.7,
+        "accessibility": 0.88,
+        "bestPractices": 0.96,
+        "seo": 1,
+        "lcpMs": 81763.40000000001,
+        "cls": 0.12091612790829862,
+        "tbtMs": 0
+      },
+      {
+        "url": "http://127.0.0.1:3000/privacidade",
+        "performance": 0.99,
+        "accessibility": 1,
+        "bestPractices": 1,
+        "seo": 0.66,
+        "lcpMs": 2265.4024,
+        "cls": 0,
+        "tbtMs": 0
+      },
+      {
+        "url": "http://localhost:3000/#doutores",
+        "performance": null,
+        "accessibility": 0.87,
+        "bestPractices": 1,
+        "seo": 1,
+        "lcpMs": null,
+        "cls": 0,
+        "tbtMs": null
+      },
+      {
+        "url": "http://localhost:3000/#unidades",
+        "performance": null,
+        "accessibility": 0.87,
+        "bestPractices": 1,
+        "seo": 1,
+        "lcpMs": null,
+        "cls": 0,
+        "tbtMs": null
+      }
+    ],
+    "scores": {
+      "performance": 0.78,
+      "accessibility": 0.89875,
+      "bestPractices": 0.99,
+      "seo": 0.91875
+    }
+  },
+  "axe": {
+    "generatedAt": "2026-03-04T20:05:56.154Z",
+    "totalUrls": 8,
+    "successfulUrls": 8,
+    "failedUrls": 0,
+    "impactCounts": {
+      "critical": 6,
+      "serious": 14,
+      "moderate": 6,
+      "minor": 1,
+      "unknown": 0
+    },
+    "topRules": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "occurrences": 8,
+        "urls": [
+          "http://127.0.0.1:3000/",
+          "http://127.0.0.1:3000/agendamento",
+          "http://localhost:3000/#unidades",
+          "http://localhost:3000/#doutores",
+          "http://127.0.0.1:3000/novohamburgo",
+          "http://127.0.0.1:3000/barrashoppingsul"
+        ]
+      },
+      {
+        "id": "region",
+        "impact": "moderate",
+        "description": "Ensure all page content is contained by landmarks",
+        "occurrences": 8,
+        "urls": [
+          "http://127.0.0.1:3000/",
+          "http://localhost:3000/#unidades",
+          "http://localhost:3000/#doutores",
+          "http://127.0.0.1:3000/novohamburgo",
+          "http://127.0.0.1:3000/barrashoppingsul"
+        ]
+      },
+      {
+        "id": "aria-required-children",
+        "impact": "critical",
+        "description": "Ensure elements with an ARIA role that require child roles contain them",
+        "occurrences": 6,
+        "urls": [
+          "http://127.0.0.1:3000/",
+          "http://localhost:3000/#unidades",
+          "http://localhost:3000/#doutores",
+          "http://127.0.0.1:3000/novohamburgo",
+          "http://127.0.0.1:3000/barrashoppingsul"
+        ]
+      },
+      {
+        "id": "nested-interactive",
+        "impact": "serious",
+        "description": "Ensure interactive controls are not nested as they are not always announced by screen readers or can cause focus problems for assistive technologies",
+        "occurrences": 6,
+        "urls": [
+          "http://127.0.0.1:3000/",
+          "http://localhost:3000/#unidades",
+          "http://localhost:3000/#doutores",
+          "http://127.0.0.1:3000/novohamburgo",
+          "http://127.0.0.1:3000/barrashoppingsul"
+        ]
+      },
+      {
+        "id": "image-redundant-alt",
+        "impact": "minor",
+        "description": "Ensure image alternative is not repeated as text",
+        "occurrences": 4,
+        "urls": [
+          "http://127.0.0.1:3000/agendamento"
+        ]
+      },
+      {
+        "id": "scrollable-region-focusable",
+        "impact": "serious",
+        "description": "Ensure elements that have scrollable content are accessible by keyboard",
+        "occurrences": 1,
+        "urls": [
+          "http://127.0.0.1:3000/agendamento"
+        ]
+      }
+    ],
+    "failures": [],
+    "perUrl": [
+      {
+        "url": "http://127.0.0.1:3000/",
+        "violations": 4,
+        "passes": 41,
+        "incomplete": 2,
+        "inapplicable": 47
+      },
+      {
+        "url": "http://127.0.0.1:3000/agendamento",
+        "violations": 3,
+        "passes": 37,
+        "incomplete": 1,
+        "inapplicable": 51
+      },
+      {
+        "url": "http://localhost:3000/#unidades",
+        "violations": 4,
+        "passes": 41,
+        "incomplete": 2,
+        "inapplicable": 47
+      },
+      {
+        "url": "http://localhost:3000/#doutores",
+        "violations": 4,
+        "passes": 41,
+        "incomplete": 2,
+        "inapplicable": 47
+      },
+      {
+        "url": "http://localhost:3000/#doutores",
+        "violations": 4,
+        "passes": 41,
+        "incomplete": 2,
+        "inapplicable": 47
+      },
+      {
+        "url": "http://127.0.0.1:3000/privacidade",
+        "violations": 0,
+        "passes": 32,
+        "incomplete": 1,
+        "inapplicable": 57
+      },
+      {
+        "url": "http://127.0.0.1:3000/novohamburgo",
+        "violations": 4,
+        "passes": 43,
+        "incomplete": 3,
+        "inapplicable": 44
+      },
+      {
+        "url": "http://127.0.0.1:3000/barrashoppingsul",
+        "violations": 4,
+        "passes": 43,
+        "incomplete": 3,
+        "inapplicable": 44
+      }
+    ]
+  },
+  "linkcheck": {
+    "generatedAt": "2026-03-04T20:05:59.789Z",
+    "markdown": {
+      "scanned": 2,
+      "broken": 2,
+      "brokenLinks": [
+        {
+          "url": "https://esfa.co/nh/faleconsco",
+          "parent": "docs/validation-checklist.md",
+          "status": 404
+        },
+        {
+          "url": "https://esfa.co/",
+          "parent": "docs/audit-report.md",
+          "status": 404
+        }
+      ]
+    },
+    "site": {
+      "scanned": 0,
+      "broken": 0,
+      "brokenLinks": []
+    },
+    "totalBroken": 2
+  },
+  "ui": {
+    "generatedAt": "2026-03-04T20:06:25.212Z",
+    "captures": [
+      {
+        "url": "http://127.0.0.1:3000/",
+        "variant": "desktop",
+        "screenshotPath": "quality/reports/ui/127-0-0-1-3000-desktop.png",
+        "metrics": {
+          "scrollWidth": 1366,
+          "clientWidth": 1366,
+          "scrollHeight": 1879,
+          "viewportHeight": 900,
+          "h1Count": 1,
+          "cls": 0.0035956357997961605,
+          "horizontalOverflowPx": 0,
+          "scrollHeightRatio": 2.0877777777777777
+        },
+        "observations": []
+      },
+      {
+        "url": "http://127.0.0.1:3000/agendamento",
+        "variant": "desktop",
+        "screenshotPath": "quality/reports/ui/127-0-0-1-3000-agendamento-desktop.png",
+        "metrics": {
+          "scrollWidth": 1366,
+          "clientWidth": 1366,
+          "scrollHeight": 1283,
+          "viewportHeight": 900,
+          "h1Count": 1,
+          "cls": 0,
+          "horizontalOverflowPx": 0,
+          "scrollHeightRatio": 1.4255555555555555
+        },
+        "observations": []
+      },
+      {
+        "url": "http://127.0.0.1:3000/unidades",
+        "variant": "desktop",
+        "screenshotPath": "quality/reports/ui/127-0-0-1-3000-unidades-desktop.png",
+        "metrics": {
+          "scrollWidth": 1366,
+          "clientWidth": 1366,
+          "scrollHeight": 1879,
+          "viewportHeight": 900,
+          "h1Count": 1,
+          "cls": 0,
+          "horizontalOverflowPx": 0,
+          "scrollHeightRatio": 2.0877777777777777
+        },
+        "observations": []
+      },
+      {
+        "url": "http://127.0.0.1:3000/doutores",
+        "variant": "desktop",
+        "screenshotPath": "quality/reports/ui/127-0-0-1-3000-doutores-desktop.png",
+        "metrics": {
+          "scrollWidth": 1366,
+          "clientWidth": 1366,
+          "scrollHeight": 1879,
+          "viewportHeight": 900,
+          "h1Count": 1,
+          "cls": 0,
+          "horizontalOverflowPx": 0,
+          "scrollHeightRatio": 2.0877777777777777
+        },
+        "observations": []
+      },
+      {
+        "url": "http://127.0.0.1:3000/sobre",
+        "variant": "desktop",
+        "screenshotPath": "quality/reports/ui/127-0-0-1-3000-sobre-desktop.png",
+        "metrics": {
+          "scrollWidth": 1366,
+          "clientWidth": 1366,
+          "scrollHeight": 1879,
+          "viewportHeight": 900,
+          "h1Count": 1,
+          "cls": 0,
+          "horizontalOverflowPx": 0,
+          "scrollHeightRatio": 2.0877777777777777
+        },
+        "observations": []
+      },
+      {
+        "url": "http://127.0.0.1:3000/privacidade",
+        "variant": "desktop",
+        "screenshotPath": "quality/reports/ui/127-0-0-1-3000-privacidade-desktop.png",
+        "metrics": {
+          "scrollWidth": 1366,
+          "clientWidth": 1366,
+          "scrollHeight": 1562,
+          "viewportHeight": 900,
+          "h1Count": 1,
+          "cls": 0,
+          "horizontalOverflowPx": 0,
+          "scrollHeightRatio": 1.7355555555555555
+        },
+        "observations": []
+      },
+      {
+        "url": "http://127.0.0.1:3000/novohamburgo",
+        "variant": "desktop",
+        "screenshotPath": "quality/reports/ui/127-0-0-1-3000-novohamburgo-desktop.png",
+        "metrics": {
+          "scrollWidth": 1366,
+          "clientWidth": 1366,
+          "scrollHeight": 2511,
+          "viewportHeight": 900,
+          "h1Count": 1,
+          "cls": 0.0044302861151781356,
+          "horizontalOverflowPx": 0,
+          "scrollHeightRatio": 2.79
+        },
+        "observations": [
+          "Conteúdo relevante abaixo da dobra (altura total 2.79x viewport)."
+        ]
+      },
+      {
+        "url": "http://127.0.0.1:3000/barrashoppingsul",
+        "variant": "desktop",
+        "screenshotPath": "quality/reports/ui/127-0-0-1-3000-barrashoppingsul-desktop.png",
+        "metrics": {
+          "scrollWidth": 1366,
+          "clientWidth": 1366,
+          "scrollHeight": 2511,
+          "viewportHeight": 900,
+          "h1Count": 1,
+          "cls": 0.0044302861151781356,
+          "horizontalOverflowPx": 0,
+          "scrollHeightRatio": 2.79
+        },
+        "observations": [
+          "Conteúdo relevante abaixo da dobra (altura total 2.79x viewport)."
+        ]
+      },
+      {
+        "url": "http://127.0.0.1:3000/",
+        "variant": "mobile",
+        "screenshotPath": "quality/reports/ui/127-0-0-1-3000-mobile.png",
+        "metrics": {
+          "scrollWidth": 390,
+          "clientWidth": 390,
+          "scrollHeight": 3683,
+          "viewportHeight": 664,
+          "h1Count": 1,
+          "cls": 0,
+          "horizontalOverflowPx": 0,
+          "scrollHeightRatio": 5.546686746987952
+        },
+        "observations": [
+          "Conteúdo relevante abaixo da dobra (altura total 5.55x viewport)."
+        ]
+      },
+      {
+        "url": "http://127.0.0.1:3000/agendamento",
+        "variant": "mobile",
+        "screenshotPath": "quality/reports/ui/127-0-0-1-3000-agendamento-mobile.png",
+        "metrics": {
+          "scrollWidth": 390,
+          "clientWidth": 390,
+          "scrollHeight": 1759,
+          "viewportHeight": 664,
+          "h1Count": 1,
+          "cls": 0,
+          "horizontalOverflowPx": 0,
+          "scrollHeightRatio": 2.6490963855421685
+        },
+        "observations": [
+          "Conteúdo relevante abaixo da dobra (altura total 2.65x viewport)."
+        ]
+      },
+      {
+        "url": "http://127.0.0.1:3000/unidades",
+        "variant": "mobile",
+        "screenshotPath": "quality/reports/ui/127-0-0-1-3000-unidades-mobile.png",
+        "metrics": {
+          "scrollWidth": 390,
+          "clientWidth": 390,
+          "scrollHeight": 3683,
+          "viewportHeight": 664,
+          "h1Count": 1,
+          "cls": 0,
+          "horizontalOverflowPx": 0,
+          "scrollHeightRatio": 5.546686746987952
+        },
+        "observations": [
+          "Conteúdo relevante abaixo da dobra (altura total 5.55x viewport)."
+        ]
+      },
+      {
+        "url": "http://127.0.0.1:3000/doutores",
+        "variant": "mobile",
+        "screenshotPath": "quality/reports/ui/127-0-0-1-3000-doutores-mobile.png",
+        "metrics": {
+          "scrollWidth": 390,
+          "clientWidth": 390,
+          "scrollHeight": 3683,
+          "viewportHeight": 664,
+          "h1Count": 1,
+          "cls": 0,
+          "horizontalOverflowPx": 0,
+          "scrollHeightRatio": 5.546686746987952
+        },
+        "observations": [
+          "Conteúdo relevante abaixo da dobra (altura total 5.55x viewport)."
+        ]
+      },
+      {
+        "url": "http://127.0.0.1:3000/sobre",
+        "variant": "mobile",
+        "screenshotPath": "quality/reports/ui/127-0-0-1-3000-sobre-mobile.png",
+        "metrics": {
+          "scrollWidth": 390,
+          "clientWidth": 390,
+          "scrollHeight": 3683,
+          "viewportHeight": 664,
+          "h1Count": 1,
+          "cls": 0,
+          "horizontalOverflowPx": 0,
+          "scrollHeightRatio": 5.546686746987952
+        },
+        "observations": [
+          "Conteúdo relevante abaixo da dobra (altura total 5.55x viewport)."
+        ]
+      },
+      {
+        "url": "http://127.0.0.1:3000/privacidade",
+        "variant": "mobile",
+        "screenshotPath": "quality/reports/ui/127-0-0-1-3000-privacidade-mobile.png",
+        "metrics": {
+          "scrollWidth": 390,
+          "clientWidth": 390,
+          "scrollHeight": 2442,
+          "viewportHeight": 664,
+          "h1Count": 1,
+          "cls": 0,
+          "horizontalOverflowPx": 0,
+          "scrollHeightRatio": 3.677710843373494
+        },
+        "observations": [
+          "Conteúdo relevante abaixo da dobra (altura total 3.68x viewport)."
+        ]
+      },
+      {
+        "url": "http://127.0.0.1:3000/novohamburgo",
+        "variant": "mobile",
+        "screenshotPath": "quality/reports/ui/127-0-0-1-3000-novohamburgo-mobile.png",
+        "metrics": {
+          "scrollWidth": 390,
+          "clientWidth": 390,
+          "scrollHeight": 4302,
+          "viewportHeight": 664,
+          "h1Count": 1,
+          "cls": 0,
+          "horizontalOverflowPx": 0,
+          "scrollHeightRatio": 6.478915662650603
+        },
+        "observations": [
+          "Conteúdo relevante abaixo da dobra (altura total 6.48x viewport)."
+        ]
+      },
+      {
+        "url": "http://127.0.0.1:3000/barrashoppingsul",
+        "variant": "mobile",
+        "screenshotPath": "quality/reports/ui/127-0-0-1-3000-barrashoppingsul-mobile.png",
+        "metrics": {
+          "scrollWidth": 390,
+          "clientWidth": 390,
+          "scrollHeight": 4302,
+          "viewportHeight": 664,
+          "h1Count": 1,
+          "cls": 0,
+          "horizontalOverflowPx": 0,
+          "scrollHeightRatio": 6.478915662650603
+        },
+        "observations": [
+          "Conteúdo relevante abaixo da dobra (altura total 6.48x viewport)."
+        ]
+      }
+    ],
+    "highRiskCount": 0
+  },
+  "topIssues": [
+    {
+      "rank": 1,
+      "area": "links",
+      "severity": 3,
+      "title": "2 links quebrados detectados",
+      "details": "Priorizar links de navegação, CTAs e páginas com status >= 400."
+    },
+    {
+      "rank": 2,
+      "area": "a11y",
+      "severity": 3,
+      "title": "6 violações críticas de acessibilidade",
+      "details": "Corrigir primeiro regras com maior recorrência (axe top rules)."
+    },
+    {
+      "rank": 3,
+      "area": "a11y",
+      "severity": 2,
+      "title": "14 violações sérias de acessibilidade",
+      "details": "Revisar contraste, labels, landmarks e navegação por teclado."
+    },
+    {
+      "rank": 4,
+      "area": "lighthouse",
+      "severity": 2,
+      "title": "Performance médio em 78%",
+      "details": "Revisar pages com score baixo na categoria Performance."
+    }
+  ]
+}

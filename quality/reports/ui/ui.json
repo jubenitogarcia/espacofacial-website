@@ -1,0 +1,282 @@
+{
+  "generatedAt": "2026-03-04T20:06:25.212Z",
+  "captures": [
+    {
+      "url": "http://127.0.0.1:3000/",
+      "variant": "desktop",
+      "screenshotPath": "quality/reports/ui/127-0-0-1-3000-desktop.png",
+      "metrics": {
+        "scrollWidth": 1366,
+        "clientWidth": 1366,
+        "scrollHeight": 1879,
+        "viewportHeight": 900,
+        "h1Count": 1,
+        "cls": 0.0035956357997961605,
+        "horizontalOverflowPx": 0,
+        "scrollHeightRatio": 2.0877777777777777
+      },
+      "observations": []
+    },
+    {
+      "url": "http://127.0.0.1:3000/agendamento",
+      "variant": "desktop",
+      "screenshotPath": "quality/reports/ui/127-0-0-1-3000-agendamento-desktop.png",
+      "metrics": {
+        "scrollWidth": 1366,
+        "clientWidth": 1366,
+        "scrollHeight": 1283,
+        "viewportHeight": 900,
+        "h1Count": 1,
+        "cls": 0,
+        "horizontalOverflowPx": 0,
+        "scrollHeightRatio": 1.4255555555555555
+      },
+      "observations": []
+    },
+    {
+      "url": "http://127.0.0.1:3000/unidades",
+      "variant": "desktop",
+      "screenshotPath": "quality/reports/ui/127-0-0-1-3000-unidades-desktop.png",
+      "metrics": {
+        "scrollWidth": 1366,
+        "clientWidth": 1366,
+        "scrollHeight": 1879,
+        "viewportHeight": 900,
+        "h1Count": 1,
+        "cls": 0,
+        "horizontalOverflowPx": 0,
+        "scrollHeightRatio": 2.0877777777777777
+      },
+      "observations": []
+    },
+    {
+      "url": "http://127.0.0.1:3000/doutores",
+      "variant": "desktop",
+      "screenshotPath": "quality/reports/ui/127-0-0-1-3000-doutores-desktop.png",
+      "metrics": {
+        "scrollWidth": 1366,
+        "clientWidth": 1366,
+        "scrollHeight": 1879,
+        "viewportHeight": 900,
+        "h1Count": 1,
+        "cls": 0,
+        "horizontalOverflowPx": 0,
+        "scrollHeightRatio": 2.0877777777777777
+      },
+      "observations": []
+    },
+    {
+      "url": "http://127.0.0.1:3000/sobre",
+      "variant": "desktop",
+      "screenshotPath": "quality/reports/ui/127-0-0-1-3000-sobre-desktop.png",
+      "metrics": {
+        "scrollWidth": 1366,
+        "clientWidth": 1366,
+        "scrollHeight": 1879,
+        "viewportHeight": 900,
+        "h1Count": 1,
+        "cls": 0,
+        "horizontalOverflowPx": 0,
+        "scrollHeightRatio": 2.0877777777777777
+      },
+      "observations": []
+    },
+    {
+      "url": "http://127.0.0.1:3000/privacidade",
+      "variant": "desktop",
+      "screenshotPath": "quality/reports/ui/127-0-0-1-3000-privacidade-desktop.png",
+      "metrics": {
+        "scrollWidth": 1366,
+        "clientWidth": 1366,
+        "scrollHeight": 1562,
+        "viewportHeight": 900,
+        "h1Count": 1,
+        "cls": 0,
+        "horizontalOverflowPx": 0,
+        "scrollHeightRatio": 1.7355555555555555
+      },
+      "observations": []
+    },
+    {
+      "url": "http://127.0.0.1:3000/novohamburgo",
+      "variant": "desktop",
+      "screenshotPath": "quality/reports/ui/127-0-0-1-3000-novohamburgo-desktop.png",
+      "metrics": {
+        "scrollWidth": 1366,
+        "clientWidth": 1366,
+        "scrollHeight": 2511,
+        "viewportHeight": 900,
+        "h1Count": 1,
+        "cls": 0.0044302861151781356,
+        "horizontalOverflowPx": 0,
+        "scrollHeightRatio": 2.79
+      },
+      "observations": [
+        "Conteúdo relevante abaixo da dobra (altura total 2.79x viewport)."
+      ]
+    },
+    {
+      "url": "http://127.0.0.1:3000/barrashoppingsul",
+      "variant": "desktop",
+      "screenshotPath": "quality/reports/ui/127-0-0-1-3000-barrashoppingsul-desktop.png",
+      "metrics": {
+        "scrollWidth": 1366,
+        "clientWidth": 1366,
+        "scrollHeight": 2511,
+        "viewportHeight": 900,
+        "h1Count": 1,
+        "cls": 0.0044302861151781356,
+        "horizontalOverflowPx": 0,
+        "scrollHeightRatio": 2.79
+      },
+      "observations": [
+        "Conteúdo relevante abaixo da dobra (altura total 2.79x viewport)."
+      ]
+    },
+    {
+      "url": "http://127.0.0.1:3000/",
+      "variant": "mobile",
+      "screenshotPath": "quality/reports/ui/127-0-0-1-3000-mobile.png",
+      "metrics": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "scrollHeight": 3683,
+        "viewportHeight": 664,
+        "h1Count": 1,
+        "cls": 0,
+        "horizontalOverflowPx": 0,
+        "scrollHeightRatio": 5.546686746987952
+      },
+      "observations": [
+        "Conteúdo relevante abaixo da dobra (altura total 5.55x viewport)."
+      ]
+    },
+    {
+      "url": "http://127.0.0.1:3000/agendamento",
+      "variant": "mobile",
+      "screenshotPath": "quality/reports/ui/127-0-0-1-3000-agendamento-mobile.png",
+      "metrics": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "scrollHeight": 1759,
+        "viewportHeight": 664,
+        "h1Count": 1,
+        "cls": 0,
+        "horizontalOverflowPx": 0,
+        "scrollHeightRatio": 2.6490963855421685
+      },
+      "observations": [
+        "Conteúdo relevante abaixo da dobra (altura total 2.65x viewport)."
+      ]
+    },
+    {
+      "url": "http://127.0.0.1:3000/unidades",
+      "variant": "mobile",
+      "screenshotPath": "quality/reports/ui/127-0-0-1-3000-unidades-mobile.png",
+      "metrics": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "scrollHeight": 3683,
+        "viewportHeight": 664,
+        "h1Count": 1,
+        "cls": 0,
+        "horizontalOverflowPx": 0,
+        "scrollHeightRatio": 5.546686746987952
+      },
+      "observations": [
+        "Conteúdo relevante abaixo da dobra (altura total 5.55x viewport)."
+      ]
+    },
+    {
+      "url": "http://127.0.0.1:3000/doutores",
+      "variant": "mobile",
+      "screenshotPath": "quality/reports/ui/127-0-0-1-3000-doutores-mobile.png",
+      "metrics": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "scrollHeight": 3683,
+        "viewportHeight": 664,
+        "h1Count": 1,
+        "cls": 0,
+        "horizontalOverflowPx": 0,
+        "scrollHeightRatio": 5.546686746987952
+      },
+      "observations": [
+        "Conteúdo relevante abaixo da dobra (altura total 5.55x viewport)."
+      ]
+    },
+    {
+      "url": "http://127.0.0.1:3000/sobre",
+      "variant": "mobile",
+      "screenshotPath": "quality/reports/ui/127-0-0-1-3000-sobre-mobile.png",
+      "metrics": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "scrollHeight": 3683,
+        "viewportHeight": 664,
+        "h1Count": 1,
+        "cls": 0,
+        "horizontalOverflowPx": 0,
+        "scrollHeightRatio": 5.546686746987952
+      },
+      "observations": [
+        "Conteúdo relevante abaixo da dobra (altura total 5.55x viewport)."
+      ]
+    },
+    {
+      "url": "http://127.0.0.1:3000/privacidade",
+      "variant": "mobile",
+      "screenshotPath": "quality/reports/ui/127-0-0-1-3000-privacidade-mobile.png",
+      "metrics": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "scrollHeight": 2442,
+        "viewportHeight": 664,
+        "h1Count": 1,
+        "cls": 0,
+        "horizontalOverflowPx": 0,
+        "scrollHeightRatio": 3.677710843373494
+      },
+      "observations": [
+        "Conteúdo relevante abaixo da dobra (altura total 3.68x viewport)."
+      ]
+    },
+    {
+      "url": "http://127.0.0.1:3000/novohamburgo",
+      "variant": "mobile",
+      "screenshotPath": "quality/reports/ui/127-0-0-1-3000-novohamburgo-mobile.png",
+      "metrics": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "scrollHeight": 4302,
+        "viewportHeight": 664,
+        "h1Count": 1,
+        "cls": 0,
+        "horizontalOverflowPx": 0,
+        "scrollHeightRatio": 6.478915662650603
+      },
+      "observations": [
+        "Conteúdo relevante abaixo da dobra (altura total 6.48x viewport)."
+      ]
+    },
+    {
+      "url": "http://127.0.0.1:3000/barrashoppingsul",
+      "variant": "mobile",
+      "screenshotPath": "quality/reports/ui/127-0-0-1-3000-barrashoppingsul-mobile.png",
+      "metrics": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "scrollHeight": 4302,
+        "viewportHeight": 664,
+        "h1Count": 1,
+        "cls": 0,
+        "horizontalOverflowPx": 0,
+        "scrollHeightRatio": 6.478915662650603
+      },
+      "observations": [
+        "Conteúdo relevante abaixo da dobra (altura total 6.48x viewport)."
+      ]
+    }
+  ],
+  "highRiskCount": 0
+}

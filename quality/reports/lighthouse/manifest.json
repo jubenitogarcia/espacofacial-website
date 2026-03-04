@@ -1,0 +1,98 @@
+[
+  {
+    "url": "http://127.0.0.1:3000/",
+    "isRepresentativeRun": true,
+    "htmlPath": "/Users/jubenitogarcia/Automation/website/quality/reports/lighthouse/-2026_03_04_20_04_07-report.html",
+    "jsonPath": "/Users/jubenitogarcia/Automation/website/quality/reports/lighthouse/-2026_03_04_20_04_07-report.json",
+    "summary": {
+      "performance": 0.72,
+      "accessibility": 0.87,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://127.0.0.1:3000/agendamento",
+    "isRepresentativeRun": true,
+    "htmlPath": "/Users/jubenitogarcia/Automation/website/quality/reports/lighthouse/agendamento-2026_03_04_20_04_18-report.html",
+    "jsonPath": "/Users/jubenitogarcia/Automation/website/quality/reports/lighthouse/agendamento-2026_03_04_20_04_18-report.json",
+    "summary": {
+      "performance": 0.8,
+      "accessibility": 0.95,
+      "best-practices": 1,
+      "seo": 0.69
+    }
+  },
+  {
+    "url": "http://127.0.0.1:3000/unidades",
+    "isRepresentativeRun": true,
+    "htmlPath": "/Users/jubenitogarcia/Automation/website/quality/reports/lighthouse/unidades-2026_03_04_20_04_31-report.html",
+    "jsonPath": "/Users/jubenitogarcia/Automation/website/quality/reports/lighthouse/unidades-2026_03_04_20_04_31-report.json",
+    "summary": {
+      "performance": null,
+      "accessibility": 0.87,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://127.0.0.1:3000/doutores",
+    "isRepresentativeRun": true,
+    "htmlPath": "/Users/jubenitogarcia/Automation/website/quality/reports/lighthouse/doutores-2026_03_04_20_04_42-report.html",
+    "jsonPath": "/Users/jubenitogarcia/Automation/website/quality/reports/lighthouse/doutores-2026_03_04_20_04_42-report.json",
+    "summary": {
+      "performance": null,
+      "accessibility": 0.87,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://127.0.0.1:3000/sobre",
+    "isRepresentativeRun": true,
+    "htmlPath": "/Users/jubenitogarcia/Automation/website/quality/reports/lighthouse/sobre-2026_03_04_20_04_53-report.html",
+    "jsonPath": "/Users/jubenitogarcia/Automation/website/quality/reports/lighthouse/sobre-2026_03_04_20_04_53-report.json",
+    "summary": {
+      "performance": null,
+      "accessibility": 0.87,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://127.0.0.1:3000/privacidade",
+    "isRepresentativeRun": true,
+    "htmlPath": "/Users/jubenitogarcia/Automation/website/quality/reports/lighthouse/privacidade-2026_03_04_20_05_04-report.html",
+    "jsonPath": "/Users/jubenitogarcia/Automation/website/quality/reports/lighthouse/privacidade-2026_03_04_20_05_04-report.json",
+    "summary": {
+      "performance": 0.99,
+      "accessibility": 1,
+      "best-practices": 1,
+      "seo": 0.66
+    }
+  },
+  {
+    "url": "http://127.0.0.1:3000/novohamburgo",
+    "isRepresentativeRun": true,
+    "htmlPath": "/Users/jubenitogarcia/Automation/website/quality/reports/lighthouse/novohamburgo-2026_03_04_20_05_14-report.html",
+    "jsonPath": "/Users/jubenitogarcia/Automation/website/quality/reports/lighthouse/novohamburgo-2026_03_04_20_05_14-report.json",
+    "summary": {
+      "performance": 0.7,
+      "accessibility": 0.88,
+      "best-practices": 0.96,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://127.0.0.1:3000/barrashoppingsul",
+    "isRepresentativeRun": true,
+    "htmlPath": "/Users/jubenitogarcia/Automation/website/quality/reports/lighthouse/barrashoppingsul-2026_03_04_20_05_26-report.html",
+    "jsonPath": "/Users/jubenitogarcia/Automation/website/quality/reports/lighthouse/barrashoppingsul-2026_03_04_20_05_26-report.json",
+    "summary": {
+      "performance": 0.69,
+      "accessibility": 0.88,
+      "best-practices": 0.96,
+      "seo": 1
+    }
+  }
+]

@@ -1,0 +1,145 @@
+{
+  "generatedAt": "2026-03-04T20:05:56.154Z",
+  "totalUrls": 8,
+  "successfulUrls": 8,
+  "failedUrls": 0,
+  "impactCounts": {
+    "critical": 6,
+    "serious": 14,
+    "moderate": 6,
+    "minor": 1,
+    "unknown": 0
+  },
+  "topRules": [
+    {
+      "id": "color-contrast",
+      "impact": "serious",
+      "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+      "occurrences": 8,
+      "urls": [
+        "http://127.0.0.1:3000/",
+        "http://127.0.0.1:3000/agendamento",
+        "http://localhost:3000/#unidades",
+        "http://localhost:3000/#doutores",
+        "http://127.0.0.1:3000/novohamburgo",
+        "http://127.0.0.1:3000/barrashoppingsul"
+      ]
+    },
+    {
+      "id": "region",
+      "impact": "moderate",
+      "description": "Ensure all page content is contained by landmarks",
+      "occurrences": 8,
+      "urls": [
+        "http://127.0.0.1:3000/",
+        "http://localhost:3000/#unidades",
+        "http://localhost:3000/#doutores",
+        "http://127.0.0.1:3000/novohamburgo",
+        "http://127.0.0.1:3000/barrashoppingsul"
+      ]
+    },
+    {
+      "id": "aria-required-children",
+      "impact": "critical",
+      "description": "Ensure elements with an ARIA role that require child roles contain them",
+      "occurrences": 6,
+      "urls": [
+        "http://127.0.0.1:3000/",
+        "http://localhost:3000/#unidades",
+        "http://localhost:3000/#doutores",
+        "http://127.0.0.1:3000/novohamburgo",
+        "http://127.0.0.1:3000/barrashoppingsul"
+      ]
+    },
+    {
+      "id": "nested-interactive",
+      "impact": "serious",
+      "description": "Ensure interactive controls are not nested as they are not always announced by screen readers or can cause focus problems for assistive technologies",
+      "occurrences": 6,
+      "urls": [
+        "http://127.0.0.1:3000/",
+        "http://localhost:3000/#unidades",
+        "http://localhost:3000/#doutores",
+        "http://127.0.0.1:3000/novohamburgo",
+        "http://127.0.0.1:3000/barrashoppingsul"
+      ]
+    },
+    {
+      "id": "image-redundant-alt",
+      "impact": "minor",
+      "description": "Ensure image alternative is not repeated as text",
+      "occurrences": 4,
+      "urls": [
+        "http://127.0.0.1:3000/agendamento"
+      ]
+    },
+    {
+      "id": "scrollable-region-focusable",
+      "impact": "serious",
+      "description": "Ensure elements that have scrollable content are accessible by keyboard",
+      "occurrences": 1,
+      "urls": [
+        "http://127.0.0.1:3000/agendamento"
+      ]
+    }
+  ],
+  "failures": [],
+  "perUrl": [
+    {
+      "url": "http://127.0.0.1:3000/",
+      "violations": 4,
+      "passes": 41,
+      "incomplete": 2,
+      "inapplicable": 47
+    },
+    {
+      "url": "http://127.0.0.1:3000/agendamento",
+      "violations": 3,
+      "passes": 37,
+      "incomplete": 1,
+      "inapplicable": 51
+    },
+    {
+      "url": "http://localhost:3000/#unidades",
+      "violations": 4,
+      "passes": 41,
+      "incomplete": 2,
+      "inapplicable": 47
+    },
+    {
+      "url": "http://localhost:3000/#doutores",
+      "violations": 4,
+      "passes": 41,
+      "incomplete": 2,
+      "inapplicable": 47
+    },
+    {
+      "url": "http://localhost:3000/#doutores",
+      "violations": 4,
+      "passes": 41,
+      "incomplete": 2,
+      "inapplicable": 47
+    },
+    {
+      "url": "http://127.0.0.1:3000/privacidade",
+      "violations": 0,
+      "passes": 32,
+      "incomplete": 1,
+      "inapplicable": 57
+    },
+    {
+      "url": "http://127.0.0.1:3000/novohamburgo",
+      "violations": 4,
+      "passes": 43,
+      "incomplete": 3,
+      "inapplicable": 44
+    },
+    {
+      "url": "http://127.0.0.1:3000/barrashoppingsul",
+      "violations": 4,
+      "passes": 43,
+      "incomplete": 3,
+      "inapplicable": 44
+    }
+  ]
+}

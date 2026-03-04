@@ -1,0 +1,154 @@
+[
+  {
+    "name": "maxNumericValue",
+    "expected": 900000,
+    "actual": 16079612,
+    "values": [
+      16079612
+    ],
+    "operator": "<=",
+    "passed": false,
+    "auditProperty": "image.size",
+    "auditId": "resource-summary",
+    "level": "warn",
+    "url": "http://127.0.0.1:3000/",
+    "auditTitle": "Resources Summary"
+  },
+  {
+    "name": "minScore",
+    "expected": 0.82,
+    "actual": 0.69,
+    "values": [
+      0.69
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditProperty": "seo",
+    "auditId": "categories",
+    "level": "warn",
+    "url": "http://127.0.0.1:3000/agendamento"
+  },
+  {
+    "name": "maxNumericValue",
+    "expected": 900000,
+    "actual": 1375307,
+    "values": [
+      1375307
+    ],
+    "operator": "<=",
+    "passed": false,
+    "auditProperty": "image.size",
+    "auditId": "resource-summary",
+    "level": "warn",
+    "url": "http://127.0.0.1:3000/agendamento",
+    "auditTitle": "Resources Summary"
+  },
+  {
+    "name": "minScore",
+    "expected": 0.55,
+    "actual": null,
+    "values": [
+      null,
+      null,
+      null
+    ],
+    "operator": ">=",
+    "passed": false,
+    "message": "Audit did not produce a value at all. \"minScore\" might not be a valid assertion for this audit.",
+    "auditProperty": "performance",
+    "auditId": "categories",
+    "level": "warn",
+    "url": "http://localhost:3000/"
+  },
+  {
+    "name": "maxNumericValue",
+    "expected": 900000,
+    "actual": 16079612,
+    "values": [
+      16079612,
+      16079612,
+      16079612
+    ],
+    "operator": "<=",
+    "passed": false,
+    "auditProperty": "image.size",
+    "auditId": "resource-summary",
+    "level": "warn",
+    "url": "http://localhost:3000/",
+    "auditTitle": "Resources Summary"
+  },
+  {
+    "name": "minScore",
+    "expected": 0.82,
+    "actual": 0.66,
+    "values": [
+      0.66
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditProperty": "seo",
+    "auditId": "categories",
+    "level": "warn",
+    "url": "http://127.0.0.1:3000/privacidade"
+  },
+  {
+    "name": "maxNumericValue",
+    "expected": 450000,
+    "actual": 562331,
+    "values": [
+      562331
+    ],
+    "operator": "<=",
+    "passed": false,
+    "auditProperty": "script.size",
+    "auditId": "resource-summary",
+    "level": "warn",
+    "url": "http://127.0.0.1:3000/novohamburgo",
+    "auditTitle": "Resources Summary"
+  },
+  {
+    "name": "maxNumericValue",
+    "expected": 900000,
+    "actual": 16096177,
+    "values": [
+      16096177
+    ],
+    "operator": "<=",
+    "passed": false,
+    "auditProperty": "image.size",
+    "auditId": "resource-summary",
+    "level": "warn",
+    "url": "http://127.0.0.1:3000/novohamburgo",
+    "auditTitle": "Resources Summary"
+  },
+  {
+    "name": "maxNumericValue",
+    "expected": 450000,
+    "actual": 562331,
+    "values": [
+      562331
+    ],
+    "operator": "<=",
+    "passed": false,
+    "auditProperty": "script.size",
+    "auditId": "resource-summary",
+    "level": "warn",
+    "url": "http://127.0.0.1:3000/barrashoppingsul",
+    "auditTitle": "Resources Summary"
+  },
+  {
+    "name": "maxNumericValue",
+    "expected": 900000,
+    "actual": 16083807,
+    "values": [
+      16083807
+    ],
+    "operator": "<=",
+    "passed": false,
+    "auditProperty": "image.size",
+    "auditId": "resource-summary",
+    "level": "warn",
+    "url": "http://127.0.0.1:3000/barrashoppingsul",
+    "auditTitle": "Resources Summary"
+  }
+]

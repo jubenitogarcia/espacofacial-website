@@ -1,0 +1,8 @@
+http://127.0.0.1:3000/
+http://127.0.0.1:3000/agendamento
+http://127.0.0.1:3000/unidades
+http://127.0.0.1:3000/doutores
+http://127.0.0.1:3000/sobre
+http://127.0.0.1:3000/privacidade
+http://127.0.0.1:3000/novohamburgo
+http://127.0.0.1:3000/barrashoppingsul
