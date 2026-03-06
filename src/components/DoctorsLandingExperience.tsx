@@ -1,9 +1,12 @@
 "use client";
 
+import { useMemo } from "react";
 import ExperienceTracker from "@/components/ExperienceTracker";
+import ConversionIntentRail from "@/components/ConversionIntentRail";
 import TrackedBookingLink from "@/components/TrackedBookingLink";
 import DoctorsDirectoryStats from "@/components/DoctorsDirectoryStats";
 import { useExperienceVariant } from "@/hooks/useExperienceVariant";
+import { useTeamDirectory } from "@/hooks/useTeamDirectory";
 import { trackExperienceShortcutClick } from "@/lib/leadTracking";
 
 type DoctorsUiVariant = "open-directory" | "fast-match";
@@ -61,10 +64,20 @@ function pickDoctorsUiVariant(input: string): DoctorsUiVariant {
 
 export default function DoctorsLandingExperience() {
     const resolved = useExperienceVariant("/doutores", "open-directory");
+    const { members } = useTeamDirectory();
     const uiVariant = pickDoctorsUiVariant(resolved.variant);
     const content = DOCTORS_VARIANTS[uiVariant];
     const fastBookingHref = "/agendamento?doctor=any#booking-flow";
     const directBookingHref = "/agendamento#booking-flow";
+    const authoritySignals = useMemo(() => {
+        if (!members || members.length === 0) return null;
+        const membersWithInstagram = members.filter((member) => member.instagramUrl).length;
+        const multiUnitMembers = members.filter((member) => member.units.length > 1).length;
+        const uniqueRoles = new Set(
+            members.flatMap((member) => member.roles.map((role) => role.trim()).filter(Boolean))
+        ).size;
+        return { membersWithInstagram, multiUnitMembers, uniqueRoles };
+    }, [members]);
 
     return (
         <>
@@ -77,6 +90,22 @@ export default function DoctorsLandingExperience() {
                         <h1 className="sectionTitle">{content.title}</h1>
                         <p className="sectionSub">{content.description}</p>
                         <DoctorsDirectoryStats />
+                        {authoritySignals ? (
+                            <div className="doctorsHero__signals" aria-label="Sinais de autoridade da equipe">
+                                <div className="doctorsHero__signalCard">
+                                    <strong>{authoritySignals.membersWithInstagram}</strong>
+                                    <span>profissionais com portifolio consultavel</span>
+                                </div>
+                                <div className="doctorsHero__signalCard">
+                                    <strong>{authoritySignals.multiUnitMembers}</strong>
+                                    <span>especialistas com cobertura em mais de uma unidade</span>
+                                </div>
+                                <div className="doctorsHero__signalCard">
+                                    <strong>{authoritySignals.uniqueRoles}</strong>
+                                    <span>frentes de atuacao representadas no diretorio</span>
+                                </div>
+                            </div>
+                        ) : null}
                     </div>
 
                     <aside className="doctorsHero__panel" aria-label="Guia de escolha do profissional">
@@ -95,6 +124,68 @@ export default function DoctorsLandingExperience() {
                     </aside>
                 </div>
             </section>
+
+            <ConversionIntentRail
+                className="pageSection"
+                title="Escolha a estrategia de decisao"
+                subtitle="Cada caminho abaixo prioriza uma logica diferente: velocidade, comparacao guiada ou triagem por unidade."
+                items={[
+                    {
+                        id: "doctor-fastlane",
+                        eyebrow: "Estrategia 01",
+                        title: "Velocidade com criterio minimo",
+                        body: "Use sem preferencia para abrir a agenda mais ampla e confirmar horario primeiro.",
+                        ctaLabel: "Entrar na agenda rapida",
+                        href: fastBookingHref,
+                        kind: "primary",
+                        onClick: () =>
+                            trackExperienceShortcutClick({
+                                page: "/doutores",
+                                shortcut: "Agenda rapida por doutores",
+                                destination: fastBookingHref,
+                                placement: "doctors_page",
+                                experience: "authority_directory_v3",
+                                variant: resolved.variant,
+                            }),
+                    },
+                    {
+                        id: "doctor-compare",
+                        eyebrow: "Estrategia 02",
+                        title: "Comparacao de perfis",
+                        body: "Abra o diretorio completo e compare 2 ou 3 profissionais antes de reservar.",
+                        ctaLabel: "Abrir diretorio completo",
+                        href: "#directory-grid",
+                        kind: "secondary",
+                        onClick: () =>
+                            trackExperienceShortcutClick({
+                                page: "/doutores",
+                                shortcut: "Comparar perfis no diretorio",
+                                destination: "#directory-grid",
+                                placement: "doctors_page",
+                                experience: "authority_directory_v3",
+                                variant: resolved.variant,
+                            }),
+                    },
+                    {
+                        id: "doctor-local",
+                        eyebrow: "Estrategia 03",
+                        title: "Triagem por unidade",
+                        body: "Se localizacao pesa, escolha a unidade no topo e o diretorio ja filtra opcoes relevantes.",
+                        ctaLabel: "Ver unidades primeiro",
+                        href: "/unidades#units-featured",
+                        kind: "ghost",
+                        onClick: () =>
+                            trackExperienceShortcutClick({
+                                page: "/doutores",
+                                shortcut: "Triagem por unidade",
+                                destination: "/unidades#units-featured",
+                                placement: "doctors_page",
+                                experience: "authority_directory_v3",
+                                variant: resolved.variant,
+                            }),
+                    },
+                ]}
+            />
 
             <section className="pageSection decisionCardsSection" aria-label="Como escolher seu profissional">
                 <div className="decisionCards">

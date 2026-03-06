@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import ExperienceTracker from "@/components/ExperienceTracker";
+import ConversionIntentRail from "@/components/ConversionIntentRail";
 import TrackedBookingLink from "@/components/TrackedBookingLink";
 import { useExperienceVariant } from "@/hooks/useExperienceVariant";
 import { trackExperienceShortcutClick } from "@/lib/leadTracking";
@@ -13,6 +14,8 @@ export type UnitsFeaturedCard = {
     maps: string | null;
     state: string | null;
     city: string;
+    contactUrl: string | null;
+    whatsappPhone: string | null;
 };
 
 type UnitsLandingExperienceProps = {
@@ -157,6 +160,69 @@ export default function UnitsLandingExperience({ featuredUnits, unitsByState }: 
                 </div>
             </section>
 
+            <ConversionIntentRail
+                className="pageSection"
+                title="Qual e sua intencao agora?"
+                subtitle="Escolha o caminho mais curto para sua prioridade e reduza tempo ate a acao."
+                items={[
+                    {
+                        id: "route-first",
+                        eyebrow: "Intencao 01",
+                        title: "Quero decidir por proximidade",
+                        body: "Va direto ao mapa completo para validar deslocamento e unidade mais conveniente.",
+                        ctaLabel: "Abrir mapa de unidades",
+                        href: "#units-map",
+                        kind: "secondary",
+                        onClick: () =>
+                            trackExperienceShortcutClick({
+                                page: "/unidades",
+                                shortcut: "Abrir mapa por proximidade",
+                                destination: "#units-map",
+                                placement: "units_page",
+                                experience: "local_landing_v3",
+                                variant: resolved.variant,
+                            }),
+                    },
+                    {
+                        id: "speed-first",
+                        eyebrow: "Intencao 02",
+                        title: "Quero o primeiro horario viavel",
+                        body: "Entre no booking com sem preferencia para ampliar disponibilidade imediatamente.",
+                        ctaLabel: "Ir para agenda mais ampla",
+                        href: "/agendamento?doctor=any#booking-flow",
+                        kind: "primary",
+                        onClick: () =>
+                            trackExperienceShortcutClick({
+                                page: "/unidades",
+                                shortcut: "Agenda mais ampla",
+                                destination: "/agendamento?doctor=any#booking-flow",
+                                placement: "units_page",
+                                experience: "local_landing_v3",
+                                variant: resolved.variant,
+                            }),
+                    },
+                    {
+                        id: "support-first",
+                        eyebrow: "Intencao 03",
+                        title: "Quero falar com a unidade antes",
+                        body: "Acesse o contato direto para tirar duvidas rapidas e entrar no fluxo com mais seguranca.",
+                        ctaLabel: "Abrir fale conosco",
+                        href: "/barrashoppingsul/faleconosco",
+                        kind: "ghost",
+                        note: "Voce pode trocar para outra unidade no topo da tela.",
+                        onClick: () =>
+                            trackExperienceShortcutClick({
+                                page: "/unidades",
+                                shortcut: "Contato direto de unidade",
+                                destination: "/barrashoppingsul/faleconosco",
+                                placement: "units_page",
+                                experience: "local_landing_v3",
+                                variant: resolved.variant,
+                            }),
+                    },
+                ]}
+            />
+
             <section id="units-featured" className="pageSection decisionCardsSection" aria-label="Unidades destacadas para decisao rapida">
                 <div className="decisionCards">
                     {featuredUnits.map((unit) => (
@@ -166,32 +232,15 @@ export default function UnitsLandingExperience({ featuredUnits, unitsByState }: 
                             <p>{unit.addressLine ? unit.addressLine : "Abra a unidade para ver detalhes e contato direto."}</p>
 
                             <div className="decisionCard__meta">
-                                <span className="decisionCard__metaItem">Pagina local dedicada</span>
-                                <span className="decisionCard__metaItem">Contato direto da unidade</span>
-                                <span className="decisionCard__metaItem">Entrada imediata no agendamento</span>
+                                <span className="decisionCard__metaItem">{unit.city}, {unit.state ?? "Brasil"}</span>
+                                <span className="decisionCard__metaItem">{unit.maps ? "Rota Google ativa" : "Rota sob consulta"}</span>
+                                <span className="decisionCard__metaItem">{unit.whatsappPhone ? "WhatsApp direto" : "Contato local"}</span>
                             </div>
 
                             <div className="decisionCard__actions">
-                                <Link
-                                    href={`/${unit.slug}`}
-                                    className="decisionCard__primary"
-                                    onClick={() =>
-                                        trackExperienceShortcutClick({
-                                            page: "/unidades",
-                                            shortcut: `Ver unidade ${unit.slug}`,
-                                            destination: `/${unit.slug}`,
-                                            placement: "units_page",
-                                            unitSlug: unit.slug,
-                                            experience: "local_landing_v3",
-                                            variant: resolved.variant,
-                                        })
-                                    }
-                                >
-                                    Ver unidade
-                                </Link>
                                 <TrackedBookingLink
                                     href={`/agendamento?unit=${encodeURIComponent(unit.slug)}#booking-flow`}
-                                    className="decisionCard__secondary"
+                                    className="decisionCard__primary"
                                     placement="units_page"
                                     unitSlug={unit.slug}
                                     experience="local_landing_v3"
@@ -201,17 +250,15 @@ export default function UnitsLandingExperience({ featuredUnits, unitsByState }: 
                                 </TrackedBookingLink>
                             </div>
 
-                            {unit.maps ? (
-                                <a
-                                    href={unit.maps}
+                            <div className="decisionCard__linksRow">
+                                <Link
+                                    href={`/${unit.slug}`}
                                     className="decisionCard__link"
-                                    target="_blank"
-                                    rel="noreferrer"
                                     onClick={() =>
                                         trackExperienceShortcutClick({
                                             page: "/unidades",
-                                            shortcut: `Abrir rota ${unit.slug}`,
-                                            destination: unit.maps ?? "maps",
+                                            shortcut: `Detalhes unidade ${unit.slug}`,
+                                            destination: `/${unit.slug}`,
                                             placement: "units_page",
                                             unitSlug: unit.slug,
                                             experience: "local_landing_v3",
@@ -219,9 +266,51 @@ export default function UnitsLandingExperience({ featuredUnits, unitsByState }: 
                                         })
                                     }
                                 >
-                                    Abrir rota no mapa
-                                </a>
-                            ) : null}
+                                    Ver detalhes da unidade
+                                </Link>
+
+                                {unit.contactUrl ? (
+                                    <Link
+                                        href={unit.contactUrl}
+                                        className="decisionCard__link"
+                                        onClick={() =>
+                                            trackExperienceShortcutClick({
+                                                page: "/unidades",
+                                                shortcut: `Contato unidade ${unit.slug}`,
+                                                destination: unit.contactUrl ?? "contact",
+                                                placement: "units_page",
+                                                unitSlug: unit.slug,
+                                                experience: "local_landing_v3",
+                                                variant: resolved.variant,
+                                            })
+                                        }
+                                    >
+                                        Falar com a unidade
+                                    </Link>
+                                ) : null}
+
+                                {unit.maps ? (
+                                    <a
+                                        href={unit.maps}
+                                        className="decisionCard__link"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        onClick={() =>
+                                            trackExperienceShortcutClick({
+                                                page: "/unidades",
+                                                shortcut: `Abrir rota ${unit.slug}`,
+                                                destination: unit.maps ?? "maps",
+                                                placement: "units_page",
+                                                unitSlug: unit.slug,
+                                                experience: "local_landing_v3",
+                                                variant: resolved.variant,
+                                            })
+                                        }
+                                    >
+                                        Abrir rota no mapa
+                                    </a>
+                                ) : null}
+                            </div>
                         </article>
                     ))}
                 </div>

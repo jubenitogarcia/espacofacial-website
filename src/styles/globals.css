@@ -7,6 +7,12 @@
   --shadow: 0 10px 30px rgba(0, 0, 0, .10);
   --radius: 18px;
   --brand: #111111;
+  --ds-surface-main: linear-gradient(180deg, #ffffff, #f5f1ea);
+  --ds-surface-soft: linear-gradient(180deg, #fff8ef, #f1ece2);
+  --ds-border-soft: rgba(0, 0, 0, .08);
+  --ds-pill-bg: rgba(17, 17, 17, .06);
+  --ds-primary-bg: #111111;
+  --ds-primary-fg: #ffffff;
 }
 
 * {
@@ -775,6 +781,33 @@ button:focus-visible {
 
 .doctorsHero__copy .pageNarrative__stats {
   margin-top: 22px;
+}
+
+.doctorsHero__signals {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.doctorsHero__signalCard {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--ds-border-soft);
+  background: rgba(255, 255, 255, .84);
+}
+
+.doctorsHero__signalCard strong {
+  font-size: 15px;
+  line-height: 1.1;
+}
+
+.doctorsHero__signalCard span {
+  font-size: 12px;
+  line-height: 1.45;
+  color: #5d5d5d;
 }
 
 .bookingFlow {
@@ -3365,6 +3398,95 @@ video.heroMediaEl {
   padding-top: 10px;
 }
 
+.conversionRail {
+  display: grid;
+  gap: 18px;
+}
+
+.conversionRail__intro {
+  max-width: 840px;
+}
+
+.conversionRail__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.conversionRail__card {
+  border: 1px solid var(--ds-border-soft);
+  border-radius: 24px;
+  background: var(--ds-surface-main);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, .07);
+  padding: 22px;
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.conversionRail__eyebrow {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #8a5f2a;
+}
+
+.conversionRail__card h3 {
+  margin: 0;
+  font-size: clamp(22px, 2.9vw, 28px);
+  line-height: 1.06;
+  letter-spacing: -.03em;
+}
+
+.conversionRail__card p {
+  margin: 0;
+  color: rgba(18, 18, 18, .78);
+  line-height: 1.58;
+}
+
+.conversionRail__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(17, 17, 17, .12);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  transition: transform 160ms ease, background 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.conversionRail__cta--primary {
+  background: var(--ds-primary-bg);
+  color: var(--ds-primary-fg);
+  border-color: var(--ds-primary-bg);
+}
+
+.conversionRail__cta--secondary {
+  background: rgba(255, 255, 255, .84);
+  color: #111;
+}
+
+.conversionRail__cta--ghost {
+  background: var(--ds-surface-soft);
+  border-color: rgba(138, 95, 42, .16);
+  color: #6e5130;
+}
+
+.conversionRail__cta:hover {
+  transform: translateY(-1px);
+}
+
+.conversionRail__note {
+  font-size: 12px;
+  color: #696969;
+  line-height: 1.45;
+}
+
 .decisionCards {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3372,9 +3494,9 @@ video.heroMediaEl {
 }
 
 .decisionCard {
-  border: 1px solid rgba(0, 0, 0, .08);
+  border: 1px solid var(--ds-border-soft);
   border-radius: 24px;
-  background: linear-gradient(180deg, #ffffff, #f5f1ea);
+  background: var(--ds-surface-main);
   box-shadow: 0 18px 42px rgba(0, 0, 0, .07);
   padding: 22px;
   display: grid;
@@ -3417,7 +3539,7 @@ video.heroMediaEl {
   min-height: 32px;
   padding: 6px 11px;
   border-radius: 999px;
-  background: rgba(17, 17, 17, .06);
+  background: var(--ds-pill-bg);
   color: rgba(18, 18, 18, .78);
   font-size: 12px;
   font-weight: 700;
@@ -3451,9 +3573,9 @@ video.heroMediaEl {
 
 .decisionCard__primary,
 .doctorDirectoryCard__action--primary {
-  background: #111111;
-  color: #ffffff;
-  border-color: #111111;
+  background: var(--ds-primary-bg);
+  color: var(--ds-primary-fg);
+  border-color: var(--ds-primary-bg);
 }
 
 .decisionCard__secondary,
@@ -3470,6 +3592,12 @@ video.heroMediaEl {
 
 .decisionCard__link {
   justify-self: start;
+}
+
+.decisionCard__linksRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .decisionCard__primary:hover,
@@ -3755,6 +3883,8 @@ video.heroMediaEl {
   .bookingPrep__grid,
   .homeEditorialRail,
   .pageNarrative__stats,
+  .conversionRail__grid,
+  .doctorsHero__signals,
   .decisionCards {
     grid-template-columns: 1fr;
   }
@@ -3784,6 +3914,7 @@ video.heroMediaEl {
   }
 
   .decisionCard,
+  .conversionRail__card,
   .pageNarrative__stat,
   .bookingPrep__card,
   .homeEditorialRail__card,
@@ -3796,12 +3927,14 @@ video.heroMediaEl {
   }
 
   .decisionCard__actions,
+  .decisionCard__linksRow,
   .doctorDirectoryCard__actions {
     flex-direction: column;
   }
 
   .decisionCard__primary,
   .decisionCard__secondary,
+  .conversionRail__cta,
   .doctorDirectoryCard__action {
     width: 100%;
   }

@@ -21,6 +21,8 @@ const featuredUnitCards: UnitsFeaturedCard[] = featuredUnits.map((unit) => ({
   maps: unit.maps ?? null,
   state: unit.state ?? null,
   city: cityBySlug[unit.slug] ?? unit.state ?? "Unidade",
+  contactUrl: unit.contactUrl ?? null,
+  whatsappPhone: unit.whatsappPhone ?? null,
 }));
 
 export const metadata: Metadata = {
