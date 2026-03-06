@@ -56,6 +56,8 @@ export function trackBookingStart(params: {
     unitSlug: string | null;
     doctorName?: string;
     bookingUrl?: string;
+    experience?: string;
+    variant?: string;
 }) {
     const payload: AnalyticsEventParams = withCampaign({
         placement: params.placement,
@@ -65,6 +67,8 @@ export function trackBookingStart(params: {
 
     if (params.doctorName) payload.doctorName = params.doctorName;
     if (params.bookingUrl) payload.bookingUrl = params.bookingUrl;
+    if (params.experience) payload.experience = params.experience;
+    if (params.variant) payload.variant = params.variant;
 
     trackEvent("cta_booking_start", payload);
     trackLeadConversion({

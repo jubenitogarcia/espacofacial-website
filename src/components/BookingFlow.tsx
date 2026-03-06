@@ -6,19 +6,10 @@ import { useSearchParams } from "next/navigation";
 import { units } from "@/data/units";
 import { services, type Service } from "@/data/services";
 import { useCurrentUnit } from "@/hooks/useCurrentUnit";
+import { useTeamDirectory } from "@/hooks/useTeamDirectory";
 import { doctorSlugFromTeamMember, normalizeDoctorSlug } from "@/lib/doctorSlug";
 import { setStoredUnitSlug } from "@/lib/unitSelection";
 import TurnstileWidget from "@/components/TurnstileWidget";
-
-type TeamMember = {
-    name: string;
-    nickname: string | null;
-    units: string[];
-    role: string;
-    roles: string[];
-    instagramHandle: string | null;
-    instagramUrl: string | null;
-};
 
 type SlotsPayload = {
     ok: true;
@@ -215,10 +206,10 @@ export default function BookingFlow() {
     const currentUnit = useCurrentUnit();
     const searchParams = useSearchParams();
     const turnstileSiteKey = (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "").trim();
+    const { members, error: membersError, loading: membersLoading } = useTeamDirectory();
 
     const [step, setStep] = useState<"pick" | "details" | "submitted">("pick");
 
-    const [members, setMembers] = useState<TeamMember[] | null>(null);
     const [doctor, setDoctor] = useState<{ slug: string; name: string; handle: string | null } | null>(null);
     const [service, setService] = useState<Service | null>(null);
 
@@ -274,11 +265,13 @@ export default function BookingFlow() {
 
     const lastUnitSlugRef = useRef<string | null>(null);
     const appliedDoctorQueryRef = useRef<string | null>(null);
+    const appliedServiceQueryRef = useRef<string | null>(null);
     useEffect(() => {
         const prev = lastUnitSlugRef.current;
         if (prev === unitSlug) return;
         lastUnitSlugRef.current = unitSlug;
         appliedDoctorQueryRef.current = null;
+        appliedServiceQueryRef.current = null;
 
         if (unitSlug) {
             setDoctor({ slug: "any", name: "Sem preferência", handle: null });
@@ -307,31 +300,6 @@ export default function BookingFlow() {
         setNotes("");
     }, [unitSlug]);
 
-    // Load doctors (injectors) from Google Sheet.
-    const [membersError, setMembersError] = useState<string | null>(null);
-    useEffect(() => {
-        let cancelled = false;
-        async function load() {
-            try {
-                const res = await fetch("/api/equipe", { cache: "no-store" });
-                const json = (await res.json().catch(() => null)) as
-                    | { ok?: boolean; members?: TeamMember[]; error?: { code?: string; status?: number } }
-                    | null;
-                if (cancelled) return;
-                setMembers(Array.isArray(json?.members) ? json!.members! : []);
-                setMembersError(json && json.ok === false ? json.error?.code ?? "unknown" : null);
-            } catch {
-                if (cancelled) return;
-                setMembers([]);
-                setMembersError("exception");
-            }
-        }
-        load();
-        return () => {
-            cancelled = true;
-        };
-    }, []);
-
     const unit = useMemo(() => findUnit(unitSlug), [unitSlug]);
     const unitLabel = useMemo(() => unitLabelFromSlug(unitSlug), [unitSlug]);
     const doctorsForUnit = useMemo(() => {
@@ -349,11 +317,18 @@ export default function BookingFlow() {
     }, [members, unitLabel]);
 
     const doctorQuery = useMemo(() => normalizeDoctorSlug(searchParams?.get("doctor") ?? ""), [searchParams]);
+    const serviceQuery = useMemo(() => normalizeDoctorSlug(searchParams?.get("service") ?? ""), [searchParams]);
 
     useEffect(() => {
         if (!unitSlug || !doctorsForUnit || doctorsForUnit.length === 0) return;
-        if (!doctorQuery || doctorQuery === "any") return;
+        if (!doctorQuery) return;
         if (appliedDoctorQueryRef.current === doctorQuery) return;
+
+        if (doctorQuery === "any") {
+            setDoctor({ slug: "any", name: "Sem preferência", handle: null });
+            appliedDoctorQueryRef.current = doctorQuery;
+            return;
+        }
 
         const match = doctorsForUnit.find((d) => {
             if (normalizeDoctorSlug(d.slug) === doctorQuery) return true;
@@ -365,6 +340,25 @@ export default function BookingFlow() {
         setDoctor({ slug: match.slug, name: match.name, handle: match.handle });
         appliedDoctorQueryRef.current = doctorQuery;
     }, [doctorQuery, doctorsForUnit, unitSlug]);
+
+    useEffect(() => {
+        if (!unitSlug || !serviceQuery) return;
+        if (appliedServiceQueryRef.current === serviceQuery) return;
+
+        if (serviceQuery === "any") {
+            setService({ id: "any", name: "Quero orientação", subtitle: "Ainda não sei qual procedimento" });
+            appliedServiceQueryRef.current = serviceQuery;
+            return;
+        }
+
+        const match = services.find((item) => {
+            return normalizeDoctorSlug(item.id) === serviceQuery || normalizeDoctorSlug(item.name) === serviceQuery;
+        });
+
+        if (!match) return;
+        setService(match);
+        appliedServiceQueryRef.current = serviceQuery;
+    }, [serviceQuery, unitSlug]);
 
     const upcomingDays = useMemo(() => {
         const out: string[] = [];
@@ -766,8 +760,12 @@ export default function BookingFlow() {
                         <div className="bookingFlow__cardSub">Selecione um(a) profissional (ou sem preferência).</div>
                         <div style={{ marginTop: 10 }}>
                             {unitLabel ? null : <div className="small">Selecione BarraShoppingSul ou Novo Hamburgo no topo para ver doutores.</div>}
-                            {doctorsForUnit === null ? (
-                                <div className="small">Carregando equipe…</div>
+                            {doctorsForUnit === null || membersLoading ? (
+                                <div className="bookingFlow__doctorLoading" aria-hidden="true">
+                                    <span className="bookingFlow__doctorLoadingAvatar" />
+                                    <span className="bookingFlow__doctorLoadingLine bookingFlow__doctorLoadingLine--title" />
+                                    <span className="bookingFlow__doctorLoadingLine" />
+                                </div>
                             ) : doctorsForUnit.length === 0 ? (
                                 <div className="small">
                                     {membersError ? "Equipe indisponível no momento. Tente novamente mais tarde." : "Nenhum doutor encontrado para esta unidade."}

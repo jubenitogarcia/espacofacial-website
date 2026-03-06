@@ -3,10 +3,8 @@ import Footer from "@/components/Footer";
 import FloatingContact from "@/components/FloatingContact";
 import UnitsMapSection from "@/components/UnitsMapSection";
 import UnitDoctorsGrid from "@/components/UnitDoctorsGrid";
-import HeroMedia from "@/components/HeroMedia";
 import AboutUsSection from "@/components/AboutUsSection";
-import ExperienceTracker from "@/components/ExperienceTracker";
-import TrackedBookingLink from "@/components/TrackedBookingLink";
+import HomeHeroExperience from "@/components/HomeHeroExperience";
 import { getHeroMediaItems, heroVariantFromUserAgent } from "@/lib/heroMedia.server";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
@@ -40,69 +38,30 @@ export default async function HomePage() {
 
     return (
         <>
-            <ExperienceTracker page="/" experience="home_value_hero_v2" variant="value-led" />
             <Header />
-
-      <section className="hero" aria-label="Destaque">
-        <HeroMedia initialItems={heroItems} initialVariant={variant} />
-        <div className="heroOverlay" />
-        <div className="container heroContent">
-          <div className="heroContent__copy">
-            <span className="heroContent__eyebrow">Harmonização facial e corporal</span>
-            <h1>Resultados elegantes, conduta responsável e acompanhamento real.</h1>
-            <p>
-              A Espaço Facial combina avaliação criteriosa, equipe especializada e plano de cuidado
-              individual para quem quer melhorar a aparência sem cair em excessos.
-            </p>
-            <div className="heroContent__actions">
-              <TrackedBookingLink href="/agendamento" className="heroContent__primary" placement="home_hero">
-                Agendar avaliação
-              </TrackedBookingLink>
-              <a href="#doutores" className="heroContent__secondary">
-                Ver especialistas
-              </a>
-            </div>
-            <div className="heroContent__proof">
-              <div className="heroContent__proofItem">
-                <strong>2 unidades</strong>
-                <span>BarraShoppingSul e Novo Hamburgo</span>
-              </div>
-              <div className="heroContent__proofItem">
-                <strong>Equipe especializada</strong>
-                <span>Atendimento conduzido por doutores e time clínico</span>
-              </div>
-              <div className="heroContent__proofItem">
-                <strong>Jornada integrada</strong>
-                <span>Da avaliação ao retorno, com agenda e confirmação digital</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="heroContent__panel" role="group" aria-label="Motivos para escolher a Espaço Facial">
-            <div className="heroContent__panelCard">
-              <span className="heroContent__panelLabel">Nossa proposta</span>
-              <ul className="heroContent__panelList">
-                <li>Diagnóstico estético com foco em equilíbrio, não exagero.</li>
-                <li>Plano de tratamento pensado para rotina, segurança e previsibilidade.</li>
-                <li>Agendamento online com acompanhamento por canais diretos.</li>
-              </ul>
-            </div>
-
-            <div className="heroContent__panelCard heroContent__panelCard--soft">
-              <span className="heroContent__panelLabel">Próximo passo</span>
-              <p>
-                Comece pela avaliação para entender o que faz sentido para o seu caso antes de escolher
-                o procedimento.
-              </p>
-              <TrackedBookingLink href="/agendamento" className="heroContent__panelCta" placement="home_panel">
-                Iniciar agendamento
-              </TrackedBookingLink>
-            </div>
-          </div>
-        </div>
-      </section>
+            <HomeHeroExperience heroItems={heroItems} initialMediaVariant={variant} />
 
       <main className="container">
+        <section className="homeEditorialRail" aria-label="Teses da marca">
+          <article className="homeEditorialRail__card">
+            <span className="homeEditorialRail__eyebrow">Tese 01</span>
+            <h2>Harmonização não precisa parecer procedimento.</h2>
+            <p>O projeto clínico parte da leitura do rosto e do corpo, não do cardápio de técnicas.</p>
+          </article>
+
+          <article className="homeEditorialRail__card homeEditorialRail__card--accent">
+            <span className="homeEditorialRail__eyebrow">Tese 02</span>
+            <h2>Boa estética combina repertório visual com disciplina de indicação.</h2>
+            <p>Decisão forte é saber o que fazer, em que ritmo fazer e o que não precisa entrar no plano.</p>
+          </article>
+
+          <article className="homeEditorialRail__card">
+            <span className="homeEditorialRail__eyebrow">Tese 03</span>
+            <h2>O site já deve funcionar como triagem inteligente.</h2>
+            <p>Unidade, especialista e agenda aparecem como uma mesma conversa, não como páginas soltas.</p>
+          </article>
+        </section>
+
         <AboutUsSection />
 
         <section id="doutores" className="pageSection" style={{ marginTop: 50 }}>

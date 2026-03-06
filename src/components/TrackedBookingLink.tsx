@@ -10,6 +10,8 @@ type TrackedBookingLinkProps = LinkProps & {
     placement: LeadPlacement;
     unitSlug?: string | null;
     doctorName?: string;
+    experience?: string;
+    variant?: string;
     onClick?: MouseEventHandler<HTMLAnchorElement>;
 };
 
@@ -19,6 +21,8 @@ export default function TrackedBookingLink({
     placement,
     unitSlug = null,
     doctorName,
+    experience,
+    variant,
     onClick,
     href,
     ...rest
@@ -35,6 +39,8 @@ export default function TrackedBookingLink({
                     unitSlug,
                     doctorName,
                     bookingUrl: typeof href === "string" ? href : undefined,
+                    experience,
+                    variant,
                 });
             }}
         >
