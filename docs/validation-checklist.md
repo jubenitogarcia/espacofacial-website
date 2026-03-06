@@ -1,12 +1,14 @@
 # Checklist final de validação
 
 ## Comandos
-- Build + typecheck:
-  - `npm run build`
-- Lint:
-  - `npm run lint`
-- Smoke (rotas críticas):
-  - `npm run smoke`
+- Suíte completa (CI):
+  - `npm run quality:ci`
+- Suíte completa (local, sem reinstalar deps):
+  - `npm run quality:check`
+- Smoke isolado (rotas críticas + agenda obrigatório):
+  - `npm run smoke:strict`
+- Auditoria 360 (design/ui/ux/seo/perf/a11y):
+  - `npm run audit:360`
 
 ## URLs para conferir
 - Home: https://espacofacial.com/

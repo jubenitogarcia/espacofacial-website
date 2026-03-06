@@ -9,6 +9,43 @@ npm run dev
 ```
 Abra `http://localhost:3000`.
 
+## Suíte de qualidade
+
+Executar validações locais (sem reinstalar dependências):
+```bash
+npm run quality:check
+```
+
+Executar validações em modo CI (com `npm ci`):
+```bash
+npm run quality:ci
+```
+
+Para cobertura completa do smoke de agenda (`/api/agenda`), configure:
+- `SMOKE_AGENDA_TOKEN` (ou `AGENDA_SYNC_TOKEN` como fallback)
+- opcionalmente `SMOKE_AGENDA_UNIT`, `SMOKE_AGENDA_FROM`, `SMOKE_AGENDA_TO`
+
+## Auditoria 360 (Design/UI/UX/SEO/Perf/A11y)
+
+Executar auditoria completa e gerar relatório consolidado em `reports/quality/<timestamp>-audit360`:
+```bash
+npm run audit:360
+```
+
+Executar em modo CI (com reinstall de dependências):
+```bash
+npm run audit:360:ci
+```
+
+Saídas principais:
+- `audit360-report.md` (resumo executivo e backlog)
+- `summary.json` + `findings.json` (dados estruturados)
+- `screenshots/` e `diffs/` (regressões visuais desktop/mobile)
+- `a11y/*.json` (axe por página)
+- `strategy-audit.json` (lentes estratégicas: técnico sênior, growth, direção de arte, performance marketing)
+- `design-reform-backlog.json` (plano de reformas agressivas priorizado em P0/P1/P2)
+- `design-reform-roadmap.md` (roteiro 0-14 / 15-45 / 46-90 dias)
+
 ## Colocar online (Cloudflare Workers via OpenNext)
 
 Pré-requisitos:

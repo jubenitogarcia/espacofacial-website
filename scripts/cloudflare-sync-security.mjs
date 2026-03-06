@@ -5,7 +5,6 @@ function env(name, fallback = "") {
 }
 
 function log(msg) {
-  // eslint-disable-next-line no-console
   console.log(`[cf-security] ${msg}`);
 }
 
@@ -101,8 +100,6 @@ async function run() {
 }
 
 run().catch((err) => {
-  // eslint-disable-next-line no-console
   console.error("[cf-security] FAILED:", err?.message ?? err);
   process.exit(1);
 });
-

@@ -105,7 +105,7 @@ function normalizePath(pathname: string): string {
   return lower;
 }
 
-export default {
+const worker = {
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
     const path = normalizePath(url.pathname);
@@ -127,3 +127,5 @@ export default {
     return Response.redirect(target.toString(), 301);
   },
 };
+
+export default worker;

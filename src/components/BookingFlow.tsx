@@ -203,6 +203,7 @@ function ScrollPicker(props: { ariaLabel: string; children: ReactNode; className
                 onScroll={update}
                 role="group"
                 aria-label={props.ariaLabel}
+                tabIndex={0}
             >
                 {props.children}
             </div>
@@ -614,6 +615,48 @@ export default function BookingFlow() {
 
     const showDetailsModal = step === "details" && !!unitSlug && !!doctor && !!service && !!dateKey && !!timeKey;
 
+    const progressSteps = [
+        {
+            id: "doctor",
+            number: "01",
+            label: "Profissional",
+            value: doctor?.name ?? "Escolha quem vai atender",
+            state: doctor ? "done" : unitSlug ? "current" : "pending",
+        },
+        {
+            id: "procedure",
+            number: "02",
+            label: "Procedimento",
+            value: service?.name ?? "Defina o objetivo da consulta",
+            state: service ? "done" : doctor ? "current" : "pending",
+        },
+        {
+            id: "services",
+            number: "03",
+            label: "Tempo do atendimento",
+            value: durationMinutes > 0 ? `${durationMinutes} min estimados` : "Monte a composição do atendimento",
+            state: service && durationMinutes > 0 ? "done" : service ? "current" : "pending",
+        },
+        {
+            id: "schedule",
+            number: "04",
+            label: "Horário",
+            value: dateKey && timeKey ? `${formatDatePtBr(dateKey)} às ${timeKey}` : "Escolha a melhor janela disponível",
+            state: selectedSlot ? "done" : canPick ? "current" : "pending",
+        },
+    ] as const;
+
+    const guidanceMessage = !unit
+        ? "Selecione a unidade no topo para liberar equipe, procedimento e agenda."
+        : !service
+            ? "Escolha o procedimento ou use “Quero orientação” para abrir a agenda adequada."
+            : !selectedSlot
+                ? "Defina data e horário. Ao clicar em um horário disponível, o formulário final será aberto."
+                : "Horário selecionado. Falta apenas confirmar seus dados para enviar o pedido.";
+
+    const selectedDateSummary = dateKey ? `${weekdayPtBrShort(dateKey)}, ${formatDatePtBr(dateKey)}` : "Ainda não escolhido";
+    const selectedTimeSummary = timeKey ?? "Ainda não escolhido";
+
     useEffect(() => {
         if (!showDetailsModal) return;
         const previous = document.body.style.overflow;
@@ -640,19 +683,80 @@ export default function BookingFlow() {
     return (
         <div className="bookingFlow">
             <div className="bookingFlow__intro">
-                <h1>Agendamento</h1>
+                <div className="bookingFlow__eyebrow">Reserva guiada</div>
+                <h2>Monte seu atendimento sem perder contexto no caminho.</h2>
                 <p>
-                    Escolha um(a) profissional (ou sem preferência), o procedimento (ou quero orientação), os serviços e o horário. A confirmação é enviada por e-mail e WhatsApp.
+                    O fluxo abaixo prioriza clareza: primeiro a unidade, depois o profissional, o procedimento, o tempo do atendimento e, por fim, a janela disponível. A confirmação é enviada por e-mail e WhatsApp.
                 </p>
-                {unit ? (
-                    <div className="small bookingFlow__unitStatus">
-                        Unidade selecionada: <span className="bookingFlow__unitName">{unit.name}</span>
+                <div className="bookingFlow__statusRow">
+                    {unit ? (
+                        <div className="small bookingFlow__unitStatus">
+                            Unidade selecionada: <span className="bookingFlow__unitName">{unit.name}</span>
+                        </div>
+                    ) : (
+                        <div className="small bookingFlow__unitStatus bookingFlow__unitStatus--error" role="status">
+                            Selecione a unidade no topo para agendar.
+                        </div>
+                    )}
+                    <div className="bookingFlow__supportPill">Confirmação por e-mail e WhatsApp</div>
+                </div>
+            </div>
+
+            <div className="bookingFlow__summaryGrid" aria-label="Resumo do progresso do agendamento">
+                <div className="card bookingFlow__progressCard">
+                    <div className="bookingFlow__summaryHeader">
+                        <div>
+                            <div className="bookingFlow__summaryEyebrow">Progresso</div>
+                            <div className="bookingFlow__summaryTitle">O que falta para concluir</div>
+                        </div>
+                        <div className="bookingFlow__summaryBadge">
+                            {progressSteps.filter((item) => item.state === "done").length}/{progressSteps.length}
+                        </div>
                     </div>
-                ) : (
-                    <div className="small bookingFlow__unitStatus bookingFlow__unitStatus--error" role="status">
-                        Selecione a unidade no topo para agendar.
+                    <div className="bookingFlow__progressList">
+                        {progressSteps.map((item) => (
+                            <div key={item.id} className="bookingFlow__progressItem" data-state={item.state}>
+                                <div className="bookingFlow__progressNumber">{item.number}</div>
+                                <div>
+                                    <div className="bookingFlow__progressLabel">{item.label}</div>
+                                    <div className="bookingFlow__progressValue">{item.value}</div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                )}
+                </div>
+
+                <div className="card bookingFlow__contextCard">
+                    <div className="bookingFlow__summaryHeader">
+                        <div>
+                            <div className="bookingFlow__summaryEyebrow">Resumo atual</div>
+                            <div className="bookingFlow__summaryTitle">Seleção em andamento</div>
+                        </div>
+                    </div>
+                    <div className="bookingFlow__contextList">
+                        <div className="bookingFlow__contextItem">
+                            <span>Profissional</span>
+                            <strong>{doctor?.name ?? "Sem seleção"}</strong>
+                        </div>
+                        <div className="bookingFlow__contextItem">
+                            <span>Procedimento</span>
+                            <strong>{service?.name ?? "Sem seleção"}</strong>
+                        </div>
+                        <div className="bookingFlow__contextItem">
+                            <span>Duração</span>
+                            <strong>{durationMinutes > 0 ? `${durationMinutes} min` : "A definir"}</strong>
+                        </div>
+                        <div className="bookingFlow__contextItem">
+                            <span>Data</span>
+                            <strong>{selectedDateSummary}</strong>
+                        </div>
+                        <div className="bookingFlow__contextItem">
+                            <span>Horário</span>
+                            <strong>{selectedTimeSummary}</strong>
+                        </div>
+                    </div>
+                    <div className="bookingFlow__guidance">{guidanceMessage}</div>
+                </div>
             </div>
 
             {step !== "submitted" ? (
@@ -793,11 +897,12 @@ export default function BookingFlow() {
                                         {s.highlightImage ? (
                                             <Image
                                                 src={s.highlightImage}
-                                                alt={s.name}
+                                                alt=""
                                                 fill
                                                 sizes="240px"
                                                 style={{ objectFit: "cover" }}
                                                 unoptimized
+                                                aria-hidden="true"
                                             />
                                         ) : (
                                             <div className="bookingFlow__procedureMediaFallback" aria-hidden="true">
@@ -843,7 +948,7 @@ export default function BookingFlow() {
 
                     <div className={`card bookingFlow__cardServices ${canPickServices ? "" : "bookingFlow__card--locked"}`.trim()} style={{ padding: 16 }}>
                         <div style={{ fontWeight: 900 }}>3) Serviços</div>
-                        <div className="bookingFlow__cardSub">Selecione um ou mais serviços para calcular o tempo.</div>
+                        <div className="bookingFlow__cardSub">Selecione um ou mais serviços para calcular o tempo. O total ajuda a filtrar a grade real de horários.</div>
                         {!canPickServices ? (
                             <div className="bookingFlow__lockOverlay" aria-hidden="true">
                                 <div className="bookingFlow__lockText">Selecione um procedimento para continuar.</div>
@@ -898,7 +1003,8 @@ export default function BookingFlow() {
                                             textAlign: "left",
                                         }}
                                     >
-                                        {opt.label}
+                                        <span>{opt.label}</span>
+                                        <span className="bookingFlow__serviceMinutes">{opt.minutes} min</span>
                                     </button>
                                 ))}
                             </div>
@@ -926,6 +1032,8 @@ export default function BookingFlow() {
                         </div>
                         <div className="bookingFlow__cardSub">
                             {upcomingDays.length ? `${formatDatePtBr(upcomingDays[0])} – ${formatDatePtBr(upcomingDays[upcomingDays.length - 1] ?? upcomingDays[0])}` : null}
+                            {doctor ? ` · ${doctor.name}` : ""}
+                            {service ? ` · ${service.name}` : ""}
                         </div>
                         {!canPick ? (
                             <div className="bookingFlow__lockOverlay" aria-hidden="true">

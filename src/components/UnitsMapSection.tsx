@@ -441,7 +441,7 @@ export default function UnitsMapSection() {
             <div className="unitsMapSplit">
                 <div className="unitsMapLeft">
                     <div className="brMap" aria-label="Mapa do Brasil com unidades" ref={wrapRef}>
-                        <svg ref={svgRef} viewBox={brazilMap.viewBox} role="img" aria-label="Brasil">
+                        <svg ref={svgRef} viewBox={brazilMap.viewBox} role="group" aria-label="Mapa do Brasil interativo">
                             <g fill="#111111" opacity="0.85">
                                 {brazilMap.locations.map((loc: { id: string; path: string }) => (
                                     <path

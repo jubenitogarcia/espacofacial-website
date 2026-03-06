@@ -7,12 +7,14 @@ import AboutUsSection from "@/components/AboutUsSection";
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://espacofacial.com").replace(/\/$/, "");
 
 export const metadata: Metadata = {
-  title: "Sobre Nós",
-  description: "Conheça a Espaço Facial, nossa equipe e abordagem em harmonização.",
+  title: "Sobre a Espaço Facial",
+  description:
+    "Conheça a história da Espaço Facial, nossa equipe e a abordagem de harmonização facial e corporal.",
   alternates: { canonical: `${siteUrl}/sobre` },
   openGraph: {
-    title: "Sobre Nós | Espaço Facial",
-    description: "Conheça a Espaço Facial, nossa equipe e abordagem em harmonização.",
+    title: "Sobre a Espaço Facial",
+    description:
+      "Conheça a história da Espaço Facial, nossa equipe e a abordagem de harmonização facial e corporal.",
     url: `${siteUrl}/sobre`,
     type: "website",
   },

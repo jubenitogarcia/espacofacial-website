@@ -2,9 +2,18 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Privacidade e Cookies",
-  robots: { index: false, follow: false },
+  description:
+    "Política de privacidade e cookies da Espaço Facial com transparência sobre coleta, uso e proteção de dados.",
+  robots: { index: true, follow: true },
   alternates: {
     canonical: "/privacidade",
+  },
+  openGraph: {
+    title: "Privacidade e Cookies | Espaço Facial",
+    description:
+      "Política de privacidade e cookies da Espaço Facial com transparência sobre coleta, uso e proteção de dados.",
+    url: "/privacidade",
+    type: "website",
   },
 };
 

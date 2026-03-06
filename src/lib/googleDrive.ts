@@ -30,6 +30,13 @@ function base64UrlEncodeJson(obj: unknown): string {
     return base64UrlEncodeFromBytes(bytes);
 }
 
+function utf8ToArrayBuffer(value: string): ArrayBuffer {
+    const bytes = new TextEncoder().encode(value);
+    const out = new ArrayBuffer(bytes.byteLength);
+    new Uint8Array(out).set(bytes);
+    return out;
+}
+
 function decodePemToPkcs8(pem: string): ArrayBuffer {
     const normalized = pem
         .replace(/\r\n/g, "\n")
@@ -50,7 +57,9 @@ function decodePemToPkcs8(pem: string): ArrayBuffer {
         bytes = new Uint8Array(buf);
     }
 
-    return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+    const out = new ArrayBuffer(bytes.byteLength);
+    new Uint8Array(out).set(bytes);
+    return out;
 }
 
 function loadServiceAccountFromEnv(): ServiceAccountJson {
@@ -138,7 +147,7 @@ async function getAccessToken(scope: string): Promise<string> {
     const signature = await crypto.subtle.sign(
         { name: "RSASSA-PKCS1-v1_5" },
         key,
-        new TextEncoder().encode(unsigned),
+        utf8ToArrayBuffer(unsigned),
     );
 
     const jwt = `${unsigned}.${base64UrlEncodeFromBytes(new Uint8Array(signature))}`;

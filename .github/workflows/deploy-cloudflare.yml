@@ -15,6 +15,7 @@ jobs:
     permissions:
       contents: read
     env:
+      AGENDA_SYNC_TOKEN: ${{ secrets.AGENDA_SYNC_TOKEN }}
       TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
       TITAN_SMTP_HOST: ${{ secrets.TITAN_SMTP_HOST }}
       TITAN_SMTP_PORT: ${{ secrets.TITAN_SMTP_PORT }}
@@ -50,7 +51,7 @@ jobs:
 
       - name: Sync worker secrets (optional)
         continue-on-error: true
-        if: ${{ env.TURNSTILE_SECRET_KEY != '' || env.TITAN_SMTP_HOST != '' || env.TITAN_SMTP_PORT != '' || env.TITAN_SMTP_USER_BARRA != '' || env.TITAN_SMTP_PASS_BARRA != '' || env.TITAN_SMTP_USER_NH != '' || env.TITAN_SMTP_PASS_NH != '' }}
+        if: ${{ env.AGENDA_SYNC_TOKEN != '' || env.TURNSTILE_SECRET_KEY != '' || env.TITAN_SMTP_HOST != '' || env.TITAN_SMTP_PORT != '' || env.TITAN_SMTP_USER_BARRA != '' || env.TITAN_SMTP_PASS_BARRA != '' || env.TITAN_SMTP_USER_NH != '' || env.TITAN_SMTP_PASS_NH != '' }}
         run: |
           put_secret() {
             local name="$1"
@@ -60,6 +61,7 @@ jobs:
             fi
           }
 
+          put_secret "AGENDA_SYNC_TOKEN" "${AGENDA_SYNC_TOKEN}"
           put_secret "TURNSTILE_SECRET_KEY" "${TURNSTILE_SECRET_KEY}"
           put_secret "TITAN_SMTP_HOST" "${TITAN_SMTP_HOST}"
           put_secret "TITAN_SMTP_PORT" "${TITAN_SMTP_PORT}"
@@ -96,4 +98,5 @@ jobs:
       - name: Smoke test production
         run: npm run smoke
         env:
+          SMOKE_AGENDA_TOKEN: ${{ secrets.AGENDA_SYNC_TOKEN }}
           SMOKE_BASE_URL: https://espacofacial.com

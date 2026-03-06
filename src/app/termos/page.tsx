@@ -2,9 +2,18 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Termos de Uso",
-  robots: { index: false, follow: false },
+  description:
+    "Termos de uso do site da Espaço Facial com orientações de uso, informações de atendimento e canais oficiais.",
+  robots: { index: true, follow: true },
   alternates: {
     canonical: "/termos",
+  },
+  openGraph: {
+    title: "Termos de Uso | Espaço Facial",
+    description:
+      "Termos de uso do site da Espaço Facial com orientações de uso, informações de atendimento e canais oficiais.",
+    url: "/termos",
+    type: "website",
   },
 };
 

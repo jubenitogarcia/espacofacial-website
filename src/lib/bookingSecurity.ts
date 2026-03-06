@@ -9,21 +9,30 @@ function fromUtf8(s: string): Uint8Array {
     return new TextEncoder().encode(s);
 }
 
+function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
+    const out = new ArrayBuffer(bytes.byteLength);
+    new Uint8Array(out).set(bytes);
+    return out;
+}
+
 async function hmacSha256(secret: string, message: string): Promise<string> {
     const cryptoObj = (globalThis as unknown as { crypto?: Crypto }).crypto;
     if (!cryptoObj?.subtle) {
         throw new Error("webcrypto_unavailable");
     }
 
+    const secretBytes = fromUtf8(secret);
+    const messageBytes = fromUtf8(message);
+
     const key = await cryptoObj.subtle.importKey(
         "raw",
-        fromUtf8(secret),
+        toArrayBuffer(secretBytes),
         { name: "HMAC", hash: "SHA-256" },
         false,
         ["sign"],
     );
 
-    const sig = await cryptoObj.subtle.sign("HMAC", key, fromUtf8(message));
+    const sig = await cryptoObj.subtle.sign("HMAC", key, toArrayBuffer(messageBytes));
     return toBase64Url(new Uint8Array(sig));
 }
 

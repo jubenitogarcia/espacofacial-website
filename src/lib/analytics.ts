@@ -40,14 +40,12 @@ export function trackEvent(event: string, params: AnalyticsEventParams = {}) {
 
     if (!hasTrackingConsent()) {
         if (debug) {
-            // eslint-disable-next-line no-console
             console.info("[analytics:block]", event, params);
         }
         return;
     }
 
     if (debug) {
-        // eslint-disable-next-line no-console
         console.info("[analytics]", event, params);
     }
 

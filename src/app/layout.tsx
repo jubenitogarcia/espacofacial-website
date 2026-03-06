@@ -18,13 +18,15 @@ export const metadata: Metadata = {
     follow: true,
   },
   title: {
-    default: "Espaço Facial",
+    default: "Espaço Facial | Harmonização Facial e Corporal",
     template: "%s | Espaço Facial",
   },
-  description: "Harmonização facial e corporal. Selecione sua unidade e agende.",
+  description:
+    "Espaço Facial: harmonização facial e corporal com equipe especializada, protocolos personalizados e agendamento online.",
   openGraph: {
-    title: "Espaço Facial",
-    description: "Harmonização facial e corporal. Selecione sua unidade e agende.",
+    title: "Espaço Facial | Harmonização Facial e Corporal",
+    description:
+      "Espaço Facial: harmonização facial e corporal com equipe especializada, protocolos personalizados e agendamento online.",
     url: siteUrl,
     siteName: "Espaço Facial",
     locale: "pt_BR",
@@ -92,7 +94,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </Suspense>
         <script
           type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
         />
         {children}
