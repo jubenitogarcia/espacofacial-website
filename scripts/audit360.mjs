@@ -32,7 +32,7 @@ iframe {
 }
 `;
 const visualDiffSkipRoutes = new Set(
-    (process.env.AUDIT_VISUAL_SKIP_ROUTES ?? "/,/unidades,/doutores,/sobre")
+    (process.env.AUDIT_VISUAL_SKIP_ROUTES ?? "/,/sobre")
         .split(",")
         .map((route) => route.trim())
         .filter(Boolean),
