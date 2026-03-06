@@ -608,6 +608,175 @@ button:focus-visible {
   line-height: 1.62;
 }
 
+.unitsHero,
+.doctorsHero {
+  display: grid;
+  gap: 18px;
+}
+
+.unitsHero__shell,
+.doctorsHero__shell {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1.18fr) minmax(280px, 0.82fr);
+  align-items: stretch;
+}
+
+.unitsHero__copy,
+.doctorsHero__copy,
+.unitsHero__panelCard,
+.doctorsHero__panelCard {
+  border: 1px solid rgba(0, 0, 0, .08);
+  border-radius: 24px;
+  background: linear-gradient(180deg, #fff, #f7f4ef);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, .07);
+}
+
+.unitsHero__copy,
+.doctorsHero__copy {
+  padding: clamp(24px, 4vw, 38px);
+}
+
+.unitsHero__capsule,
+.doctorsHero__capsule {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(138, 95, 42, .18);
+  background: rgba(255, 249, 241, .92);
+  color: #7c5631;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.unitsHero__copy .sectionTitle,
+.doctorsHero__copy .sectionTitle {
+  margin-top: 14px;
+  margin-bottom: 10px;
+  max-width: 12ch;
+  font-size: clamp(34px, 5vw, 56px);
+  line-height: .98;
+  letter-spacing: -1.8px;
+}
+
+.unitsHero__copy .sectionSub,
+.doctorsHero__copy .sectionSub {
+  margin: 0;
+  max-width: 68ch;
+  color: #4f4f4f;
+  line-height: 1.6;
+}
+
+.unitsHero__actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.unitsHero__primary,
+.unitsHero__secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-weight: 900;
+}
+
+.unitsHero__primary {
+  background: #111;
+  color: #fff;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, .2);
+}
+
+.unitsHero__secondary {
+  border: 1px solid rgba(0, 0, 0, .12);
+  background: rgba(255, 255, 255, .78);
+  color: #111;
+}
+
+.unitsHero__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.unitsHero__stat {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(0, 0, 0, .08);
+  background: rgba(255, 255, 255, .78);
+}
+
+.unitsHero__stat strong {
+  font-size: 15px;
+}
+
+.unitsHero__stat span {
+  font-size: 12px;
+  line-height: 1.45;
+  color: #5d5d5d;
+}
+
+.unitsHero__panel,
+.doctorsHero__panel {
+  display: grid;
+  gap: 12px;
+}
+
+.unitsHero__panelCard,
+.doctorsHero__panelCard {
+  padding: 22px;
+  background: linear-gradient(180deg, #f6eee3, #fff);
+}
+
+.unitsHero__panelCard--soft,
+.doctorsHero__panelCard--soft {
+  background: linear-gradient(180deg, #fff, #f6f6f6);
+}
+
+.unitsHero__panelLabel,
+.doctorsHero__panelLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #8a5f2a;
+}
+
+.unitsHero__panelList,
+.doctorsHero__panelList {
+  margin: 14px 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 10px;
+  color: #454545;
+  line-height: 1.55;
+}
+
+.unitsHero__panelCard p,
+.doctorsHero__panelCard p {
+  margin: 12px 0 0;
+  color: rgba(18, 18, 18, .78);
+  line-height: 1.6;
+}
+
+.doctorsHero__copy .pageNarrative__stats {
+  margin-top: 22px;
+}
+
 .bookingFlow {
   width: min(960px, 100% - 40px);
   margin: 0 auto;
@@ -3515,6 +3684,8 @@ video.heroMediaEl {
     grid-template-columns: repeat(2, 1fr)
   }
 
+  .unitsHero__shell,
+  .doctorsHero__shell,
   .bookingPrep__grid,
   .homeEditorialRail,
   .pageNarrative__stats,
@@ -3549,7 +3720,11 @@ video.heroMediaEl {
   .decisionCard,
   .pageNarrative__stat,
   .bookingPrep__card,
-  .homeEditorialRail__card {
+  .homeEditorialRail__card,
+  .unitsHero__copy,
+  .doctorsHero__copy,
+  .unitsHero__panelCard,
+  .doctorsHero__panelCard {
     border-radius: 20px;
     padding: 18px;
   }

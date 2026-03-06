@@ -8,6 +8,7 @@ import { services, type Service } from "@/data/services";
 import { useCurrentUnit } from "@/hooks/useCurrentUnit";
 import { useTeamDirectory } from "@/hooks/useTeamDirectory";
 import { doctorSlugFromTeamMember, normalizeDoctorSlug } from "@/lib/doctorSlug";
+import { trackBookingRequestSubmitted } from "@/lib/leadTracking";
 import { setStoredUnitSlug } from "@/lib/unitSelection";
 import TurnstileWidget from "@/components/TurnstileWidget";
 
@@ -534,6 +535,15 @@ export default function BookingFlow() {
             }
 
             setSubmitted({ id: json.id, status: json.status, confirmByMs: json.confirmByMs, notifications: json.notifications });
+            trackBookingRequestSubmitted({
+                bookingId: json.id,
+                unitSlug,
+                doctorSlug: doctor.slug,
+                serviceId: service.id,
+                durationMinutes,
+                date: dateKey,
+                time: timeKey,
+            });
             setStep("submitted");
         } catch {
             setSubmitError("Falha de rede ao enviar.");

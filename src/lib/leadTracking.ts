@@ -1,6 +1,7 @@
 import { trackEvent, type AnalyticsEventParams } from "@/lib/analytics";
 import { campaignParamsForEvent } from "@/lib/campaign";
 import { trackContactConversion, trackLeadConversion } from "@/lib/conversions";
+import { readExperienceContextParams } from "@/lib/experienceContext";
 
 export type LeadPlacement =
     | "header"
@@ -25,7 +26,8 @@ function landingPeriodUtc(): string {
 
 function withCampaign(params: AnalyticsEventParams): AnalyticsEventParams {
     const campaign = campaignParamsForEvent();
-    return { ...campaign, landingPeriod: landingPeriodUtc(), ...params };
+    const experience = readExperienceContextParams(typeof params.page === "string" ? params.page : null);
+    return { ...campaign, ...experience, landingPeriod: landingPeriodUtc(), ...params };
 }
 
 export function trackAgendarClick(params: {
@@ -45,6 +47,7 @@ export function trackAgendarClick(params: {
 
     trackEvent("cta_agendar_click", payload);
     trackLeadConversion({
+        ...readExperienceContextParams(),
         source: "whatsapp",
         placement: params.placement,
         unitSlug: params.unitSlug,
@@ -72,10 +75,57 @@ export function trackBookingStart(params: {
 
     trackEvent("cta_booking_start", payload);
     trackLeadConversion({
+        ...readExperienceContextParams(),
         source: "booking",
         placement: params.placement,
         unitSlug: params.unitSlug,
     });
+}
+
+export function trackBookingRequestSubmitted(params: {
+    bookingId: string;
+    unitSlug: string;
+    doctorSlug: string;
+    serviceId: string;
+    durationMinutes: number;
+    date: string;
+    time: string;
+}) {
+    trackEvent(
+        "booking_request_submitted",
+        withCampaign({
+            bookingId: params.bookingId,
+            unitSlug: params.unitSlug,
+            doctorSlug: params.doctorSlug,
+            serviceId: params.serviceId,
+            durationMinutes: params.durationMinutes,
+            date: params.date,
+            time: params.time,
+        }),
+    );
+}
+
+export function trackExperienceShortcutClick(params: {
+    page: string;
+    shortcut: string;
+    destination: string;
+    placement: LeadPlacement;
+    unitSlug?: string | null;
+    experience?: string;
+    variant?: string;
+}) {
+    trackEvent(
+        "experience_shortcut_click",
+        withCampaign({
+            page: params.page,
+            shortcut: params.shortcut,
+            destination: params.destination,
+            placement: params.placement,
+            unitSlug: params.unitSlug ?? null,
+            experience: params.experience,
+            variant: params.variant,
+        }),
+    );
 }
 
 export function trackDoctorWhatsappClick(params: {

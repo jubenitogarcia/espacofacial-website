@@ -5,6 +5,7 @@ import TrackedBookingLink from "@/components/TrackedBookingLink";
 import ExperienceTracker from "@/components/ExperienceTracker";
 import { useExperienceVariant } from "@/hooks/useExperienceVariant";
 import type { HeroMediaItem, HeroMediaVariant } from "@/lib/heroMediaShared";
+import { trackExperienceShortcutClick } from "@/lib/leadTracking";
 
 type HomeHeroExperienceProps = {
     heroItems: HeroMediaItem[];
@@ -115,7 +116,20 @@ export default function HomeHeroExperience({ heroItems, initialMediaVariant }: H
                             >
                                 {content.primaryCta}
                             </TrackedBookingLink>
-                            <a href={secondaryHref} className="heroContent__secondary">
+                            <a
+                                href={secondaryHref}
+                                className="heroContent__secondary"
+                                onClick={() =>
+                                    trackExperienceShortcutClick({
+                                        page: "/",
+                                        shortcut: content.secondaryCta,
+                                        destination: secondaryHref,
+                                        placement: "home_panel",
+                                        experience: "home_value_hero_v3",
+                                        variant: resolved.variant,
+                                    })
+                                }
+                            >
                                 {content.secondaryCta}
                             </a>
                         </div>
