@@ -1,77 +1,43 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-type TeamMember = {
-    units: string[];
-    instagramUrl: string | null;
-};
-
-type DirectoryStats = {
-    members: number | null;
-    unitsRepresented: number | null;
-    instagramProfiles: number | null;
-};
-
-const initialStats: DirectoryStats = {
-    members: null,
-    unitsRepresented: null,
-    instagramProfiles: null,
-};
+import { useMemo } from "react";
+import { useTeamDirectory } from "@/hooks/useTeamDirectory";
 
 export default function DoctorsDirectoryStats() {
-    const [stats, setStats] = useState<DirectoryStats>(initialStats);
+    const { members, loading } = useTeamDirectory();
 
-    useEffect(() => {
-        let cancelled = false;
+    const stats = useMemo(() => {
+        if (!members) return null;
 
-        async function load() {
-            try {
-                const res = await fetch("/api/equipe", { cache: "no-store" });
-                const json = (await res.json().catch(() => null)) as { members?: TeamMember[] } | null;
-                if (cancelled) return;
+        return {
+            members: members.length,
+            unitsRepresented: new Set(
+                members.flatMap((member) => member.units.map((unit) => unit.trim()).filter(Boolean))
+            ).size,
+            instagramProfiles: members.filter((member) => member.instagramUrl).length,
+        };
+    }, [members]);
 
-                const members = Array.isArray(json?.members) ? json.members : [];
-                const unitsRepresented = new Set(
-                    members.flatMap((member) => member.units.map((unit) => unit.trim()).filter(Boolean))
-                ).size;
-                const instagramProfiles = members.filter((member) => member.instagramUrl).length;
-
-                setStats({
-                    members: members.length,
-                    unitsRepresented,
-                    instagramProfiles,
-                });
-            } catch {
-                if (cancelled) return;
-                setStats({
-                    members: 0,
-                    unitsRepresented: 0,
-                    instagramProfiles: 0,
-                });
-            }
+    const value = (input: number | null) => {
+        if (loading || input === null) {
+            return <span className="pageNarrative__valuePlaceholder" aria-hidden="true" />;
         }
 
-        load();
-        return () => {
-            cancelled = true;
-        };
-    }, []);
-
-    const value = (input: number | null) => (input === null ? "..." : String(input));
+        return String(input);
+    };
 
     return (
         <div className="pageNarrative__stats" role="group" aria-label="Panorama da equipe">
             <div className="pageNarrative__stat">
-                <strong>{value(stats.members)}</strong>
+                <strong>{value(stats?.members ?? null)}</strong>
                 <span>profissionais ativos no diretório</span>
             </div>
             <div className="pageNarrative__stat">
-                <strong>{value(stats.unitsRepresented)}</strong>
+                <strong>{value(stats?.unitsRepresented ?? null)}</strong>
                 <span>unidades representadas na agenda</span>
             </div>
             <div className="pageNarrative__stat">
-                <strong>{value(stats.instagramProfiles)}</strong>
+                <strong>{value(stats?.instagramProfiles ?? null)}</strong>
                 <span>perfis com conteúdo consultável</span>
             </div>
         </div>

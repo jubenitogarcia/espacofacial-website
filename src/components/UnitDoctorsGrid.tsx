@@ -4,19 +4,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCurrentUnit } from "@/hooks/useCurrentUnit";
+import { useTeamDirectory } from "@/hooks/useTeamDirectory";
 import { doctorSlugFromTeamMember } from "@/lib/doctorSlug";
 import { trackBookingStart, trackDoctorInstagramClick } from "@/lib/leadTracking";
 import UnitQuickButtons from "@/components/UnitQuickButtons";
-
-type TeamMember = {
-    name: string;
-    nickname: string | null;
-    units: string[];
-    role: string;
-    roles: string[];
-    instagramHandle: string | null;
-    instagramUrl: string | null;
-};
 
 type InstagramMedia = {
     id: string;
@@ -139,12 +130,38 @@ function formatUnitsLabel(units: string[]): string {
     return `${cleaned[0]}, ${cleaned[1]} e +${cleaned.length - 2}`;
 }
 
+function DoctorsGridLoadingState() {
+    return (
+        <div className="grid" aria-hidden="true">
+            {Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="card cardSkeleton doctorDirectoryCard">
+                    <div className="cardSkeleton__row">
+                        <span className="cardSkeleton__avatar" />
+                        <div className="cardSkeleton__lines">
+                            <span className="cardSkeleton__line cardSkeleton__line--title" />
+                            <span className="cardSkeleton__line cardSkeleton__line--body" />
+                        </div>
+                    </div>
+                    <div className="cardSkeleton__pills">
+                        <span className="cardSkeleton__pill" />
+                        <span className="cardSkeleton__pill" />
+                        <span className="cardSkeleton__pill" />
+                    </div>
+                    <div className="cardSkeleton__actions">
+                        <span className="cardSkeleton__button" />
+                        <span className="cardSkeleton__button cardSkeleton__button--primary" />
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+}
+
 export default function UnitDoctorsGrid({ mode = "selection" }: UnitDoctorsGridProps) {
     const unit = useCurrentUnit();
     const unitLabel = unitLabelFromSlug(unit?.slug);
+    const { members, error: membersError, loading: membersLoading } = useTeamDirectory();
 
-    const [members, setMembers] = useState<TeamMember[] | null>(null);
-    const [membersError, setMembersError] = useState<string | null>(null);
     const [activeInstagram, setActiveInstagram] = useState<{
         name: string;
         handle: string;
@@ -160,32 +177,6 @@ export default function UnitDoctorsGrid({ mode = "selection" }: UnitDoctorsGridP
     const [instagramReloadToken, setInstagramReloadToken] = useState(0);
     const instagramScrollRef = useRef<HTMLDivElement | null>(null);
     const instagramInfiniteSentinelRef = useRef<HTMLDivElement | null>(null);
-
-    useEffect(() => {
-        let cancelled = false;
-
-        async function load() {
-            try {
-                const res = await fetch("/api/equipe", { cache: "no-store" });
-                const json = (await res.json().catch(() => null)) as
-                    | { ok?: boolean; members?: TeamMember[]; error?: { code?: string; status?: number } }
-                    | null;
-                if (cancelled) return;
-                const nextMembers = Array.isArray(json?.members) ? json!.members! : [];
-                setMembers(nextMembers);
-                setMembersError(json && json.ok === false ? json.error?.code ?? "unknown" : null);
-            } catch {
-                if (cancelled) return;
-                setMembers([]);
-                setMembersError("exception");
-            }
-        }
-
-        load();
-        return () => {
-            cancelled = true;
-        };
-    }, []);
 
     useEffect(() => {
         if (!activeInstagram) return;
@@ -346,11 +337,11 @@ export default function UnitDoctorsGrid({ mode = "selection" }: UnitDoctorsGridP
         </>
     );
 
-    if (filtered === null) {
+    if (filtered === null || membersLoading) {
         return (
             <>
                 {selectedUnitSubtitle}
-                <div className="card">Carregando equipe…</div>
+                <DoctorsGridLoadingState />
             </>
         );
     }
@@ -559,7 +550,15 @@ export default function UnitDoctorsGrid({ mode = "selection" }: UnitDoctorsGridP
                                                 preload="metadata"
                                             />
                                         ) : (
-                                            <img className="instagramViewerMedia" src={activeInstagramMedia.thumbnailUrl} alt={`Publicação de ${activeInstagram.name}`} loading="lazy" />
+                                            <Image
+                                                className="instagramViewerMedia"
+                                                src={activeInstagramMedia.thumbnailUrl}
+                                                alt={`Publicação de ${activeInstagram.name}`}
+                                                width={1200}
+                                                height={1200}
+                                                sizes="(max-width: 860px) 100vw, 860px"
+                                                unoptimized
+                                            />
                                         )}
                                     </div>
 
@@ -579,7 +578,15 @@ export default function UnitDoctorsGrid({ mode = "selection" }: UnitDoctorsGridP
                                                 onClick={() => setActiveInstagramMediaId(item.id)}
                                                 aria-label={`Abrir ${label.toLowerCase()} de ${activeInstagram.name}`}
                                             >
-                                                <img className="instagramMediaThumb" src={item.thumbnailUrl} alt={`Publicação de ${activeInstagram.name}`} loading="lazy" />
+                                                <Image
+                                                    className="instagramMediaThumb"
+                                                    src={item.thumbnailUrl}
+                                                    alt={`Publicação de ${activeInstagram.name}`}
+                                                    width={480}
+                                                    height={480}
+                                                    sizes="(max-width: 900px) 33vw, 240px"
+                                                    unoptimized
+                                                />
                                                 {label !== "Post" ? <span className="instagramMediaBadge">{label}</span> : null}
                                             </button>
                                         );

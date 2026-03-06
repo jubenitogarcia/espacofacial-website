@@ -24,6 +24,21 @@ const nextConfig = {
         hostname: "unavatar.io",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "**.cdninstagram.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "**.fbcdn.net",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "**.instagram.com",
+        pathname: "/**",
+      },
     ],
   },
   async headers() {
