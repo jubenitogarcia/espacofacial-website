@@ -1138,6 +1138,37 @@ button:focus-visible {
   color: var(--muted);
 }
 
+.bookingFlow__stageRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.bookingFlow__stagePill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(17, 17, 17, 0.12);
+  background: #fff;
+  color: #4b4b4b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.bookingFlow__stagePill[data-state="active"] {
+  border-color: rgba(17, 17, 17, 0.9);
+  background: #111;
+  color: #fff;
+}
+
+.bookingFlow__stagePill[data-state="done"] {
+  border-color: rgba(138, 95, 42, .16);
+  background: #f3ede4;
+  color: #6e5130;
+}
+
 .bookingFlow__formGrid {
   display: grid;
   gap: 12px;
@@ -1777,6 +1808,40 @@ video.heroMediaEl {
   color: rgba(255, 255, 255, .84);
 }
 
+.heroContent__trustStrip {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.heroContent__trustChip {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  background: rgba(6, 6, 6, .30);
+}
+
+.heroContent__trustChip strong {
+  font-size: 13px;
+  color: rgba(255, 241, 220, .94);
+  letter-spacing: .02em;
+}
+
+.heroContent__trustChip span {
+  font-size: 11px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, .78);
+}
+
+.heroContent__actionHint {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, .75);
+}
+
 .heroContent__primary {
   background: #fff;
   color: #111;
@@ -2315,7 +2380,8 @@ video.heroMediaEl {
   }
 
   .bookingHero__trust,
-  .heroContent__proof {
+  .heroContent__proof,
+  .heroContent__trustStrip {
     grid-template-columns: 1fr;
   }
 

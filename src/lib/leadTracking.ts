@@ -105,6 +105,33 @@ export function trackBookingRequestSubmitted(params: {
     );
 }
 
+export function trackBookingFunnelStep(params: {
+    step: string;
+    placement?: LeadPlacement;
+    unitSlug?: string | null;
+    doctorSlug?: string | null;
+    serviceId?: string | null;
+    date?: string | null;
+    time?: string | null;
+    detailsStage?: "contact" | "identity" | null;
+    restored?: boolean;
+}) {
+    trackEvent(
+        "booking_funnel_step",
+        withCampaign({
+            step: params.step,
+            placement: params.placement ?? "booking_page",
+            unitSlug: params.unitSlug ?? null,
+            doctorSlug: params.doctorSlug ?? null,
+            serviceId: params.serviceId ?? null,
+            date: params.date ?? null,
+            time: params.time ?? null,
+            detailsStage: params.detailsStage ?? null,
+            restored: params.restored ?? false,
+        }),
+    );
+}
+
 export function trackExperienceShortcutClick(params: {
     page: string;
     shortcut: string;

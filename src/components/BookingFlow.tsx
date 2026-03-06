@@ -7,8 +7,9 @@ import { units } from "@/data/units";
 import { services, type Service } from "@/data/services";
 import { useCurrentUnit } from "@/hooks/useCurrentUnit";
 import { useTeamDirectory } from "@/hooks/useTeamDirectory";
+import { clearBookingDraft, persistBookingDraft, readBookingDraft, type BookingDraftState } from "@/lib/bookingDraft";
 import { doctorSlugFromTeamMember, normalizeDoctorSlug } from "@/lib/doctorSlug";
-import { trackBookingRequestSubmitted } from "@/lib/leadTracking";
+import { trackBookingFunnelStep, trackBookingRequestSubmitted } from "@/lib/leadTracking";
 import { setStoredUnitSlug } from "@/lib/unitSelection";
 import TurnstileWidget from "@/components/TurnstileWidget";
 
@@ -45,6 +46,7 @@ type BookingStatus = {
 };
 
 type StatusResponse = { ok: true; booking: BookingStatus } | { ok: false; error: string };
+type DetailsStage = "contact" | "identity";
 
 function isOkResponse(value: unknown): value is { ok: true } {
     return !!value && typeof value === "object" && (value as { ok?: unknown }).ok === true;
@@ -210,6 +212,7 @@ export default function BookingFlow() {
     const { members, error: membersError, loading: membersLoading } = useTeamDirectory();
 
     const [step, setStep] = useState<"pick" | "details" | "submitted">("pick");
+    const [detailsStage, setDetailsStage] = useState<DetailsStage>("contact");
 
     const [doctor, setDoctor] = useState<{ slug: string; name: string; handle: string | null } | null>(null);
     const [service, setService] = useState<Service | null>(null);
@@ -243,8 +246,28 @@ export default function BookingFlow() {
 
     const [submitted, setSubmitted] = useState<{ id: string; status: string; confirmByMs: number; notifications?: { email: NotificationResult; whatsapp: NotificationResult } } | null>(null);
     const [status, setStatus] = useState<BookingStatus | null>(null);
+    const draftToRestoreRef = useRef<BookingDraftState | null>(null);
+    const draftAppliedRef = useRef(false);
+    const draftReadyRef = useRef(false);
 
     const allowedUnitSlugs = useMemo(() => new Set(["barrashoppingsul", "novo-hamburgo"]), []);
+
+    useEffect(() => {
+        const draft = readBookingDraft();
+        if (!draft) {
+            draftReadyRef.current = true;
+            return;
+        }
+        if (draft.unitSlug && !allowedUnitSlugs.has(draft.unitSlug)) {
+            clearBookingDraft();
+            draftReadyRef.current = true;
+            return;
+        }
+        draftToRestoreRef.current = draft;
+        if (draft.unitSlug && allowedUnitSlugs.has(draft.unitSlug)) {
+            setStoredUnitSlug(draft.unitSlug);
+        }
+    }, [allowedUnitSlugs]);
 
     // Allow deep-linking to a unit via `?unit=` by syncing it into storage (and therefore header selection).
     useEffect(() => {
@@ -287,6 +310,7 @@ export default function BookingFlow() {
         setDateTouched(false);
         setTimeKey(null);
         setStep("pick");
+        setDetailsStage("contact");
         setDetailsStartedAtMs(null);
         setHoneypot("");
         setTurnstileToken(null);
@@ -302,6 +326,59 @@ export default function BookingFlow() {
     }, [unitSlug]);
 
     const unit = useMemo(() => findUnit(unitSlug), [unitSlug]);
+
+    useEffect(() => {
+        if (draftAppliedRef.current) return;
+        const draft = draftToRestoreRef.current;
+        if (!draft) return;
+        if (draft.unitSlug && draft.unitSlug !== unitSlug) return;
+
+        if (draft.doctorSlug && draft.doctorName) {
+            setDoctor({ slug: draft.doctorSlug, name: draft.doctorName, handle: draft.doctorHandle });
+        } else if (unitSlug) {
+            setDoctor({ slug: "any", name: "Sem preferência", handle: null });
+        }
+
+        if (draft.serviceId) {
+            if (draft.serviceId === "any") {
+                setService({ id: "any", name: "Quero orientação", subtitle: "Ainda não sei qual procedimento" });
+            } else {
+                const serviceMatch = services.find((item) => item.id === draft.serviceId) ?? null;
+                setService(serviceMatch);
+            }
+        }
+
+        setIncludeAvaliacao(draft.includeAvaliacao);
+        setIncludeProcedimento(draft.includeProcedimento);
+        setIncludeRevisao(draft.includeRevisao);
+        setDateKey(draft.dateKey);
+        setDateTouched(Boolean(draft.dateKey));
+        setTimeKey(draft.timeKey);
+        setPatientName(draft.patientName);
+        setEmail(draft.email);
+        setWhatsapp(draft.whatsapp);
+        setCpf(draft.cpf);
+        setAddress(draft.address);
+        setNotes(draft.notes);
+        const canRestoreDetails = draft.step === "details" && !!draft.serviceId && !!draft.dateKey && !!draft.timeKey && !!draft.doctorSlug;
+        setStep(canRestoreDetails ? "details" : "pick");
+        setDetailsStage(canRestoreDetails ? draft.detailsStage : "contact");
+        if (canRestoreDetails) setDetailsStartedAtMs(Date.now());
+
+        trackBookingFunnelStep({
+            step: "draft_restored",
+            restored: true,
+            unitSlug: draft.unitSlug,
+            doctorSlug: draft.doctorSlug,
+            serviceId: draft.serviceId,
+            date: draft.dateKey,
+            time: draft.timeKey,
+            detailsStage: draft.detailsStage,
+        });
+
+        draftAppliedRef.current = true;
+        draftReadyRef.current = true;
+    }, [unitSlug]);
     const unitLabel = useMemo(() => unitLabelFromSlug(unitSlug), [unitSlug]);
     const doctorsForUnit = useMemo(() => {
         if (!members) return null;
@@ -544,6 +621,7 @@ export default function BookingFlow() {
                 date: dateKey,
                 time: timeKey,
             });
+            clearBookingDraft();
             setStep("submitted");
         } catch {
             setSubmitError("Falha de rede ao enviar.");
@@ -599,6 +677,25 @@ export default function BookingFlow() {
         return slots.slots.find((s) => s.time === timeKey) ?? null;
     }, [slots?.slots, timeKey]);
 
+    function openDetailsModal(nextTime: string) {
+        setTimeKey(nextTime);
+        setStep("details");
+        setDetailsStage("contact");
+        setDetailsStartedAtMs(Date.now());
+        setTurnstileToken(null);
+        setTurnstileHadError(false);
+        setSubmitError(null);
+        trackBookingFunnelStep({
+            step: "details_opened",
+            unitSlug,
+            doctorSlug: doctor?.slug ?? null,
+            serviceId: service?.id ?? null,
+            date: dateKey,
+            time: nextTime,
+            detailsStage: "contact",
+        });
+    }
+
     const showSensitiveHint = true;
     const emailValue = email.trim().toLowerCase();
     const emailSeemsValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue);
@@ -608,6 +705,11 @@ export default function BookingFlow() {
     const cpfSeemsValid = cpfDigits.length === 11;
     const addressSeemsValid = address.trim().length >= 6;
     const turnstileRequired = !!turnstileSiteKey;
+    const canAdvanceIdentity =
+        !!selectedSlot &&
+        !!patientName.trim() &&
+        emailSeemsValid &&
+        whatsappSeemsValid;
     const canSubmit =
         !!selectedSlot &&
         !!patientName.trim() &&
@@ -675,6 +777,7 @@ export default function BookingFlow() {
         const onKey = (event: KeyboardEvent) => {
             if (event.key === "Escape") {
                 setStep("pick");
+                setDetailsStage("contact");
                 setSubmitError(null);
                 setTurnstileToken(null);
                 setTurnstileHadError(false);
@@ -683,6 +786,73 @@ export default function BookingFlow() {
         window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
     }, [showDetailsModal]);
+
+    useEffect(() => {
+        if (!draftReadyRef.current) return;
+        if (step === "submitted") {
+            clearBookingDraft();
+            return;
+        }
+
+        const hasData = Boolean(
+            unitSlug ||
+                doctor?.slug ||
+                service?.id ||
+                dateKey ||
+                timeKey ||
+                patientName.trim() ||
+                email.trim() ||
+                whatsapp.trim() ||
+                cpf.trim() ||
+                address.trim() ||
+                notes.trim(),
+        );
+
+        if (!hasData) {
+            clearBookingDraft();
+            return;
+        }
+
+        persistBookingDraft({
+            unitSlug,
+            doctorSlug: doctor?.slug ?? null,
+            doctorName: doctor?.name ?? null,
+            doctorHandle: doctor?.handle ?? null,
+            serviceId: service?.id ?? null,
+            includeAvaliacao,
+            includeProcedimento,
+            includeRevisao,
+            dateKey,
+            timeKey,
+            step: step === "details" ? "details" : "pick",
+            detailsStage,
+            patientName,
+            email,
+            whatsapp,
+            cpf,
+            address,
+            notes,
+        });
+    }, [
+        address,
+        cpf,
+        dateKey,
+        detailsStage,
+        doctor?.handle,
+        doctor?.name,
+        doctor?.slug,
+        email,
+        includeAvaliacao,
+        includeProcedimento,
+        includeRevisao,
+        notes,
+        patientName,
+        service?.id,
+        step,
+        timeKey,
+        unitSlug,
+        whatsapp,
+    ]);
 
     return (
         <div className="bookingFlow">
@@ -703,6 +873,7 @@ export default function BookingFlow() {
                         </div>
                     )}
                     <div className="bookingFlow__supportPill">Confirmação por e-mail e WhatsApp</div>
+                    <div className="bookingFlow__supportPill">Retomada automática da etapa em caso de abandono</div>
                 </div>
             </div>
 
@@ -1149,27 +1320,19 @@ export default function BookingFlow() {
                                                             if (ariaDisabled) return;
                                                             if (active) {
                                                                 if (step !== "details") {
-                                                                    setStep("details");
-                                                                    setDetailsStartedAtMs(Date.now());
-                                                                    setTurnstileToken(null);
-                                                                    setTurnstileHadError(false);
-                                                                    setSubmitError(null);
+                                                                    openDetailsModal(s.time);
                                                                     return;
                                                                 }
                                                                 setTimeKey(null);
                                                                 setStep("pick");
+                                                                setDetailsStage("contact");
                                                                 setDetailsStartedAtMs(null);
                                                                 setTurnstileToken(null);
                                                                 setTurnstileHadError(false);
                                                                 setSubmitError(null);
                                                                 return;
                                                             }
-                                                            setTimeKey(s.time);
-                                                            setStep("details");
-                                                            setDetailsStartedAtMs(Date.now());
-                                                            setTurnstileToken(null);
-                                                            setTurnstileHadError(false);
-                                                            setSubmitError(null);
+                                                            openDetailsModal(s.time);
                                                         }}
                                                         tabIndex={ariaDisabled ? -1 : 0}
                                                         style={{
@@ -1265,6 +1428,8 @@ export default function BookingFlow() {
                                     setSubmitted(null);
                                     setStatus(null);
                                     setSubmitError(null);
+                                    setDetailsStage("contact");
+                                    clearBookingDraft();
                                 }}
                                 style={{ cursor: "pointer" }}
                             >
@@ -1283,6 +1448,7 @@ export default function BookingFlow() {
                     onClick={(event) => {
                         if (event.target !== event.currentTarget) return;
                         setStep("pick");
+                        setDetailsStage("contact");
                         setSubmitError(null);
                         setTurnstileToken(null);
                         setTurnstileHadError(false);
@@ -1302,6 +1468,7 @@ export default function BookingFlow() {
                                 aria-label="Fechar"
                                 onClick={() => {
                                     setStep("pick");
+                                    setDetailsStage("contact");
                                     setSubmitError(null);
                                     setTurnstileToken(null);
                                     setTurnstileHadError(false);
@@ -1336,134 +1503,194 @@ export default function BookingFlow() {
                             </div>
 
                             <div className="bookingFlow__modalHint">
-                                Esses dados criam sua conta para futuros agendamentos.
+                                Etapa {detailsStage === "contact" ? "1 de 2" : "2 de 2"} · o fluxo salva automaticamente para continuar depois.
                             </div>
 
-                            <div className="bookingFlow__formGrid">
-                                <label className="bookingFlow__field">
-                                    <span>Nome</span>
-                                    <input
-                                        value={patientName}
-                                        onChange={(e) => setPatientName(e.target.value)}
-                                        placeholder="Seu nome"
-                                        autoComplete="name"
-                                        className="bookingFlow__input"
-                                    />
-                                </label>
-
-                                <label className="bookingFlow__field">
-                                    <span>E-mail</span>
-                                    <input
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        placeholder="voce@email.com"
-                                        autoComplete="email"
-                                        inputMode="email"
-                                        className="bookingFlow__input"
-                                        aria-invalid={email.length > 0 && !emailSeemsValid}
-                                    />
-                                </label>
+                            <div className="bookingFlow__stageRow" role="list" aria-label="Etapas de confirmação">
+                                <div className="bookingFlow__stagePill" role="listitem" data-state={detailsStage === "contact" ? "active" : "done"}>
+                                    1. Contato
+                                </div>
+                                <div className="bookingFlow__stagePill" role="listitem" data-state={detailsStage === "identity" ? "active" : "pending"}>
+                                    2. Dados de confirmação
+                                </div>
                             </div>
-                            {email.length > 0 && !emailSeemsValid ? (
-                                <div className="bookingFlow__fieldError">Informe um e-mail válido.</div>
-                            ) : null}
 
-                            <div className="bookingFlow__formGrid">
-                                <label className="bookingFlow__field">
-                                    <span>WhatsApp</span>
-                                    <input
-                                        value={whatsapp}
-                                        onChange={(e) => setWhatsapp(formatBrPhone(e.target.value))}
-                                        placeholder="(DDD) 9xxxx-xxxx"
-                                        inputMode="tel"
-                                        autoComplete="tel"
-                                        aria-invalid={whatsapp.length > 0 && !whatsappSeemsValid}
-                                        className="bookingFlow__input"
-                                    />
-                                </label>
+                            {detailsStage === "contact" ? (
+                                <>
+                                    <div className="bookingFlow__formGrid">
+                                        <label className="bookingFlow__field">
+                                            <span>Nome</span>
+                                            <input
+                                                value={patientName}
+                                                onChange={(e) => setPatientName(e.target.value)}
+                                                placeholder="Seu nome"
+                                                autoComplete="name"
+                                                className="bookingFlow__input"
+                                            />
+                                        </label>
 
-                                <label className="bookingFlow__field">
-                                    <span>CPF</span>
-                                    <input
-                                        value={cpf}
-                                        onChange={(e) => setCpf(formatCpf(e.target.value))}
-                                        placeholder="000.000.000-00"
-                                        inputMode="numeric"
-                                        autoComplete="off"
-                                        aria-invalid={cpf.length > 0 && !cpfSeemsValid}
-                                        className="bookingFlow__input"
-                                    />
-                                </label>
-                            </div>
-                            {!whatsappSeemsValid && whatsapp.length > 0 ? (
-                                <div className="bookingFlow__fieldError">Informe DDD + número (ex.: (51) 99999-9999).</div>
-                            ) : null}
-                            {!cpfSeemsValid && cpf.length > 0 ? (
-                                <div className="bookingFlow__fieldError">Informe um CPF válido.</div>
-                            ) : null}
+                                        <label className="bookingFlow__field">
+                                            <span>E-mail</span>
+                                            <input
+                                                value={email}
+                                                onChange={(e) => setEmail(e.target.value)}
+                                                placeholder="voce@email.com"
+                                                autoComplete="email"
+                                                inputMode="email"
+                                                className="bookingFlow__input"
+                                                aria-invalid={email.length > 0 && !emailSeemsValid}
+                                            />
+                                        </label>
+                                    </div>
+                                    {email.length > 0 && !emailSeemsValid ? (
+                                        <div className="bookingFlow__fieldError">Informe um e-mail válido.</div>
+                                    ) : null}
 
-                            <label className="bookingFlow__field">
-                                <span>Endereço completo</span>
-                                <textarea
-                                    value={address}
-                                    onChange={(e) => setAddress(e.target.value)}
-                                    placeholder="Rua, número, bairro, cidade e CEP"
-                                    rows={2}
-                                    className="bookingFlow__textarea"
-                                />
-                            </label>
-                            {!addressSeemsValid && address.length > 0 ? (
-                                <div className="bookingFlow__fieldError">Informe o endereço completo.</div>
-                            ) : null}
+                                    <label className="bookingFlow__field">
+                                        <span>WhatsApp</span>
+                                        <input
+                                            value={whatsapp}
+                                            onChange={(e) => setWhatsapp(formatBrPhone(e.target.value))}
+                                            placeholder="(DDD) 9xxxx-xxxx"
+                                            inputMode="tel"
+                                            autoComplete="tel"
+                                            aria-invalid={whatsapp.length > 0 && !whatsappSeemsValid}
+                                            className="bookingFlow__input"
+                                        />
+                                    </label>
+                                    {!whatsappSeemsValid && whatsapp.length > 0 ? (
+                                        <div className="bookingFlow__fieldError">Informe DDD + número (ex.: (51) 99999-9999).</div>
+                                    ) : null}
 
-                            {turnstileRequired ? (
-                                <div style={{ display: "grid", gap: 8 }}>
-                                    <TurnstileWidget
-                                        siteKey={turnstileSiteKey}
-                                        onToken={setTurnstileToken}
-                                        onError={() => setTurnstileHadError(true)}
-                                    />
-                                    {!turnstileToken ? (
-                                        <div className="small" style={{ color: turnstileHadError ? "#b91c1c" : "var(--muted)" }}>
-                                            {turnstileHadError ? "Não foi possível carregar a verificação anti-robô." : "Confirme que você não é um robô para enviar."}
+                                    <div className="bookingFlow__modalActions">
+                                        <button
+                                            type="button"
+                                            className="bookingFlow__primaryBtn"
+                                            disabled={!canAdvanceIdentity}
+                                            onClick={() => {
+                                                setDetailsStage("identity");
+                                                setSubmitError(null);
+                                                trackBookingFunnelStep({
+                                                    step: "identity_opened",
+                                                    unitSlug,
+                                                    doctorSlug: doctor.slug,
+                                                    serviceId: service.id,
+                                                    date: dateKey,
+                                                    time: timeKey,
+                                                    detailsStage: "identity",
+                                                });
+                                            }}
+                                        >
+                                            Continuar para confirmação
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="bookingFlow__ghostBtn"
+                                            onClick={() => {
+                                                setStep("pick");
+                                                setDetailsStage("contact");
+                                                setSubmitError(null);
+                                                setTurnstileToken(null);
+                                                setTurnstileHadError(false);
+                                            }}
+                                        >
+                                            Voltar para agenda
+                                        </button>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="bookingFlow__formGrid">
+                                        <label className="bookingFlow__field">
+                                            <span>CPF</span>
+                                            <input
+                                                value={cpf}
+                                                onChange={(e) => setCpf(formatCpf(e.target.value))}
+                                                placeholder="000.000.000-00"
+                                                inputMode="numeric"
+                                                autoComplete="off"
+                                                aria-invalid={cpf.length > 0 && !cpfSeemsValid}
+                                                className="bookingFlow__input"
+                                            />
+                                        </label>
+
+                                        <label className="bookingFlow__field">
+                                            <span>Endereço completo</span>
+                                            <textarea
+                                                value={address}
+                                                onChange={(e) => setAddress(e.target.value)}
+                                                placeholder="Rua, número, bairro, cidade e CEP"
+                                                rows={2}
+                                                className="bookingFlow__textarea"
+                                            />
+                                        </label>
+                                    </div>
+                                    {!cpfSeemsValid && cpf.length > 0 ? (
+                                        <div className="bookingFlow__fieldError">Informe um CPF válido.</div>
+                                    ) : null}
+                                    {!addressSeemsValid && address.length > 0 ? (
+                                        <div className="bookingFlow__fieldError">Informe o endereço completo.</div>
+                                    ) : null}
+
+                                    {turnstileRequired ? (
+                                        <div style={{ display: "grid", gap: 8 }}>
+                                            <TurnstileWidget
+                                                siteKey={turnstileSiteKey}
+                                                onToken={setTurnstileToken}
+                                                onError={() => setTurnstileHadError(true)}
+                                            />
+                                            {!turnstileToken ? (
+                                                <div className="small" style={{ color: turnstileHadError ? "#b91c1c" : "var(--muted)" }}>
+                                                    {turnstileHadError ? "Não foi possível carregar a verificação anti-robô." : "Confirme que você não é um robô para enviar."}
+                                                </div>
+                                            ) : null}
                                         </div>
                                     ) : null}
-                                </div>
-                            ) : null}
 
-                            <label className="bookingFlow__field">
-                                <span>Observações (opcional)</span>
-                                <textarea
-                                    value={notes}
-                                    onChange={(e) => setNotes(e.target.value)}
-                                    placeholder={showSensitiveHint ? "Opcional. Evite informações sensíveis; use apenas preferências (ex.: melhor horário)." : "Opcional"}
-                                    rows={3}
-                                    className="bookingFlow__textarea"
-                                />
-                            </label>
+                                    <label className="bookingFlow__field">
+                                        <span>Observações (opcional)</span>
+                                        <textarea
+                                            value={notes}
+                                            onChange={(e) => setNotes(e.target.value)}
+                                            placeholder={showSensitiveHint ? "Opcional. Evite informações sensíveis; use apenas preferências (ex.: melhor horário)." : "Opcional"}
+                                            rows={3}
+                                            className="bookingFlow__textarea"
+                                        />
+                                    </label>
 
-                            <div className="bookingFlow__modalActions">
-                                <button
-                                    type="button"
-                                    onClick={submit}
-                                    disabled={submitting || !canSubmit}
-                                    className="bookingFlow__primaryBtn"
-                                >
-                                    {submitting ? "Confirmando…" : "Confirmar reserva"}
-                                </button>
-                                <button
-                                    type="button"
-                                    className="bookingFlow__ghostBtn"
-                                    onClick={() => {
-                                        setStep("pick");
-                                        setSubmitError(null);
-                                        setTurnstileToken(null);
-                                        setTurnstileHadError(false);
-                                    }}
-                                >
-                                    Voltar
-                                </button>
-                            </div>
+                                    <div className="bookingFlow__modalActions">
+                                        <button
+                                            type="button"
+                                            onClick={submit}
+                                            disabled={submitting || !canSubmit}
+                                            className="bookingFlow__primaryBtn"
+                                        >
+                                            {submitting ? "Confirmando…" : "Confirmar reserva"}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="bookingFlow__ghostBtn"
+                                            onClick={() => {
+                                                setDetailsStage("contact");
+                                                setSubmitError(null);
+                                                setTurnstileToken(null);
+                                                setTurnstileHadError(false);
+                                                trackBookingFunnelStep({
+                                                    step: "contact_reopened",
+                                                    unitSlug,
+                                                    doctorSlug: doctor.slug,
+                                                    serviceId: service.id,
+                                                    date: dateKey,
+                                                    time: timeKey,
+                                                    detailsStage: "contact",
+                                                });
+                                            }}
+                                        >
+                                            Voltar para contato
+                                        </button>
+                                    </div>
+                                </>
+                            )}
 
                             {submitError ? (
                                 <div role="status" className="bookingFlow__fieldError">

@@ -22,6 +22,7 @@ const HOME_VARIANTS: Record<
         description: string;
         primaryCta: string;
         secondaryCta: string;
+        trustStrip: Array<{ value: string; label: string }>;
         proof: Array<{ label: string; detail: string }>;
         program: Array<{ title: string; body: string }>;
         panelTitle: string;
@@ -37,6 +38,11 @@ const HOME_VARIANTS: Record<
             "A Espaço Facial combina avaliação criteriosa, equipe especializada e um plano visualmente coerente para quem quer melhorar a aparência sem sacrificar naturalidade.",
         primaryCta: "Agendar avaliação",
         secondaryCta: "Ver especialistas",
+        trustStrip: [
+            { value: "4.9★", label: "Média pública de avaliação local" },
+            { value: "Agenda online", label: "Escolha unidade, doutor e horário no mesmo fluxo" },
+            { value: "Sem excesso", label: "Conduta focada em proporção e naturalidade" },
+        ],
         proof: [
             { label: "2 unidades-chave", detail: "BarraShoppingSul e Novo Hamburgo com jornada digital ativa." },
             { label: "Equipe especializada", detail: "Doutores, agenda integrada e acompanhamento de retorno." },
@@ -61,6 +67,11 @@ const HOME_VARIANTS: Record<
             "A jornada foi pensada para pacientes que valorizam critério técnico, previsibilidade de agenda e um plano estético que faça sentido no espelho e na rotina.",
         primaryCta: "Montar meu plano",
         secondaryCta: "Escolher unidade",
+        trustStrip: [
+            { value: "Leitura clínica", label: "Mapeamento técnico antes de qualquer intervenção" },
+            { value: "Fluxo objetivo", label: "Atalhos para reduzir indecisão e tempo até ação" },
+            { value: "Ritmo sustentável", label: "Plano para manter resultado ao longo do tempo" },
+        ],
         proof: [
             { label: "Leitura anatômica", detail: "Cada indicação considera estrutura, tempo e expectativa real." },
             { label: "Agenda inteligente", detail: "Você entra no fluxo já com unidade, doutor e janela de atendimento." },
@@ -106,6 +117,15 @@ export default function HomeHeroExperience({ heroItems, initialMediaVariant }: H
                         <h1>{content.title}</h1>
                         <p>{content.description}</p>
 
+                        <div className="heroContent__trustStrip" aria-label="Provas de confiança para decisão rápida">
+                            {content.trustStrip.map((item) => (
+                                <div key={`${item.value}-${item.label}`} className="heroContent__trustChip">
+                                    <strong>{item.value}</strong>
+                                    <span>{item.label}</span>
+                                </div>
+                            ))}
+                        </div>
+
                         <div className="heroContent__actions">
                             <TrackedBookingLink
                                 href="/agendamento"
@@ -133,6 +153,7 @@ export default function HomeHeroExperience({ heroItems, initialMediaVariant }: H
                                 {content.secondaryCta}
                             </a>
                         </div>
+                        <p className="heroContent__actionHint">Leva menos de 1 minuto para iniciar o fluxo de agendamento.</p>
 
                         <div className="heroContent__proof">
                             {content.proof.map((item) => (
