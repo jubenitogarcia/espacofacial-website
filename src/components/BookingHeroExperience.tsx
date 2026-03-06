@@ -3,6 +3,7 @@
 import Link from "next/link";
 import ExperienceTracker from "@/components/ExperienceTracker";
 import { useExperienceVariant } from "@/hooks/useExperienceVariant";
+import { trackExperienceShortcutClick } from "@/lib/leadTracking";
 
 type BookingUiVariant = "editorial-guided" | "concierge-fastlane";
 
@@ -114,6 +115,16 @@ export default function BookingHeroExperience() {
                                         key={item.title}
                                         href={item.href}
                                         className={`bookingHero__shortcut bookingHero__shortcut--${item.kind}`.trim()}
+                                        onClick={() =>
+                                            trackExperienceShortcutClick({
+                                                page: "/agendamento",
+                                                shortcut: item.title,
+                                                destination: item.href,
+                                                placement: "booking_page",
+                                                experience: "guided_booking_v3",
+                                                variant: resolved.variant,
+                                            })
+                                        }
                                     >
                                         <strong>{item.title}</strong>
                                         <span>{item.body}</span>

@@ -1,4 +1,5 @@
 import { getCookieConsent } from "@/lib/cookieConsent";
+import { readExperienceContextParams } from "@/lib/experienceContext";
 
 export type AnalyticsEventParams = Record<string, unknown>;
 
@@ -49,12 +50,19 @@ export function trackEvent(event: string, params: AnalyticsEventParams = {}) {
         console.info("[analytics]", event, params);
     }
 
+    const pageHint = typeof params.page === "string" ? params.page : window.location.pathname;
+    const experienceContext = readExperienceContextParams(pageHint);
+    const payload: AnalyticsEventParams = {
+        ...experienceContext,
+        ...params,
+    };
+
     window.dataLayer = window.dataLayer ?? [];
-    window.dataLayer.push({ event, ...params });
+    window.dataLayer.push({ event, ...payload });
 
     if (typeof window.gtag === "function") {
         try {
-            window.gtag("event", event, params);
+            window.gtag("event", event, payload);
         } catch {
             // noop
         }
@@ -62,7 +70,7 @@ export function trackEvent(event: string, params: AnalyticsEventParams = {}) {
 
     if (hasMarketingConsent() && typeof window.fbq === "function") {
         try {
-            window.fbq("trackCustom", event, params);
+            window.fbq("trackCustom", event, payload);
         } catch {
             // noop
         }
