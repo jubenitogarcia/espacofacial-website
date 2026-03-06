@@ -343,6 +343,28 @@ button:focus-visible {
   padding: clamp(24px, 4vw, 38px);
 }
 
+.bookingHero__copy--experience {
+  background:
+    radial-gradient(circle at top left, rgba(244, 210, 167, .42), transparent 42%),
+    linear-gradient(180deg, #fff6ec, #f7f4ef);
+}
+
+.bookingHero__capsule,
+.heroContent__capsule {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(138, 95, 42, .18);
+  background: rgba(255, 249, 241, .92);
+  color: #7c5631;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
 .bookingHero__eyebrow,
 .bookingFlow__eyebrow,
 .bookingFlow__summaryEyebrow,
@@ -457,6 +479,12 @@ button:focus-visible {
   background: linear-gradient(180deg, #f6eee3, #fff);
 }
 
+.bookingHero__panelCard--accent {
+  background:
+    linear-gradient(135deg, rgba(255, 242, 223, .92), rgba(255, 255, 255, .96)),
+    linear-gradient(180deg, #f6eee3, #fff);
+}
+
 .bookingHero__panelCard--soft {
   background: linear-gradient(180deg, #fff, #f6f6f6);
 }
@@ -474,6 +502,110 @@ button:focus-visible {
 
 .bookingFlowSection {
   padding-bottom: 32px;
+}
+
+.bookingHero__shortcutGrid {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.bookingHero__shortcut {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(17, 17, 17, .1);
+  background: rgba(255, 255, 255, .72);
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.bookingHero__shortcut strong {
+  font-size: 15px;
+  line-height: 1.1;
+}
+
+.bookingHero__shortcut span {
+  color: rgba(17, 17, 17, .72);
+  line-height: 1.5;
+}
+
+.bookingHero__shortcut:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, .08);
+}
+
+.bookingHero__shortcut--primary {
+  border-color: rgba(17, 17, 17, .16);
+  background: #111;
+  color: #fff;
+}
+
+.bookingHero__shortcut--primary span {
+  color: rgba(255, 255, 255, .74);
+}
+
+.bookingHero__story {
+  display: grid;
+  gap: 10px;
+  padding: 18px 20px;
+  border-radius: 22px;
+  border: 1px solid rgba(0, 0, 0, .08);
+  background: linear-gradient(180deg, rgba(255, 252, 248, .98), rgba(246, 240, 232, .94));
+}
+
+.bookingHero__story p {
+  margin: 0;
+  color: rgba(17, 17, 17, .72);
+  line-height: 1.6;
+}
+
+.bookingPrep {
+  padding: 14px 0 8px;
+}
+
+.bookingPrep__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.bookingPrep__card {
+  display: grid;
+  gap: 12px;
+  min-height: 100%;
+  padding: 22px;
+  border-radius: 24px;
+  border: 1px solid rgba(0, 0, 0, .08);
+  background: linear-gradient(180deg, #ffffff, #f6f1e9);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, .06);
+}
+
+.bookingPrep__card--accent {
+  background:
+    radial-gradient(circle at top right, rgba(244, 210, 167, .42), transparent 42%),
+    linear-gradient(180deg, #fff6ec, #f4ede3);
+}
+
+.bookingPrep__eyebrow {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #8a5f2a;
+}
+
+.bookingPrep__card h2 {
+  margin: 0;
+  font-size: clamp(24px, 3vw, 30px);
+  line-height: 1.04;
+  letter-spacing: -.03em;
+}
+
+.bookingPrep__card p {
+  margin: 0;
+  color: rgba(18, 18, 18, .78);
+  line-height: 1.62;
 }
 
 .bookingFlow {
@@ -538,6 +670,37 @@ button:focus-visible {
   color: #6e5130;
   font-size: 12px;
   font-weight: 800;
+}
+
+.bookingFlow__doctorLoading {
+  display: grid;
+  gap: 10px;
+  max-width: 240px;
+}
+
+.bookingFlow__doctorLoadingAvatar,
+.bookingFlow__doctorLoadingLine {
+  display: block;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(17, 17, 17, .07), rgba(17, 17, 17, .14), rgba(17, 17, 17, .07));
+  background-size: 220% 100%;
+  animation: skeletonShimmer 1.25s linear infinite;
+}
+
+.bookingFlow__doctorLoadingAvatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+}
+
+.bookingFlow__doctorLoadingLine {
+  height: 12px;
+  width: 180px;
+}
+
+.bookingFlow__doctorLoadingLine--title {
+  height: 16px;
+  width: 220px;
 }
 
 .bookingFlow__summaryGrid {
@@ -1412,9 +1575,21 @@ video.heroMediaEl {
   pointer-events: auto;
 }
 
+.heroContent__copy--experience {
+  max-width: 820px;
+}
+
 .heroContent__eyebrow,
 .heroContent__panelLabel {
   color: rgba(255, 231, 201, .9);
+}
+
+.heroContent__capsule {
+  border-color: rgba(255, 255, 255, .16);
+  background: rgba(255, 246, 233, .14);
+  color: rgba(255, 239, 218, .92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .heroContent__copy h1 {
@@ -1490,6 +1665,10 @@ video.heroMediaEl {
   color: #fff;
 }
 
+.heroContent__panelCard--accent {
+  background: linear-gradient(180deg, rgba(16, 16, 16, .48), rgba(16, 16, 16, .28));
+}
+
 .heroContent__panelCard--soft {
   background: rgba(255, 248, 238, .92);
   color: #111;
@@ -1512,6 +1691,97 @@ video.heroMediaEl {
 
 .heroContent__panelList {
   color: rgba(255, 255, 255, .82);
+}
+
+.heroContent__panel--experience {
+  gap: 12px;
+}
+
+.heroContent__program {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.heroContent__programCard {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .08);
+}
+
+.heroContent__programCard strong {
+  font-size: 14px;
+}
+
+.heroContent__programCard span {
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, .74);
+}
+
+.heroContent__asideNote {
+  display: grid;
+  gap: 8px;
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: rgba(10, 10, 10, .42);
+  border: 1px solid rgba(255, 255, 255, .12);
+  color: rgba(255, 255, 255, .88);
+}
+
+.heroContent__asideNote p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: inherit;
+}
+
+.homeEditorialRail {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.homeEditorialRail__card {
+  display: grid;
+  gap: 12px;
+  min-height: 100%;
+  padding: 22px;
+  border-radius: 24px;
+  border: 1px solid rgba(0, 0, 0, .08);
+  background: linear-gradient(180deg, #ffffff, #f4f1eb);
+  box-shadow: 0 20px 44px rgba(0, 0, 0, .06);
+}
+
+.homeEditorialRail__card--accent {
+  background:
+    radial-gradient(circle at top right, rgba(244, 210, 167, .42), transparent 46%),
+    linear-gradient(180deg, #fff6ec, #f1ece2);
+}
+
+.homeEditorialRail__eyebrow {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #8a5f2a;
+}
+
+.homeEditorialRail__card h2 {
+  margin: 0;
+  font-size: clamp(26px, 3vw, 34px);
+  line-height: 1.04;
+  letter-spacing: -.03em;
+}
+
+.homeEditorialRail__card p {
+  margin: 0;
+  color: rgba(18, 18, 18, .78);
+  line-height: 1.62;
 }
 
 .heroMediaNav {
@@ -3245,6 +3515,8 @@ video.heroMediaEl {
     grid-template-columns: repeat(2, 1fr)
   }
 
+  .bookingPrep__grid,
+  .homeEditorialRail,
   .pageNarrative__stats,
   .decisionCards {
     grid-template-columns: 1fr;
@@ -3275,7 +3547,9 @@ video.heroMediaEl {
   }
 
   .decisionCard,
-  .pageNarrative__stat {
+  .pageNarrative__stat,
+  .bookingPrep__card,
+  .homeEditorialRail__card {
     border-radius: 20px;
     padding: 18px;
   }
