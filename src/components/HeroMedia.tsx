@@ -6,9 +6,10 @@ import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "r
 
 type HeroMediaProps = {
     initialItems?: HeroMediaItem[];
+    initialVariant?: HeroMediaVariant;
 };
 
-export default function HeroMedia({ initialItems }: HeroMediaProps) {
+export default function HeroMedia({ initialItems, initialVariant }: HeroMediaProps) {
     const [index, setIndex] = useState(0);
     const [prevIndex, setPrevIndex] = useState<number | null>(null);
     const [aspectRatio, setAspectRatio] = useState<string>("16 / 9");
@@ -33,6 +34,7 @@ export default function HeroMedia({ initialItems }: HeroMediaProps) {
         if (Array.isArray(initialItems) && initialItems.length) return initialItems;
         return getLocalHeroItems(variant);
     }, [initialItems, variant]);
+    const effectiveVariant = initialVariant ?? variant;
 
     useEffect(() => {
         setIndex(0);
@@ -70,13 +72,14 @@ export default function HeroMedia({ initialItems }: HeroMediaProps) {
     useEffect(() => {
         if (items.length <= 1) return;
         if (item.type !== "image") return;
+        if (effectiveVariant === "mobile") return;
 
         const t = window.setTimeout(() => {
             goNext();
         }, 6000);
 
         return () => window.clearTimeout(t);
-    }, [goNext, items.length, item.type]);
+    }, [effectiveVariant, goNext, items.length, item.type]);
 
     const style = useMemo<HeroStyle>(() => {
         return { "--hero-ar": aspectRatio };
@@ -133,8 +136,9 @@ export default function HeroMedia({ initialItems }: HeroMediaProps) {
                             if (opts.kind !== "active") return;
                             goNext();
                         }}
-                        onLoadingComplete={(img) => {
+                        onLoad={(event) => {
                             if (opts.kind !== "active") return;
+                            const img = event.currentTarget;
                             if (img.naturalWidth > 0 && img.naturalHeight > 0) {
                                 setAspectRatio(`${img.naturalWidth} / ${img.naturalHeight}`);
                             }
@@ -165,7 +169,7 @@ export default function HeroMedia({ initialItems }: HeroMediaProps) {
             {prevIndex !== null && items[prevIndex] ? renderLayer(items[prevIndex]!, { layerKey: `prev:${items[prevIndex]!.src}:${prevIndex}`, kind: "prev" }) : null}
 
             {items.length > 1 ? (
-                <div className="heroMediaNav" aria-label="Selecionar mídia do banner" role="tablist">
+                <div className="heroMediaNav" aria-label="Selecionar mídia do banner">
                     {items.map((_, i) => {
                         const active = i === index;
                         return (

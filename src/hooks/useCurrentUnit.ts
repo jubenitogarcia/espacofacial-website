@@ -36,13 +36,17 @@ export function useCurrentUnit(): Unit | null {
 
     const unitFromPath = useMemo(() => findUnitBySlugOrAlias(slugFromPath), [slugFromPath]);
 
-    const [storedSlug, setStoredSlug] = useState<string | null>(() => {
-        if (typeof window === "undefined") return null;
-        // Requirement: opening the site on `/` should show the placeholder
-        // (do not auto-select from persisted storage on first paint).
-        if (window.location?.pathname === "/") return null;
-        return getStoredUnitSlug();
-    });
+    const [storedSlug, setStoredSlug] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        // Keep SSR and first client render aligned, then hydrate persisted choice after mount.
+        if (window.location?.pathname === "/") {
+            setStoredSlug(null);
+            return;
+        }
+        setStoredSlug(getStoredUnitSlug());
+    }, [pathname]);
 
     useEffect(() => {
         function onUnitChange(e: Event) {

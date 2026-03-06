@@ -3,6 +3,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FloatingContact from "@/components/FloatingContact";
+import Link from "next/link";
 
 export default function Error({
     error,
@@ -23,9 +24,9 @@ export default function Error({
                     <button className="pill" onClick={() => reset()} type="button">
                         Tentar novamente
                     </button>
-                    <a className="pill" href="/unidades">
+                    <Link className="pill" href="/unidades">
                         Ver unidades
-                    </a>
+                    </Link>
                 </div>
                 <p className="small" style={{ marginTop: 14 }}>
                     {/* Ajuda diagnóstico sem expor detalhes ao usuário final */}

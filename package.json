@@ -8,9 +8,15 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "next lint",
+    "lint": "eslint src scripts tests workers/esfa-redirector --ext .js,.mjs,.ts,.tsx",
     "smoke": "node scripts/smoke.mjs",
+    "smoke:strict": "SMOKE_REQUIRE_AGENDA=1 node scripts/smoke.mjs",
     "test:agenda": "tsx --test tests/agendaDb.test.ts",
+    "quality:check": "npm run lint && npm run typecheck && npm run test:agenda && npm run build && npm run smoke",
+    "quality:check:strict": "npm run lint && npm run typecheck && npm run test:agenda && npm run build && npm run smoke:strict",
+    "quality:ci": "npm ci && npm run quality:check",
+    "audit:360": "node scripts/audit360.mjs",
+    "audit:360:ci": "npm ci && npm run audit:360",
     "cf:security": "node scripts/cloudflare-sync-security.mjs",
     "tail": "wrangler tail espacofacial-site --format pretty --sampling-rate 0.25",
     "tail:json": "wrangler tail espacofacial-site --format json",
@@ -20,24 +26,37 @@
   },
   "dependencies": {
     "@svg-maps/brazil": "^2.0.0",
-    "next": "14.2.35",
-    "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "next": "^16.1.6",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
   },
   "devDependencies": {
-    "@opennextjs/cloudflare": "^1.15.1",
-    "@types/node": "20.14.10",
-    "@types/react": "18.3.3",
-    "@types/react-dom": "18.3.0",
-    "eslint": "8.57.0",
-    "eslint-config-next": "14.2.35",
+    "@axe-core/playwright": "^4.11.0",
+    "@opennextjs/cloudflare": "^1.17.1",
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "cheerio": "^1.1.2",
+    "eslint": "^9",
+    "eslint-config-next": "^16.1.6",
+    "lighthouse": "^13.0.3",
+    "pixelmatch": "^7.1.0",
+    "playwright": "^1.56.1",
+    "pngjs": "^7.0.0",
     "tsx": "^4.19.2",
-    "typescript": "5.5.4",
-    "wrangler": "^4.60.0"
+    "typescript": "^5.9.3",
+    "wrangler": "^4.70.0"
   },
   "overrides": {
     "@next/eslint-plugin-next": {
       "glob": "10.5.0"
+    },
+    "@opennextjs/cloudflare": {
+      "@isaacs/brace-expansion": "5.0.1",
+      "minimatch": "10.2.4"
+    },
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "9.0.7"
     },
     "wrangler": {
       "undici": "7.18.2"

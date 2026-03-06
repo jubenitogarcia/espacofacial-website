@@ -1,4 +1,45 @@
+import fs from "node:fs";
+
 const baseUrl = (process.env.SMOKE_BASE_URL ?? "https://espacofacial.com").replace(/\/$/, "");
+
+function normalizeEnvValue(value) {
+    if (typeof value !== "string") return "";
+    const trimmed = value.trim();
+    if (!trimmed) return "";
+    if (
+        (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+        (trimmed.startsWith("'") && trimmed.endsWith("'"))
+    ) {
+        return trimmed.slice(1, -1).trim();
+    }
+    return trimmed;
+}
+
+function readEnvValueFromFiles(key, files = [".env.local", ".dev.vars"]) {
+    for (const file of files) {
+        if (!fs.existsSync(file)) continue;
+        const content = fs.readFileSync(file, "utf8");
+        for (const line of content.split(/\r?\n/)) {
+            const trimmed = line.trim();
+            if (!trimmed || trimmed.startsWith("#")) continue;
+            const idx = trimmed.indexOf("=");
+            if (idx <= 0) continue;
+            const k = trimmed.slice(0, idx).trim();
+            if (k !== key) continue;
+            const value = normalizeEnvValue(trimmed.slice(idx + 1));
+            if (value) return value;
+        }
+    }
+    return "";
+}
+
+function firstNonEmpty(...values) {
+    for (const value of values) {
+        const normalized = normalizeEnvValue(value);
+        if (normalized) return normalized;
+    }
+    return "";
+}
 
 async function fetchHead(path, options = {}) {
     const res = await fetch(`${baseUrl}${path}`, {
@@ -22,8 +63,15 @@ async function run() {
     console.log(`Smoke base URL: ${baseUrl}`);
 
     const isLocal = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(baseUrl);
-    const agendaToken = (process.env.SMOKE_AGENDA_TOKEN ?? "").trim();
+    const agendaToken = firstNonEmpty(
+        process.env.SMOKE_AGENDA_TOKEN,
+        process.env.AGENDA_SYNC_TOKEN,
+        readEnvValueFromFiles("SMOKE_AGENDA_TOKEN"),
+        readEnvValueFromFiles("AGENDA_SYNC_TOKEN"),
+    );
     const agendaUnit = (process.env.SMOKE_AGENDA_UNIT ?? "barrashoppingsul").trim();
+    const requireAgendaCheck = /^(1|true|yes)$/i.test((process.env.SMOKE_REQUIRE_AGENDA ?? "").trim());
+    const skipAgendaCheck = /^(1|true|yes)$/i.test((process.env.SMOKE_SKIP_AGENDA ?? "").trim());
 
     const now = new Date();
     const tomorrow = new Date(now);
@@ -62,7 +110,9 @@ async function run() {
         }
     }
 
-    if (agendaToken) {
+    if (skipAgendaCheck) {
+        console.warn("WARN: SMOKE_SKIP_AGENDA=1; skipping /api/agenda check");
+    } else if (agendaToken) {
         const url = `/api/agenda?unit_slug=${encodeURIComponent(agendaUnit)}&date_from=${encodeURIComponent(agendaFrom)}&date_to=${encodeURIComponent(agendaTo)}`;
         const res = await fetch(`${baseUrl}${url}`, {
             headers: { "x-agenda-sync-token": agendaToken },
@@ -71,7 +121,11 @@ async function run() {
         assert(res.status === 200, `${url} expected 200, got ${res.status}`);
         assert(/\"ok\"\s*:\s*true/.test(text), `${url} should return ok:true`);
     } else {
-        console.warn("WARN: SMOKE_AGENDA_TOKEN not set; skipping /api/agenda check");
+        const message = "SMOKE_AGENDA_TOKEN (or AGENDA_SYNC_TOKEN) not set; skipping /api/agenda check";
+        if (requireAgendaCheck) {
+            throw new Error(message);
+        }
+        console.warn(`WARN: ${message}`);
     }
 
     // 404 (some edge adapters return 200 for the not-found document; verify via body markers)

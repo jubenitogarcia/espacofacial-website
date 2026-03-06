@@ -1,11 +1,23 @@
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+
 /** @type {import('next').NextConfig} */
 const buildSha = process.env.NEXT_PUBLIC_BUILD_SHA || "";
 const buildTime = process.env.NEXT_PUBLIC_BUILD_TIME || "";
 
+initOpenNextCloudflareForDev();
+
 const nextConfig = {
   poweredByHeader: false,
   images: {
-    // We'll serve images from /public for now.
+    // Keep explicit local image patterns so cache-busted local assets remain valid in Next 16.
+    localPatterns: [
+      { pathname: "/logo.png" },
+      { pathname: "/logo-white.png" },
+      { pathname: "/mark.png" },
+      { pathname: "/mark-white.png" },
+      { pathname: "/images/**" },
+      { pathname: "/icon.svg" },
+    ],
     remotePatterns: [
       {
         protocol: "https",

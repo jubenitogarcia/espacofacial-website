@@ -127,7 +127,19 @@ function extractInstagramHandle(url: string | null): string | null {
     }
 }
 
-export default function UnitDoctorsGrid() {
+type UnitDoctorsGridProps = {
+    mode?: "selection" | "directory";
+};
+
+function formatUnitsLabel(units: string[]): string {
+    const cleaned = units.map((unit) => unit.trim()).filter(Boolean);
+    if (cleaned.length === 0) return "Unidade a confirmar";
+    if (cleaned.length === 1) return cleaned[0] ?? "Unidade a confirmar";
+    if (cleaned.length === 2) return `${cleaned[0]} e ${cleaned[1]}`;
+    return `${cleaned[0]}, ${cleaned[1]} e +${cleaned.length - 2}`;
+}
+
+export default function UnitDoctorsGrid({ mode = "selection" }: UnitDoctorsGridProps) {
     const unit = useCurrentUnit();
     const unitLabel = unitLabelFromSlug(unit?.slug);
 
@@ -193,10 +205,12 @@ export default function UnitDoctorsGrid() {
 
     const filtered = useMemo(() => {
         if (!members) return null;
-        if (!unitLabel) return [];
+        if (!unitLabel) {
+            return mode === "directory" ? members : [];
+        }
 
         return members.filter((m) => m.units.map((u) => u.toLowerCase()).includes(unitLabel.toLowerCase()));
-    }, [members, unitLabel]);
+    }, [members, mode, unitLabel]);
 
     const loadMoreInstagram = useCallback(async () => {
         if (!activeInstagram || !instagramUserId || !instagramNextCursor || instagramLoadingMore) return;
@@ -312,7 +326,7 @@ export default function UnitDoctorsGrid() {
         return () => observer.disconnect();
     }, [activeInstagram, instagramHasMore, instagramItems.length, instagramLoading, instagramLoadingMore, loadMoreInstagram]);
 
-    if (!unitLabel) {
+    if (!unitLabel && mode !== "directory") {
         return (
             <>
                 <p className="sectionSub">Selecione a unidade para conhecer nossos doutores.</p>
@@ -321,7 +335,16 @@ export default function UnitDoctorsGrid() {
         );
     }
 
-    const selectedUnitSubtitle = <p className="sectionSub">Conheça nossos doutores, veja seus perfis e procedimentos realizados.</p>;
+    const selectedUnitSubtitle = (
+        <>
+            <p className="sectionSub">
+                {unitLabel
+                    ? "Conheça nossos doutores, veja seus perfis e siga para o agendamento já com a decisão encaminhada."
+                    : "Veja o diretório completo e selecione a unidade no topo se quiser filtrar a agenda automaticamente."}
+            </p>
+            {!unitLabel && mode === "directory" ? <UnitQuickButtons placement="doctors_quick" /> : null}
+        </>
+    );
 
     if (filtered === null) {
         return (
@@ -356,7 +379,7 @@ export default function UnitDoctorsGrid() {
                     const doctorSlug = doctorSlugFromTeamMember({ name: fullName, instagramHandle: handle });
                     const bookingHref = unit?.slug
                         ? `/agendamento?unit=${encodeURIComponent(unit.slug)}&doctor=${encodeURIComponent(doctorSlug)}`
-                        : "/agendamento";
+                        : `/agendamento?doctor=${encodeURIComponent(doctorSlug)}`;
                     const openInstagram = () => {
                         if (!instagramHandle) return;
                         setActiveInstagram({ name: fullName, handle: instagramHandle });
@@ -370,7 +393,7 @@ export default function UnitDoctorsGrid() {
                     return (
                         <article
                             key={`${fullName}-${href ?? "noinsta"}`}
-                            className="card"
+                            className="card doctorDirectoryCard"
                             style={{ display: "block" }}
                         >
                             <div style={{ display: "flex", gap: 12, alignItems: "center", justifyContent: "space-between" }}>
@@ -390,7 +413,7 @@ export default function UnitDoctorsGrid() {
                                         <div style={{ flex: 1, minWidth: 0 }}>
                                             <h3 style={{ margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{fullName}</h3>
                                             <p style={{ margin: 0, color: "var(--muted)", fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                                {nickname || unitLabel}
+                                                {nickname || formatUnitsLabel(d.units)}
                                             </p>
                                         </div>
                                     </button>
@@ -404,42 +427,44 @@ export default function UnitDoctorsGrid() {
                                         <div style={{ flex: 1, minWidth: 0 }}>
                                             <h3 style={{ margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{fullName}</h3>
                                             <p style={{ margin: 0, color: "var(--muted)", fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                                {nickname || unitLabel}
+                                                {nickname || formatUnitsLabel(d.units)}
                                             </p>
                                         </div>
                                     </div>
                                 )}
+                            </div>
 
-                                <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-                                    {instagramHandle ? (
-                                        <button
-                                            className="iconBtn"
-                                            type="button"
-                                            onClick={openInstagram}
-                                            aria-label="Instagram"
-                                            title="Instagram"
-                                        >
-                                            {instagramIcon()}
-                                        </button>
-                                    ) : null}
+                            <div className="doctorDirectoryCard__meta">
+                                <span className="doctorDirectoryCard__pill">
+                                    {d.units.length > 1 ? `${d.units.length} unidades` : formatUnitsLabel(d.units)}
+                                </span>
+                                <span className="doctorDirectoryCard__pill">{href ? "Perfil consultável" : "Agenda direta"}</span>
+                                <span className="doctorDirectoryCard__pill">{unitLabel ? `Atende em ${unitLabel}` : "Escolha livre de profissional"}</span>
+                            </div>
 
-                                    <Link
-                                        className="iconBtn"
-                                        href={bookingHref}
-                                        onClick={() =>
-                                            trackBookingStart({
-                                                placement: "doctor_grid",
-                                                unitSlug: unit?.slug ?? null,
-                                                doctorName: fullName,
-                                                bookingUrl: bookingHref,
-                                            })
-                                        }
-                                        aria-label={`Agendar com ${fullName}`}
-                                        title="Agendar"
-                                    >
-                                        {bookingIcon()}
-                                    </Link>
-                                </div>
+                            <div className="doctorDirectoryCard__actions">
+                                {href ? (
+                                    <button className="doctorDirectoryCard__action" type="button" onClick={openInstagram}>
+                                        {instagramIcon()}
+                                        <span>Ver perfil</span>
+                                    </button>
+                                ) : null}
+
+                                <Link
+                                    className="doctorDirectoryCard__action doctorDirectoryCard__action--primary"
+                                    href={bookingHref}
+                                    onClick={() =>
+                                        trackBookingStart({
+                                            placement: "doctor_grid",
+                                            unitSlug: unit?.slug ?? null,
+                                            doctorName: fullName,
+                                            bookingUrl: bookingHref,
+                                        })
+                                    }
+                                >
+                                    {bookingIcon()}
+                                    <span>Agendar</span>
+                                </Link>
                             </div>
                         </article>
                     );

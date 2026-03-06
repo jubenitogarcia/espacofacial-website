@@ -24,11 +24,18 @@ export const LOCAL_HERO_ITEMS_DESKTOP: HeroMediaItem[] = [
     },
 ];
 
-export const LOCAL_HERO_ITEMS_MOBILE: HeroMediaItem[] = Array.from({ length: 27 }, (_, idx) => ({
-    type: "image",
-    src: `/images/hero/mobile/banner-${String(idx + 1).padStart(2, "0")}.png`,
-    alt: "Espaco Facial mobile banner",
-}));
+export const LOCAL_HERO_ITEMS_MOBILE: HeroMediaItem[] = [
+    {
+        type: "image",
+        src: "/images/hero/mobile/banner-01-optimized.jpg",
+        alt: "Espaco Facial mobile banner",
+    },
+    ...Array.from({ length: 26 }, (_, idx) => ({
+        type: "image" as const,
+        src: `/images/hero/mobile/banner-${String(idx + 2).padStart(2, "0")}.png`,
+        alt: "Espaco Facial mobile banner",
+    })),
+];
 
 export function getLocalHeroItems(variant: HeroMediaVariant): HeroMediaItem[] {
     return variant === "mobile" ? LOCAL_HERO_ITEMS_MOBILE : LOCAL_HERO_ITEMS_DESKTOP;

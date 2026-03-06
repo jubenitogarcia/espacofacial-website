@@ -7,9 +7,16 @@ import { doctors } from "@/data/doctors";
 import DoctorAgendarPill from "@/components/DoctorAgendarPill";
 
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://espacofacial.com").replace(/\/$/, "");
+export const revalidate = 3600;
+export const dynamicParams = false;
 
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  const doc = doctors.find((d) => d.slug === params.slug);
+export function generateStaticParams() {
+  return doctors.map((doc) => ({ slug: doc.slug }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const doc = doctors.find((d) => d.slug === slug);
   if (!doc) return {};
 
   const title = doc.name;
@@ -37,8 +44,9 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   };
 }
 
-export default function DoctorPage({ params }: { params: { slug: string } }) {
-  const doc = doctors.find((d) => d.slug === params.slug);
+export default async function DoctorPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const doc = doctors.find((d) => d.slug === slug);
   if (!doc) return notFound();
 
   return (

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAgendaDb, toUnitSlug } from "@/lib/agendaDb";
+import { getRuntimeSecret } from "@/lib/runtimeSecrets";
 
 export const dynamic = "force-dynamic";
 
@@ -29,8 +30,8 @@ function readToken(request: Request): string {
     return (request.headers.get("x-agenda-sync-token") ?? "").trim();
 }
 
-function assertToken(request: Request): boolean {
-    const secret = (process.env.AGENDA_SYNC_TOKEN ?? "").trim();
+async function assertToken(request: Request): Promise<boolean> {
+    const secret = await getRuntimeSecret("AGENDA_SYNC_TOKEN");
     if (process.env.NODE_ENV === "production" && !secret) {
         return false;
     }
@@ -59,7 +60,7 @@ function parsePositiveInt(value: string | null): number | null {
 }
 
 export async function GET(request: Request) {
-    if (!assertToken(request)) {
+    if (!(await assertToken(request))) {
         return json({ ok: false, error: "unauthorized" }, { status: 401 });
     }
 

@@ -160,24 +160,6 @@ export function middleware(req: NextRequest) {
             return NextResponse.redirect(destUrl.toString(), { status: 301 });
         }
 
-        const simpleRedirects: Record<string, string> = {
-            "/sobre": "#doutores",
-            "/unidades": "#unidades",
-            "/doutores": "#doutores",
-        };
-
-        if (simpleRedirects[pathname]) {
-            url.pathname = "/";
-            url.hash = simpleRedirects[pathname];
-            return NextResponse.redirect(url, 308);
-        }
-
-        const unitMatch = pathname.match(/^\/unidades\/([^/]+)$/);
-        if (unitMatch) {
-            url.pathname = "/";
-            url.hash = "#unidades";
-            return NextResponse.redirect(url, 308);
-        }
     }
 
     return NextResponse.next();

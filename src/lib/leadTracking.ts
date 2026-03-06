@@ -9,6 +9,11 @@ export type LeadPlacement =
     | "doctor"
     | "unit_modal"
     | "doctor_grid"
+    | "home_hero"
+    | "home_panel"
+    | "units_page"
+    | "doctors_page"
+    | "booking_page"
     | "unknown";
 
 function landingPeriodUtc(): string {

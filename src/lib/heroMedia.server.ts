@@ -54,7 +54,6 @@ async function getFromDriveFolder(folderId: string): Promise<HeroMediaItem[]> {
         return items;
     } catch (err) {
         const message = err instanceof Error ? err.message : "unknown_error";
-        // eslint-disable-next-line no-console
         console.warn("hero-media: drive folder load failed", message);
         return [];
     }
