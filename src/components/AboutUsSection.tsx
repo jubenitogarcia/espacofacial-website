@@ -884,7 +884,8 @@ export default function AboutUsSection() {
                                 src={activePhoto.src}
                                 alt={activePhoto.alt}
                                 width={1600}
-                                height={1200}
+                                height={900}
+                                loading="lazy"
                                 unoptimized
                             />
                             {activePhoto.googleUrl ? (

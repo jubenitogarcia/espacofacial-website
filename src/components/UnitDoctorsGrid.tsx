@@ -4,10 +4,19 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCurrentUnit } from "@/hooks/useCurrentUnit";
-import { useTeamDirectory } from "@/hooks/useTeamDirectory";
 import { doctorSlugFromTeamMember } from "@/lib/doctorSlug";
 import { trackBookingStart, trackDoctorInstagramClick } from "@/lib/leadTracking";
 import UnitQuickButtons from "@/components/UnitQuickButtons";
+
+type TeamMember = {
+    name: string;
+    nickname: string | null;
+    units: string[];
+    role: string;
+    roles: string[];
+    instagramHandle: string | null;
+    instagramUrl: string | null;
+};
 
 type InstagramMedia = {
     id: string;
@@ -118,50 +127,12 @@ function extractInstagramHandle(url: string | null): string | null {
     }
 }
 
-type UnitDoctorsGridProps = {
-    mode?: "selection" | "directory";
-};
-
-function formatUnitsLabel(units: string[]): string {
-    const cleaned = units.map((unit) => unit.trim()).filter(Boolean);
-    if (cleaned.length === 0) return "Unidade a confirmar";
-    if (cleaned.length === 1) return cleaned[0] ?? "Unidade a confirmar";
-    if (cleaned.length === 2) return `${cleaned[0]} e ${cleaned[1]}`;
-    return `${cleaned[0]}, ${cleaned[1]} e +${cleaned.length - 2}`;
-}
-
-function DoctorsGridLoadingState() {
-    return (
-        <div className="grid" aria-hidden="true">
-            {Array.from({ length: 3 }).map((_, index) => (
-                <div key={index} className="card cardSkeleton doctorDirectoryCard">
-                    <div className="cardSkeleton__row">
-                        <span className="cardSkeleton__avatar" />
-                        <div className="cardSkeleton__lines">
-                            <span className="cardSkeleton__line cardSkeleton__line--title" />
-                            <span className="cardSkeleton__line cardSkeleton__line--body" />
-                        </div>
-                    </div>
-                    <div className="cardSkeleton__pills">
-                        <span className="cardSkeleton__pill" />
-                        <span className="cardSkeleton__pill" />
-                        <span className="cardSkeleton__pill" />
-                    </div>
-                    <div className="cardSkeleton__actions">
-                        <span className="cardSkeleton__button" />
-                        <span className="cardSkeleton__button cardSkeleton__button--primary" />
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
-}
-
-export default function UnitDoctorsGrid({ mode = "selection" }: UnitDoctorsGridProps) {
+export default function UnitDoctorsGrid() {
     const unit = useCurrentUnit();
     const unitLabel = unitLabelFromSlug(unit?.slug);
-    const { members, error: membersError, loading: membersLoading } = useTeamDirectory();
 
+    const [members, setMembers] = useState<TeamMember[] | null>(null);
+    const [membersError, setMembersError] = useState<string | null>(null);
     const [activeInstagram, setActiveInstagram] = useState<{
         name: string;
         handle: string;
@@ -177,6 +148,32 @@ export default function UnitDoctorsGrid({ mode = "selection" }: UnitDoctorsGridP
     const [instagramReloadToken, setInstagramReloadToken] = useState(0);
     const instagramScrollRef = useRef<HTMLDivElement | null>(null);
     const instagramInfiniteSentinelRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        async function load() {
+            try {
+                const res = await fetch("/api/equipe", { cache: "no-store" });
+                const json = (await res.json().catch(() => null)) as
+                    | { ok?: boolean; members?: TeamMember[]; error?: { code?: string; status?: number } }
+                    | null;
+                if (cancelled) return;
+                const nextMembers = Array.isArray(json?.members) ? json!.members! : [];
+                setMembers(nextMembers);
+                setMembersError(json && json.ok === false ? json.error?.code ?? "unknown" : null);
+            } catch {
+                if (cancelled) return;
+                setMembers([]);
+                setMembersError("exception");
+            }
+        }
+
+        load();
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     useEffect(() => {
         if (!activeInstagram) return;
@@ -196,12 +193,10 @@ export default function UnitDoctorsGrid({ mode = "selection" }: UnitDoctorsGridP
 
     const filtered = useMemo(() => {
         if (!members) return null;
-        if (!unitLabel) {
-            return mode === "directory" ? members : [];
-        }
+        if (!unitLabel) return [];
 
         return members.filter((m) => m.units.map((u) => u.toLowerCase()).includes(unitLabel.toLowerCase()));
-    }, [members, mode, unitLabel]);
+    }, [members, unitLabel]);
 
     const loadMoreInstagram = useCallback(async () => {
         if (!activeInstagram || !instagramUserId || !instagramNextCursor || instagramLoadingMore) return;
@@ -317,7 +312,7 @@ export default function UnitDoctorsGrid({ mode = "selection" }: UnitDoctorsGridP
         return () => observer.disconnect();
     }, [activeInstagram, instagramHasMore, instagramItems.length, instagramLoading, instagramLoadingMore, loadMoreInstagram]);
 
-    if (!unitLabel && mode !== "directory") {
+    if (!unitLabel) {
         return (
             <>
                 <p className="sectionSub">Selecione a unidade para conhecer nossos doutores.</p>
@@ -326,22 +321,13 @@ export default function UnitDoctorsGrid({ mode = "selection" }: UnitDoctorsGridP
         );
     }
 
-    const selectedUnitSubtitle = (
-        <>
-            <p className="sectionSub">
-                {unitLabel
-                    ? "Conheça nossos doutores, veja seus perfis e siga para o agendamento já com a decisão encaminhada."
-                    : "Veja o diretório completo e selecione a unidade no topo se quiser filtrar a agenda automaticamente."}
-            </p>
-            {!unitLabel && mode === "directory" ? <UnitQuickButtons placement="doctors_quick" /> : null}
-        </>
-    );
+    const selectedUnitSubtitle = <p className="sectionSub">Conheça nossos doutores, veja seus perfis e procedimentos realizados.</p>;
 
-    if (filtered === null || membersLoading) {
+    if (filtered === null) {
         return (
             <>
                 {selectedUnitSubtitle}
-                <DoctorsGridLoadingState />
+                <div className="card">Carregando equipe…</div>
             </>
         );
     }
@@ -370,7 +356,7 @@ export default function UnitDoctorsGrid({ mode = "selection" }: UnitDoctorsGridP
                     const doctorSlug = doctorSlugFromTeamMember({ name: fullName, instagramHandle: handle });
                     const bookingHref = unit?.slug
                         ? `/agendamento?unit=${encodeURIComponent(unit.slug)}&doctor=${encodeURIComponent(doctorSlug)}`
-                        : `/agendamento?doctor=${encodeURIComponent(doctorSlug)}`;
+                        : "/agendamento";
                     const openInstagram = () => {
                         if (!instagramHandle) return;
                         setActiveInstagram({ name: fullName, handle: instagramHandle });
@@ -384,7 +370,7 @@ export default function UnitDoctorsGrid({ mode = "selection" }: UnitDoctorsGridP
                     return (
                         <article
                             key={`${fullName}-${href ?? "noinsta"}`}
-                            className="card doctorDirectoryCard"
+                            className="card"
                             style={{ display: "block" }}
                         >
                             <div style={{ display: "flex", gap: 12, alignItems: "center", justifyContent: "space-between" }}>
@@ -404,7 +390,7 @@ export default function UnitDoctorsGrid({ mode = "selection" }: UnitDoctorsGridP
                                         <div style={{ flex: 1, minWidth: 0 }}>
                                             <h3 style={{ margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{fullName}</h3>
                                             <p style={{ margin: 0, color: "var(--muted)", fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                                {nickname || formatUnitsLabel(d.units)}
+                                                {nickname || unitLabel}
                                             </p>
                                         </div>
                                     </button>
@@ -418,44 +404,42 @@ export default function UnitDoctorsGrid({ mode = "selection" }: UnitDoctorsGridP
                                         <div style={{ flex: 1, minWidth: 0 }}>
                                             <h3 style={{ margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{fullName}</h3>
                                             <p style={{ margin: 0, color: "var(--muted)", fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                                {nickname || formatUnitsLabel(d.units)}
+                                                {nickname || unitLabel}
                                             </p>
                                         </div>
                                     </div>
                                 )}
-                            </div>
 
-                            <div className="doctorDirectoryCard__meta">
-                                <span className="doctorDirectoryCard__pill">
-                                    {d.units.length > 1 ? `${d.units.length} unidades` : formatUnitsLabel(d.units)}
-                                </span>
-                                <span className="doctorDirectoryCard__pill">{href ? "Perfil consultável" : "Agenda direta"}</span>
-                                <span className="doctorDirectoryCard__pill">{unitLabel ? `Atende em ${unitLabel}` : "Escolha livre de profissional"}</span>
-                            </div>
+                                <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                                    {instagramHandle ? (
+                                        <button
+                                            className="iconBtn"
+                                            type="button"
+                                            onClick={openInstagram}
+                                            aria-label="Instagram"
+                                            title="Instagram"
+                                        >
+                                            {instagramIcon()}
+                                        </button>
+                                    ) : null}
 
-                            <div className="doctorDirectoryCard__actions">
-                                {href ? (
-                                    <button className="doctorDirectoryCard__action" type="button" onClick={openInstagram}>
-                                        {instagramIcon()}
-                                        <span>Ver perfil</span>
-                                    </button>
-                                ) : null}
-
-                                <Link
-                                    className="doctorDirectoryCard__action doctorDirectoryCard__action--primary"
-                                    href={bookingHref}
-                                    onClick={() =>
-                                        trackBookingStart({
-                                            placement: "doctor_grid",
-                                            unitSlug: unit?.slug ?? null,
-                                            doctorName: fullName,
-                                            bookingUrl: bookingHref,
-                                        })
-                                    }
-                                >
-                                    {bookingIcon()}
-                                    <span>Agendar</span>
-                                </Link>
+                                    <Link
+                                        className="iconBtn"
+                                        href={bookingHref}
+                                        onClick={() =>
+                                            trackBookingStart({
+                                                placement: "doctor_grid",
+                                                unitSlug: unit?.slug ?? null,
+                                                doctorName: fullName,
+                                                bookingUrl: bookingHref,
+                                            })
+                                        }
+                                        aria-label={`Agendar com ${fullName}`}
+                                        title="Agendar"
+                                    >
+                                        {bookingIcon()}
+                                    </Link>
+                                </div>
                             </div>
                         </article>
                     );
@@ -556,7 +540,7 @@ export default function UnitDoctorsGrid({ mode = "selection" }: UnitDoctorsGridP
                                                 alt={`Publicação de ${activeInstagram.name}`}
                                                 width={1200}
                                                 height={1200}
-                                                sizes="(max-width: 860px) 100vw, 860px"
+                                                loading="lazy"
                                                 unoptimized
                                             />
                                         )}
@@ -582,9 +566,9 @@ export default function UnitDoctorsGrid({ mode = "selection" }: UnitDoctorsGridP
                                                     className="instagramMediaThumb"
                                                     src={item.thumbnailUrl}
                                                     alt={`Publicação de ${activeInstagram.name}`}
-                                                    width={480}
-                                                    height={480}
-                                                    sizes="(max-width: 900px) 33vw, 240px"
+                                                    width={320}
+                                                    height={320}
+                                                    loading="lazy"
                                                     unoptimized
                                                 />
                                                 {label !== "Post" ? <span className="instagramMediaBadge">{label}</span> : null}
