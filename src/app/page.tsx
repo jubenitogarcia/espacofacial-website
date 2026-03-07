@@ -3,8 +3,8 @@ import Footer from "@/components/Footer";
 import FloatingContact from "@/components/FloatingContact";
 import UnitsMapSection from "@/components/UnitsMapSection";
 import UnitDoctorsGrid from "@/components/UnitDoctorsGrid";
+import HeroMedia from "@/components/HeroMedia";
 import AboutUsSection from "@/components/AboutUsSection";
-import HomeHeroExperience from "@/components/HomeHeroExperience";
 import { getHeroMediaItems, heroVariantFromUserAgent } from "@/lib/heroMedia.server";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
@@ -13,55 +13,38 @@ const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://espacofacial.com")
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: "Clínica de Harmonização Facial e Corporal",
-  description:
-    "Espaço Facial: harmonização facial e corporal com equipe especializada. Escolha sua unidade e agende seu atendimento com segurança.",
+  title: "Espaço Facial",
+  description: "Harmonização facial e corporal. Selecione sua unidade e agende.",
   robots: {
     index: true,
     follow: true,
   },
   alternates: { canonical: `${siteUrl}/` },
   openGraph: {
-    title: "Espaço Facial | Clínica de Harmonização Facial e Corporal",
-    description:
-      "Espaço Facial: harmonização facial e corporal com equipe especializada. Escolha sua unidade e agende seu atendimento com segurança.",
+    title: "Espaço Facial",
+    description: "Harmonização facial e corporal. Selecione sua unidade e agende.",
     url: `${siteUrl}/`,
     type: "website",
   },
 };
 
 export default async function HomePage() {
-  const requestHeaders = await headers();
-  const ua = requestHeaders.get("user-agent");
+  const ua = (await headers()).get("user-agent");
   const variant = heroVariantFromUserAgent(ua);
   const { items: heroItems } = await getHeroMediaItems({ variant });
 
-    return (
-        <>
-            <Header />
-            <HomeHeroExperience heroItems={heroItems} initialMediaVariant={variant} />
+  return (
+    <>
+      <Header />
+
+      <h1 className="srOnly">Espaço Facial</h1>
+
+      <section className="hero" aria-label="Destaque">
+        <HeroMedia initialItems={heroItems} />
+        <div className="heroOverlay" />
+      </section>
 
       <main className="container">
-        <section className="homeEditorialRail" aria-label="Teses da marca">
-          <article className="homeEditorialRail__card">
-            <span className="homeEditorialRail__eyebrow">Tese 01</span>
-            <h2>Harmonização não precisa parecer procedimento.</h2>
-            <p>O projeto clínico parte da leitura do rosto e do corpo, não do cardápio de técnicas.</p>
-          </article>
-
-          <article className="homeEditorialRail__card homeEditorialRail__card--accent">
-            <span className="homeEditorialRail__eyebrow">Tese 02</span>
-            <h2>Boa estética combina repertório visual com disciplina de indicação.</h2>
-            <p>Decisão forte é saber o que fazer, em que ritmo fazer e o que não precisa entrar no plano.</p>
-          </article>
-
-          <article className="homeEditorialRail__card">
-            <span className="homeEditorialRail__eyebrow">Tese 03</span>
-            <h2>O site já deve funcionar como triagem inteligente.</h2>
-            <p>Unidade, especialista e agenda aparecem como uma mesma conversa, não como páginas soltas.</p>
-          </article>
-        </section>
-
         <AboutUsSection />
 
         <section id="doutores" className="pageSection" style={{ marginTop: 50 }}>
