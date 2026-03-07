@@ -1,0 +1,18 @@
+[
+  {
+    "pillar": "security",
+    "severity": "high",
+    "title": "Vulnerabilidades de produção pendentes",
+    "details": "npm audit reportou 0 critical e 1 high em produção.",
+    "page": null,
+    "evidence": "reports/quality/2026-03-05T12-13-30-518Z-audit360/npm-audit-prod.json"
+  },
+  {
+    "pillar": "performance",
+    "severity": "low",
+    "title": "Uso de <img> detectado no lint",
+    "details": "Converter para next/image pode melhorar LCP e otimização de imagens.",
+    "page": null,
+    "evidence": "reports/quality/2026-03-05T12-13-30-518Z-audit360/logs/quality-check.log"
+  }
+]

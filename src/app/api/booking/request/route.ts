@@ -102,6 +102,22 @@ async function tryPostWebhook(payload: unknown) {
     }
 }
 
+function deriveServiceCandidates(service: { name: string; subtitle?: string | null }): string[] {
+    const values: string[] = [];
+    const push = (value: string | null | undefined) => {
+        const text = sanitizeOneLine(value ?? "");
+        if (!text || values.includes(text)) return;
+        values.push(text);
+    };
+
+    if (service.subtitle) {
+        for (const part of service.subtitle.split(/[,\n;|]+/)) push(part);
+    }
+
+    push(service.name);
+    return values;
+}
+
 async function expireStaleOverlaps(db: Awaited<ReturnType<typeof getBookingDb>>, overlaps: Array<{ id: string; status: string; confirm_by_ms: number }>) {
     const now = nowMs();
     for (const o of overlaps) {
@@ -410,7 +426,13 @@ export async function POST(request: Request) {
             doctorName: safeDoctorName,
             durationMinutes,
             includes: body.includes ?? null,
-            service: { id: service.id, name: service.name },
+            service: {
+                id: service.id,
+                name: service.name,
+                subtitle: service.subtitle ?? null,
+                candidates: deriveServiceCandidates(service),
+            },
+            procedure: { id: service.id, name: service.name },
             startAtMs,
             endAtMs,
             confirmByMs,

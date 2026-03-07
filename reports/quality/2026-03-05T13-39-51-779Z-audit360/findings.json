@@ -1,0 +1,26 @@
+[
+  {
+    "pillar": "visual",
+    "severity": "high",
+    "title": "Regressão visual significativa",
+    "details": "/sobre (desktop) com 5.4007% de pixels alterados.",
+    "page": "/sobre",
+    "evidence": "reports/quality/2026-03-05T13-39-51-779Z-audit360/diffs/desktop/sobre.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "high",
+    "title": "Regressão visual significativa",
+    "details": "/sobre (mobile) com 5.7977% de pixels alterados.",
+    "page": "/sobre",
+    "evidence": "reports/quality/2026-03-05T13-39-51-779Z-audit360/diffs/mobile/sobre.png"
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "Lighthouse performance baixo",
+    "details": "/agendamento com score 58.",
+    "page": "/agendamento",
+    "evidence": "reports/quality/2026-03-05T13-39-51-779Z-audit360/lighthouse/agendamento.json"
+  }
+]

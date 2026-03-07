@@ -1,0 +1,10 @@
+[
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "TTFB acima do alvo",
+    "details": "/doutores (mobile) com TTFB 867ms.",
+    "page": "/doutores",
+    "evidence": null
+  }
+]

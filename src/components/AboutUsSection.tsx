@@ -879,7 +879,15 @@ export default function AboutUsSection() {
                             </button>
                         </div>
                         <div className="modalBody photoModalBody">
-                            <img className="photoModalImage" src={activePhoto.src} alt={activePhoto.alt} loading="lazy" />
+                            <Image
+                                className="photoModalImage"
+                                src={activePhoto.src}
+                                alt={activePhoto.alt}
+                                width={1600}
+                                height={900}
+                                loading="lazy"
+                                unoptimized
+                            />
                             {activePhoto.googleUrl ? (
                                 <div className="modalActions">
                                     <a className="btn btnPrimary" href={activePhoto.googleUrl} target="_blank" rel="noreferrer">

@@ -1,0 +1,113 @@
+$ npm run quality:check
+
+
+> espacofacial-open@0.1.0 quality:check
+> npm run lint && npm run typecheck && npm run test:agenda && npm run build && npm run smoke:strict
+
+
+> espacofacial-open@0.1.0 lint
+> eslint src scripts tests workers/esfa-redirector --ext .js,.mjs,.ts,.tsx
+
+
+> espacofacial-open@0.1.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> espacofacial-open@0.1.0 test:agenda
+> tsx --test tests/agendaDb.test.ts
+
+✔ parseDateKey returns yyyy-mm-dd (0.423292ms)
+✔ parseDateKey rejects invalid (0.051125ms)
+✔ parseTimeKey returns hh:mm (0.075583ms)
+✔ parseTimeKey rejects invalid (0.0355ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 113.963708
+
+> espacofacial-open@0.1.0 build
+> next build
+
+   ▲ Next.js 15.5.12
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 1605ms
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/26) ...
+   Generating static pages (6/26) 
+   Generating static pages (12/26) 
+   Generating static pages (19/26) 
+ ✓ Generating static pages (26/26)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS  Revalidate  Expire
+┌ ƒ /                                    1.78 kB         154 kB
+├ ○ /_not-found                            213 B         102 kB
+├ ƒ /[unit]                              1.83 kB         154 kB
+├ ƒ /[unit]/faleconosco                    213 B         102 kB
+├ ƒ /[unit]/faleconsco                     213 B         102 kB
+├ ○ /agendamento                         9.99 kB         128 kB
+├ ƒ /api/agenda                            213 B         102 kB
+├ ƒ /api/agenda/sync                       213 B         102 kB
+├ ƒ /api/booking/decision                  213 B         102 kB
+├ ƒ /api/booking/request                   213 B         102 kB
+├ ƒ /api/booking/services                  213 B         102 kB
+├ ƒ /api/booking/slots                     213 B         102 kB
+├ ƒ /api/booking/status                    213 B         102 kB
+├ ƒ /api/booking/webhook/decision          213 B         102 kB
+├ ƒ /api/drive-media/[id]                  213 B         102 kB
+├ ƒ /api/equipe                            213 B         102 kB
+├ ƒ /api/gbp/accounts                      213 B         102 kB
+├ ƒ /api/gbp/health                        213 B         102 kB
+├ ƒ /api/gbp/photos                        213 B         102 kB
+├ ƒ /api/gbp/reviews                       213 B         102 kB
+├ ƒ /api/hero-media                        213 B         102 kB
+├ ƒ /api/instagram-avatar                  213 B         102 kB
+├ ƒ /api/places/details                    213 B         102 kB
+├ ƒ /api/places/photo                      213 B         102 kB
+├ ƒ /api/sugereaqui                        213 B         102 kB
+├ ○ /doutores                              602 B         121 kB          1h      1y
+├ ● /doutores/[slug]                       497 B         118 kB          1h      1y
+├   ├ /doutores/drmarcelogsoares                                         1h      1y
+├   ├ /doutores/drasamarassilva                                          1h      1y
+├   ├ /doutores/dravivianemondin                                         1h      1y
+├   └ [+4 more paths]
+├ ƒ /faleconosco/[sigla]                   213 B         102 kB
+├ ƒ /faleconsco/[sigla]                    213 B         102 kB
+├ ○ /icon.svg                                0 B            0 B
+├ ○ /opengraph-image                       213 B         102 kB
+├ ○ /privacidade                           213 B         102 kB
+├ ○ /robots.txt                            213 B         102 kB
+├ ○ /sitemap.xml                           213 B         102 kB
+├ ○ /sobre                                 225 B         123 kB
+├ ○ /sugereaqui                          1.51 kB         104 kB
+├ ○ /termos                                213 B         102 kB
+├ ○ /twitter-image                         213 B         102 kB
+├ ○ /unidades                              227 B         145 kB
+└ ƒ /unidades/[slug]                       213 B         102 kB
++ First Load JS shared by all             102 kB
+  ├ chunks/1255-a390e12b70b4a9fb.js        46 kB
+  ├ chunks/4bd1b696-f785427dddbba9fb.js  54.2 kB
+  └ other shared chunks (total)          1.93 kB
+
+
+ƒ Middleware                             35.6 kB
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+
+
+> espacofacial-open@0.1.0 smoke:strict
+> SMOKE_REQUIRE_AGENDA=1 node scripts/smoke.mjs
+
+Smoke base URL: https://espacofacial.com
+
+Smoke FAILED: /api/agenda?unit_slug=barrashoppingsul&date_from=2026-03-06&date_to=2026-03-06 expected 200, got 401

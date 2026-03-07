@@ -1,0 +1,122 @@
+[
+  {
+    "mode": "desktop",
+    "route": "/",
+    "baselineCreated": false,
+    "diffPercent": 0,
+    "baselinePath": "reports/quality/baseline/desktop/home.png",
+    "diffPath": null,
+    "skipped": true,
+    "skipReason": "Rota configurada em AUDIT_VISUAL_SKIP_ROUTES"
+  },
+  {
+    "mode": "desktop",
+    "route": "/agendamento",
+    "baselineCreated": false,
+    "diffPercent": 0.0455,
+    "baselinePath": "reports/quality/baseline/desktop/agendamento.png",
+    "diffPath": "reports/quality/2026-03-06T11-45-06-028Z-audit360/diffs/desktop/agendamento.png"
+  },
+  {
+    "mode": "desktop",
+    "route": "/unidades",
+    "baselineCreated": false,
+    "diffPercent": 0,
+    "baselinePath": "reports/quality/baseline/desktop/unidades.png",
+    "diffPath": "reports/quality/2026-03-06T11-45-06-028Z-audit360/diffs/desktop/unidades.png"
+  },
+  {
+    "mode": "desktop",
+    "route": "/doutores",
+    "baselineCreated": false,
+    "diffPercent": 0,
+    "baselinePath": "reports/quality/baseline/desktop/doutores.png",
+    "diffPath": "reports/quality/2026-03-06T11-45-06-028Z-audit360/diffs/desktop/doutores.png"
+  },
+  {
+    "mode": "desktop",
+    "route": "/sobre",
+    "baselineCreated": false,
+    "diffPercent": 0,
+    "baselinePath": "reports/quality/baseline/desktop/sobre.png",
+    "diffPath": null,
+    "skipped": true,
+    "skipReason": "Rota configurada em AUDIT_VISUAL_SKIP_ROUTES"
+  },
+  {
+    "mode": "desktop",
+    "route": "/privacidade",
+    "baselineCreated": false,
+    "diffPercent": 0,
+    "baselinePath": "reports/quality/baseline/desktop/privacidade.png",
+    "diffPath": "reports/quality/2026-03-06T11-45-06-028Z-audit360/diffs/desktop/privacidade.png"
+  },
+  {
+    "mode": "desktop",
+    "route": "/termos",
+    "baselineCreated": false,
+    "diffPercent": 0,
+    "baselinePath": "reports/quality/baseline/desktop/termos.png",
+    "diffPath": "reports/quality/2026-03-06T11-45-06-028Z-audit360/diffs/desktop/termos.png"
+  },
+  {
+    "mode": "mobile",
+    "route": "/",
+    "baselineCreated": false,
+    "diffPercent": 0,
+    "baselinePath": "reports/quality/baseline/mobile/home.png",
+    "diffPath": null,
+    "skipped": true,
+    "skipReason": "Rota configurada em AUDIT_VISUAL_SKIP_ROUTES"
+  },
+  {
+    "mode": "mobile",
+    "route": "/agendamento",
+    "baselineCreated": false,
+    "diffPercent": 100,
+    "baselinePath": "reports/quality/baseline/mobile/agendamento.png",
+    "diffPath": null
+  },
+  {
+    "mode": "mobile",
+    "route": "/unidades",
+    "baselineCreated": false,
+    "diffPercent": 0,
+    "baselinePath": "reports/quality/baseline/mobile/unidades.png",
+    "diffPath": "reports/quality/2026-03-06T11-45-06-028Z-audit360/diffs/mobile/unidades.png"
+  },
+  {
+    "mode": "mobile",
+    "route": "/doutores",
+    "baselineCreated": false,
+    "diffPercent": 0,
+    "baselinePath": "reports/quality/baseline/mobile/doutores.png",
+    "diffPath": "reports/quality/2026-03-06T11-45-06-028Z-audit360/diffs/mobile/doutores.png"
+  },
+  {
+    "mode": "mobile",
+    "route": "/sobre",
+    "baselineCreated": false,
+    "diffPercent": 0,
+    "baselinePath": "reports/quality/baseline/mobile/sobre.png",
+    "diffPath": null,
+    "skipped": true,
+    "skipReason": "Rota configurada em AUDIT_VISUAL_SKIP_ROUTES"
+  },
+  {
+    "mode": "mobile",
+    "route": "/privacidade",
+    "baselineCreated": false,
+    "diffPercent": 0,
+    "baselinePath": "reports/quality/baseline/mobile/privacidade.png",
+    "diffPath": "reports/quality/2026-03-06T11-45-06-028Z-audit360/diffs/mobile/privacidade.png"
+  },
+  {
+    "mode": "mobile",
+    "route": "/termos",
+    "baselineCreated": false,
+    "diffPercent": 0,
+    "baselinePath": "reports/quality/baseline/mobile/termos.png",
+    "diffPath": "reports/quality/2026-03-06T11-45-06-028Z-audit360/diffs/mobile/termos.png"
+  }
+]

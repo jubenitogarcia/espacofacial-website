@@ -1,0 +1,90 @@
+[
+  {
+    "pillar": "security",
+    "severity": "high",
+    "title": "Vulnerabilidades de produção pendentes",
+    "details": "npm audit reportou 0 critical e 1 high em produção.",
+    "page": null,
+    "evidence": "reports/quality/2026-03-04T23-37-58-929Z-audit360/npm-audit-prod.json"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Alteração visual moderada",
+    "details": "/ (desktop) com 1.3396% de pixels alterados.",
+    "page": "/",
+    "evidence": "reports/quality/2026-03-04T23-37-58-929Z-audit360/diffs/desktop/home.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/unidades (desktop) mudou de 1440x1901 para 1440x1086.",
+    "page": "/unidades",
+    "evidence": "reports/quality/2026-03-04T23-37-58-929Z-audit360/screenshots/desktop/unidades.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/doutores (desktop) mudou de 1440x1901 para 1440x900.",
+    "page": "/doutores",
+    "evidence": "reports/quality/2026-03-04T23-37-58-929Z-audit360/screenshots/desktop/doutores.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/sobre (desktop) mudou de 1440x1901 para 1440x900.",
+    "page": "/sobre",
+    "evidence": "reports/quality/2026-03-04T23-37-58-929Z-audit360/screenshots/desktop/sobre.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/ (mobile) mudou de 1170x11049 para 1170x11121.",
+    "page": "/",
+    "evidence": "reports/quality/2026-03-04T23-37-58-929Z-audit360/screenshots/mobile/home.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/unidades (mobile) mudou de 1170x11049 para 1170x8592.",
+    "page": "/unidades",
+    "evidence": "reports/quality/2026-03-04T23-37-58-929Z-audit360/screenshots/mobile/unidades.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/doutores (mobile) mudou de 1170x11049 para 1170x1992.",
+    "page": "/doutores",
+    "evidence": "reports/quality/2026-03-04T23-37-58-929Z-audit360/screenshots/mobile/doutores.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/sobre (mobile) mudou de 1170x11049 para 1170x2031.",
+    "page": "/sobre",
+    "evidence": "reports/quality/2026-03-04T23-37-58-929Z-audit360/screenshots/mobile/sobre.png"
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "Lighthouse performance baixo",
+    "details": "/ com score 65.",
+    "page": "/",
+    "evidence": "reports/quality/2026-03-04T23-37-58-929Z-audit360/lighthouse/home.json"
+  },
+  {
+    "pillar": "performance",
+    "severity": "low",
+    "title": "Load event alto",
+    "details": "/ (mobile) com load 10532ms.",
+    "page": "/",
+    "evidence": null
+  }
+]

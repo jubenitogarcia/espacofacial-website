@@ -1,0 +1,26 @@
+[
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/agendamento (desktop) mudou de 1440x1285 para 1440x1275.",
+    "page": "/agendamento",
+    "evidence": "reports/quality/2026-03-05T16-40-23-668Z-audit360/screenshots/desktop/agendamento.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/agendamento (mobile) mudou de 1170x5232 para 1170x5202.",
+    "page": "/agendamento",
+    "evidence": "reports/quality/2026-03-05T16-40-23-668Z-audit360/screenshots/mobile/agendamento.png"
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "Lighthouse performance baixo",
+    "details": "/ com score 69.",
+    "page": "/",
+    "evidence": "reports/quality/2026-03-05T16-40-23-668Z-audit360/lighthouse/home.json"
+  }
+]

@@ -1,0 +1,10 @@
+[
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "Lighthouse performance baixo",
+    "details": "/agendamento com score 35.",
+    "page": "/agendamento",
+    "evidence": "reports/quality/2026-03-05T15-54-38-815Z-audit360/lighthouse/agendamento.json"
+  }
+]

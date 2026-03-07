@@ -1,0 +1,317 @@
+{
+  "pageHeuristics": [
+    {
+      "route": "/",
+      "heuristics": {
+        "h1Count": 1,
+        "h2Count": 3,
+        "ctaCount": 4,
+        "ctaAboveFold": 4,
+        "primaryCtaAboveFold": 3,
+        "controlsAboveFold": 18,
+        "navLinks": 5,
+        "sectionCount": 4,
+        "cardCount": 0,
+        "formFields": 0,
+        "avgParagraphWords": 13.6,
+        "paragraphCount": 5,
+        "trustSignalsCount": 6,
+        "mediaCount": 4,
+        "uniqueFonts": 2,
+        "pageLengthScreens": 2.11
+      },
+      "lighthouse": {
+        "route": "/",
+        "performance": 80,
+        "seo": 100,
+        "accessibility": 96,
+        "bestPractices": 100
+      },
+      "performanceDesktop": {
+        "ttfb": 220.19999999925494,
+        "fcp": 792,
+        "load": 1020,
+        "lcp": null
+      },
+      "scores": {
+        "technicalSenior": 100,
+        "growthStrategist": 100,
+        "artDirectionSenior": 94,
+        "performanceMarketing": 100
+      },
+      "routeScore": 99,
+      "priority": "P2"
+    },
+    {
+      "route": "/agendamento",
+      "heuristics": {
+        "h1Count": 1,
+        "h2Count": 1,
+        "ctaCount": 3,
+        "ctaAboveFold": 3,
+        "primaryCtaAboveFold": 2,
+        "controlsAboveFold": 12,
+        "navLinks": 5,
+        "sectionCount": 2,
+        "cardCount": 11,
+        "formFields": 0,
+        "avgParagraphWords": 28,
+        "paragraphCount": 2,
+        "trustSignalsCount": 3,
+        "mediaCount": 13,
+        "uniqueFonts": 2,
+        "pageLengthScreens": 2.91
+      },
+      "lighthouse": {
+        "route": "/agendamento",
+        "performance": 82,
+        "seo": 100,
+        "accessibility": 100,
+        "bestPractices": 100
+      },
+      "performanceDesktop": {
+        "ttfb": 77.40000000037253,
+        "fcp": 172,
+        "load": 175.40000000037253,
+        "lcp": null
+      },
+      "scores": {
+        "technicalSenior": 100,
+        "growthStrategist": 100,
+        "artDirectionSenior": 90,
+        "performanceMarketing": 100
+      },
+      "routeScore": 98,
+      "priority": "P2"
+    },
+    {
+      "route": "/unidades",
+      "heuristics": {
+        "h1Count": 1,
+        "h2Count": 0,
+        "ctaCount": 2,
+        "ctaAboveFold": 2,
+        "primaryCtaAboveFold": 1,
+        "controlsAboveFold": 25,
+        "navLinks": 5,
+        "sectionCount": 1,
+        "cardCount": 0,
+        "formFields": 0,
+        "avgParagraphWords": 12,
+        "paragraphCount": 1,
+        "trustSignalsCount": 1,
+        "mediaCount": 3,
+        "uniqueFonts": 2,
+        "pageLengthScreens": 1.21
+      },
+      "lighthouse": null,
+      "performanceDesktop": {
+        "ttfb": 81.10000000149012,
+        "fcp": 144,
+        "load": 144.80000000074506,
+        "lcp": null
+      },
+      "scores": {
+        "technicalSenior": 100,
+        "growthStrategist": 100,
+        "artDirectionSenior": 84,
+        "performanceMarketing": 100
+      },
+      "routeScore": 96,
+      "priority": "P2"
+    },
+    {
+      "route": "/doutores",
+      "heuristics": {
+        "h1Count": 1,
+        "h2Count": 0,
+        "ctaCount": 2,
+        "ctaAboveFold": 2,
+        "primaryCtaAboveFold": 1,
+        "controlsAboveFold": 14,
+        "navLinks": 5,
+        "sectionCount": 1,
+        "cardCount": 0,
+        "formFields": 0,
+        "avgParagraphWords": 7,
+        "paragraphCount": 1,
+        "trustSignalsCount": 1,
+        "mediaCount": 3,
+        "uniqueFonts": 2,
+        "pageLengthScreens": 0.48
+      },
+      "lighthouse": {
+        "route": "/doutores",
+        "performance": 92,
+        "seo": 100,
+        "accessibility": 100,
+        "bestPractices": 100
+      },
+      "performanceDesktop": {
+        "ttfb": 51.80000000074506,
+        "fcp": 216,
+        "load": 214.80000000074506,
+        "lcp": null
+      },
+      "scores": {
+        "technicalSenior": 100,
+        "growthStrategist": 100,
+        "artDirectionSenior": 84,
+        "performanceMarketing": 100
+      },
+      "routeScore": 96,
+      "priority": "P2"
+    }
+  ],
+  "lensScores": {
+    "technicalSenior": 100,
+    "growthStrategist": 100,
+    "artDirectionSenior": 88,
+    "performanceMarketing": 100
+  },
+  "reformBacklog": [
+    {
+      "id": "REF-HOME-01",
+      "priority": "P1",
+      "track": "Direção de Arte + Growth",
+      "title": "Redesign do hero para proposta de valor e conversão imediata",
+      "pages": [
+        "/"
+      ],
+      "actions": [
+        "Hero em 2 colunas com headline de benefício, prova social e CTA primário fixo.",
+        "Strip de confiança acima da dobra (reviews, autoridade médica, segurança).",
+        "Reduzir variação visual no primeiro viewport para foco no CTA principal."
+      ],
+      "kpi": [
+        "CTR do CTA primário",
+        "Taxa de início de agendamento",
+        "LCP mobile"
+      ],
+      "expectedImpact": "Alto",
+      "effort": "M"
+    },
+    {
+      "id": "REF-BOOK-01",
+      "priority": "P1",
+      "track": "UX + Performance Marketing",
+      "title": "Checkout de agendamento com fricção mínima",
+      "pages": [
+        "/agendamento"
+      ],
+      "actions": [
+        "Reduzir campos iniciais e aplicar progressive disclosure por etapa.",
+        "Inserir feedback de progresso/tempo e validação inline.",
+        "Adicionar recuperação de abandono (retomar etapa e UTM persistente)."
+      ],
+      "kpi": [
+        "Conversão do funil de agendamento",
+        "Abandono por etapa",
+        "Tempo médio para concluir"
+      ],
+      "expectedImpact": "Alto",
+      "effort": "M"
+    },
+    {
+      "id": "REF-UNITS-01",
+      "priority": "P1",
+      "track": "Arquitetura de Informação + Local SEO",
+      "title": "Landing local orientada por intenção e proximidade",
+      "pages": [
+        "/unidades"
+      ],
+      "actions": [
+        "Cards de unidade com proposta clara, diferenciais e CTA único por unidade.",
+        "Prova social local e highlights de conveniência (endereço, horário, estacionamento).",
+        "Melhorar hierarquia do mapa com suporte a decisão rápida."
+      ],
+      "kpi": [
+        "Cliques para rotas/WhatsApp",
+        "Conversão por unidade",
+        "Engajamento local"
+      ],
+      "expectedImpact": "Médio",
+      "effort": "M"
+    },
+    {
+      "id": "REF-DOCTORS-01",
+      "priority": "P1",
+      "track": "Autoridade + Conversão",
+      "title": "Página de especialistas com narrativa de autoridade",
+      "pages": [
+        "/doutores"
+      ],
+      "actions": [
+        "Cards com especialidade, credenciais, prova social e CTA direto por profissional.",
+        "Padronizar microcopy de valor por perfil para reduzir indecisão.",
+        "Incluir comparativo simples de foco clínico para acelerar escolha."
+      ],
+      "kpi": [
+        "CTR por profissional",
+        "Início de agendamento via doutores",
+        "Tempo até ação"
+      ],
+      "expectedImpact": "Médio",
+      "effort": "M"
+    },
+    {
+      "id": "REF-SYS-01",
+      "priority": "P1",
+      "track": "Design System",
+      "title": "Design system visual e verbal v2 com governança",
+      "pages": [
+        "/",
+        "/agendamento",
+        "/unidades",
+        "/doutores"
+      ],
+      "actions": [
+        "Definir tokens de tipografia, cor e ritmo espacial por contexto (acima da dobra, formulário, prova social).",
+        "Criar biblioteca de componentes de conversão (hero, prova social, cards de autoridade, CTA stack).",
+        "Padronizar linguagem persuasiva de alta clareza para campanhas e tráfego pago."
+      ],
+      "kpi": [
+        "Consistência visual percebida",
+        "Velocidade de entrega",
+        "Taxa de conversão por template"
+      ],
+      "expectedImpact": "Alto",
+      "effort": "L"
+    },
+    {
+      "id": "REF-GROWTH-01",
+      "priority": "P1",
+      "track": "Performance Marketing",
+      "title": "Programa contínuo de experimentação (A/B e multivariada)",
+      "pages": [
+        "/",
+        "/agendamento"
+      ],
+      "actions": [
+        "Experimentar variações de headline, prova social, oferta e CTA em ciclos quinzenais.",
+        "Medir por coorte de origem (orgânico, tráfego pago, social, influência).",
+        "Promover automaticamente variantes vencedoras por ganho incremental estatisticamente válido."
+      ],
+      "kpi": [
+        "Lift de conversão",
+        "CAC por origem",
+        "Receita incremental"
+      ],
+      "expectedImpact": "Alto",
+      "effort": "L"
+    }
+  ],
+  "roadmap": {
+    "sprint0_14dias": [],
+    "sprint15_45dias": [
+      "Redesign do hero para proposta de valor e conversão imediata",
+      "Checkout de agendamento com fricção mínima",
+      "Landing local orientada por intenção e proximidade",
+      "Página de especialistas com narrativa de autoridade",
+      "Design system visual e verbal v2 com governança",
+      "Programa contínuo de experimentação (A/B e multivariada)"
+    ],
+    "sprint46_90dias": []
+  },
+  "generatedAt": "2026-03-05T21:42:44.877Z"
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "pillar": "security",
+    "severity": "high",
+    "title": "Vulnerabilidades de produção pendentes",
+    "details": "npm audit reportou 0 critical e 1 high em produção.",
+    "page": null,
+    "evidence": "reports/quality/2026-03-07T22-33-52-475Z-audit360/npm-audit-prod.json"
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "Lighthouse performance baixo",
+    "details": "/ com score 64.",
+    "page": "/",
+    "evidence": "reports/quality/2026-03-07T22-33-52-475Z-audit360/lighthouse/home.json"
+  },
+  {
+    "pillar": "performance",
+    "severity": "low",
+    "title": "Uso de <img> detectado no lint",
+    "details": "Converter para next/image pode melhorar LCP e otimização de imagens.",
+    "page": null,
+    "evidence": "reports/quality/2026-03-07T22-33-52-475Z-audit360/logs/quality-check.log"
+  }
+]

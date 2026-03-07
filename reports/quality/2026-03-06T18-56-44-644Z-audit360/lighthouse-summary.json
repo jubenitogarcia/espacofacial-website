@@ -1,0 +1,23 @@
+[
+  {
+    "route": "/",
+    "performance": 79,
+    "seo": 100,
+    "accessibility": 96,
+    "bestPractices": 100
+  },
+  {
+    "route": "/agendamento",
+    "performance": 98,
+    "seo": 100,
+    "accessibility": 100,
+    "bestPractices": 100
+  },
+  {
+    "route": "/doutores",
+    "performance": 88,
+    "seo": 100,
+    "accessibility": 100,
+    "bestPractices": 100
+  }
+]

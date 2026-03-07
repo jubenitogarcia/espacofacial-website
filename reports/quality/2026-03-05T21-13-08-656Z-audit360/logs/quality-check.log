@@ -1,0 +1,37 @@
+$ npm run quality:check
+
+
+> espacofacial-open@0.1.0 quality:check
+> npm run lint && npm run typecheck && npm run test:agenda && npm run build && npm run smoke:strict
+
+
+> espacofacial-open@0.1.0 lint
+> eslint src scripts tests workers/esfa-redirector --ext .js,.mjs,.ts,.tsx
+
+
+> espacofacial-open@0.1.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> espacofacial-open@0.1.0 test:agenda
+> tsx --test tests/agendaDb.test.ts
+
+✔ parseDateKey returns yyyy-mm-dd (1.315917ms)
+✔ parseDateKey rejects invalid (0.103583ms)
+✔ parseTimeKey returns hh:mm (0.129334ms)
+✔ parseTimeKey rejects invalid (0.052542ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 941.421958
+
+> espacofacial-open@0.1.0 build
+> next build
+
+  Suggestion: If you intended to restart next build, terminate the other process, and then try again.
+
+⨯ Unable to acquire lock at /Users/jubenitogarcia/.codex/worktrees/a692/website/.next/lock, is another instance of next build running?

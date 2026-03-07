@@ -1,0 +1,34 @@
+[
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/unidades (desktop) mudou de 1440x1086 para 1440x1955.",
+    "page": "/unidades",
+    "evidence": "reports/quality/2026-03-06T11-14-21-051Z-audit360/screenshots/desktop/unidades.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/doutores (desktop) mudou de 1440x900 para 1440x1492.",
+    "page": "/doutores",
+    "evidence": "reports/quality/2026-03-06T11-14-21-051Z-audit360/screenshots/desktop/doutores.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/unidades (mobile) mudou de 1170x8592 para 1170x13287.",
+    "page": "/unidades",
+    "evidence": "reports/quality/2026-03-06T11-14-21-051Z-audit360/screenshots/mobile/unidades.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/doutores (mobile) mudou de 1170x1992 para 1170x10935.",
+    "page": "/doutores",
+    "evidence": "reports/quality/2026-03-06T11-14-21-051Z-audit360/screenshots/mobile/doutores.png"
+  }
+]

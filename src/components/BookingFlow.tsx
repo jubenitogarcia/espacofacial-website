@@ -9,6 +9,7 @@ import { useCurrentUnit } from "@/hooks/useCurrentUnit";
 import { doctorSlugFromTeamMember, normalizeDoctorSlug } from "@/lib/doctorSlug";
 import { setStoredUnitSlug } from "@/lib/unitSelection";
 import TurnstileWidget from "@/components/TurnstileWidget";
+import UnitChooser from "@/components/UnitChooser";
 
 type TeamMember = {
     name: string;
@@ -82,6 +83,16 @@ function avatarUrl(handle: string, name: string) {
     const h = encodeURIComponent(handle);
     const n = encodeURIComponent(name);
     return `/api/instagram-avatar?handle=${h}&name=${n}`;
+}
+
+function initialsFromName(name: string) {
+    const letters = name
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase() ?? "")
+        .join("");
+    return letters || "EF";
 }
 
 function pad2(n: number) {
@@ -280,7 +291,7 @@ export default function BookingFlow() {
         appliedDoctorQueryRef.current = null;
 
         if (unitSlug) {
-            setDoctor({ slug: "any", name: "Sem preferência", handle: null });
+            setDoctor({ slug: "any", name: "Todos", handle: null });
         } else {
             setDoctor(null);
         }
@@ -344,6 +355,7 @@ export default function BookingFlow() {
                 slug: doctorSlugFromTeamMember(m),
                 handle: m.instagramHandle,
                 nickname: m.nickname,
+                instagramUrl: m.instagramUrl,
             }));
     }, [members, unitLabel]);
 
@@ -637,119 +649,119 @@ export default function BookingFlow() {
         return () => window.removeEventListener("keydown", onKey);
     }, [showDetailsModal]);
 
+    function selectDoctor(nextDoctor: { slug: string; name: string; handle: string | null }) {
+        if (doctor?.slug === nextDoctor.slug) return;
+        setDoctor(nextDoctor);
+        setDateKey(null);
+        setDateTouched(false);
+        setTimeKey(null);
+        setStep("pick");
+    }
+
     return (
         <div className="bookingFlow">
-            <div className="bookingFlow__intro">
-                <h1>Agendamento</h1>
-                <p>
-                    Escolha um(a) profissional (ou sem preferência), o procedimento (ou quero orientação), os serviços e o horário. A confirmação é enviada por e-mail e WhatsApp.
-                </p>
-                {unit ? (
-                    <div className="small bookingFlow__unitStatus">
-                        Unidade selecionada: <span className="bookingFlow__unitName">{unit.name}</span>
-                    </div>
-                ) : (
-                    <div className="small bookingFlow__unitStatus bookingFlow__unitStatus--error" role="status">
-                        Selecione a unidade no topo para agendar.
-                    </div>
-                )}
-            </div>
-
             {step !== "submitted" ? (
                 <div className="bookingFlow__grid">
-                    <div className="card bookingFlow__cardDoctor" style={{ padding: 16 }}>
-                        <div style={{ fontWeight: 900 }}>1) Doutor</div>
-                        <div className="bookingFlow__cardSub">Selecione um(a) profissional (ou sem preferência).</div>
+                    {!unitSlug ? (
+                        <div className="card bookingFlow__cardEntryUnit" style={{ padding: 16 }}>
+                            <div className="bookingFlow__entryEyebrow">Entrada 01</div>
+                            <div className="bookingFlow__entryTitle">Escolha a unidade</div>
+                            <div className="bookingFlow__cardSub">A unidade libera a equipe, o procedimento e os horários reais.</div>
+                            <div className="bookingFlow__embeddedUnitChooser">
+                                <UnitChooser />
+                            </div>
+                        </div>
+                    ) : null}
+
+                    <div
+                        className={`card bookingFlow__cardDoctor ${unitSlug ? "bookingFlow__cardDoctor--full" : "bookingFlow__cardDoctor--withUnit"}`.trim()}
+                        style={{ padding: 16 }}
+                    >
+                        <div className="bookingFlow__entryEyebrow">Entrada 02</div>
+                        <div className="bookingFlow__entryTitle">Escolha o doutor</div>
+                        {unit ? (
+                            <div className="small bookingFlow__unitStatus">
+                                Unidade selecionada: <span className="bookingFlow__unitName">{unit.name}</span>
+                            </div>
+                        ) : null}
+                        <div className="bookingFlow__cardSub">Passe o mouse sobre a badge para ver os dados do doutor e clique para selecionar.</div>
                         <div style={{ marginTop: 10 }}>
-                            {unitLabel ? null : <div className="small">Selecione BarraShoppingSul ou Novo Hamburgo no topo para ver doutores.</div>}
-                            {doctorsForUnit === null ? (
+                            {!unitLabel ? (
+                                <div className="small bookingFlow__unitStatus bookingFlow__unitStatus--error" role="status">
+                                    Selecione a unidade para liberar os doutores.
+                                </div>
+                            ) : doctorsForUnit === null ? (
                                 <div className="small">Carregando equipe…</div>
                             ) : doctorsForUnit.length === 0 ? (
                                 <div className="small">
                                     {membersError ? "Equipe indisponível no momento. Tente novamente mais tarde." : "Nenhum doutor encontrado para esta unidade."}
                                 </div>
                             ) : (
-                                <ScrollPicker ariaLabel="Lista de profissionais">
+                                <div className="bookingFlow__doctorBadgeGrid" role="list" aria-label="Lista de profissionais">
                                     {doctorsForUnit.map((d) => {
                                         const active = doctor?.slug === d.slug;
+                                        const instagramHref = d.instagramUrl ?? (d.handle ? `https://instagram.com/${d.handle.replace(/^@/, "")}` : null);
                                         return (
-                                            <button
-                                                key={d.slug}
-                                                type="button"
-                                                className="bookingFlow__selectItem bookingFlow__doctorCard"
-                                                data-active={active ? "true" : "false"}
-                                                onClick={() => {
-                                                    if (active) return;
-                                                    setDoctor({ slug: d.slug, name: d.name, handle: d.handle });
-                                                    setDateKey(null);
-                                                    setDateTouched(false);
-                                                    setTimeKey(null);
-                                                    setStep("pick");
-                                                }}
-                                                style={{
-                                                    textAlign: "left",
-                                                    padding: 14,
-                                                    width: 220,
-                                                    minWidth: 220,
-                                                    flex: "0 0 auto",
-                                                    scrollSnapAlign: "start",
-                                                }}
-                                            >
-                                                <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                                                    <div className="bookingFlow__doctorAvatar">
+                                            <div key={d.slug} className="bookingFlow__doctorBadgeWrap" data-active={active ? "true" : "false"} role="listitem">
+                                                <button
+                                                    type="button"
+                                                    className="bookingFlow__doctorBadge"
+                                                    data-active={active ? "true" : "false"}
+                                                    onClick={() => selectDoctor({ slug: d.slug, name: d.name, handle: d.handle })}
+                                                    aria-label={`Selecionar ${d.name}`}
+                                                >
+                                                    <span className="bookingFlow__doctorBadgeAvatar">
                                                         {d.handle ? (
                                                             <Image
                                                                 src={avatarUrl(d.handle, d.nickname ?? d.name)}
                                                                 alt={d.nickname ?? d.name}
-                                                                width={56}
-                                                                height={56}
+                                                                fill
+                                                                sizes="76px"
+                                                                style={{ objectFit: "cover" }}
                                                                 unoptimized
                                                             />
-                                                        ) : null}
-                                                    </div>
-                                                    <div style={{ minWidth: 0 }}>
-                                                        <div className="bookingFlow__doctorName">{d.name}</div>
-                                                        <div className="bookingFlow__doctorSub">{d.nickname || unitLabel}</div>
-                                                    </div>
+                                                        ) : (
+                                                            <span className="bookingFlow__doctorBadgeFallback">{initialsFromName(d.nickname ?? d.name)}</span>
+                                                        )}
+                                                    </span>
+                                                </button>
+                                                <div className="bookingFlow__doctorTooltip" role="tooltip">
+                                                    <div className="bookingFlow__doctorTooltipName">{d.name}</div>
+                                                    <div className="bookingFlow__doctorTooltipSub">{d.nickname || unitLabel}</div>
+                                                    {instagramHref ? (
+                                                        <a
+                                                            className="bookingFlow__doctorTooltipLink"
+                                                            href={instagramHref}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            onClick={(event) => event.stopPropagation()}
+                                                        >
+                                                            Instagram
+                                                        </a>
+                                                    ) : null}
                                                 </div>
-                                            </button>
+                                            </div>
                                         );
                                     })}
 
-                                    <button
-                                        type="button"
-                                        className="bookingFlow__selectItem bookingFlow__doctorCard"
-                                        data-active={doctor?.slug === "any" ? "true" : "false"}
-                                        onClick={() => {
-                                            setDoctor({ slug: "any", name: "Sem preferência", handle: null });
-                                            setDateKey(null);
-                                            setDateTouched(false);
-                                            setTimeKey(null);
-                                            setStep("pick");
-                                        }}
-                                        style={{
-                                            textAlign: "left",
-                                            padding: 14,
-                                            width: 220,
-                                            minWidth: 220,
-                                            flex: "0 0 auto",
-                                            scrollSnapAlign: "start",
-                                        }}
-                                    >
-                                        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                                            <div
-                                                className="bookingFlow__doctorAvatar bookingFlow__doctorAvatar--fallback"
-                                                aria-hidden="true"
-                                            >
-                                                EF
-                                            </div>
-                                            <div style={{ minWidth: 0 }}>
-                                                <div className="bookingFlow__doctorName">Sem preferência</div>
-                                                <div className="bookingFlow__doctorSub">Primeiro horário disponível</div>
-                                            </div>
+                                    <div className="bookingFlow__doctorBadgeWrap" data-active={doctor?.slug === "any" ? "true" : "false"} role="listitem">
+                                        <button
+                                            type="button"
+                                            className="bookingFlow__doctorBadge bookingFlow__doctorBadge--all"
+                                            data-active={doctor?.slug === "any" ? "true" : "false"}
+                                            onClick={() => selectDoctor({ slug: "any", name: "Todos", handle: null })}
+                                            aria-label="Selecionar todos os doutores"
+                                        >
+                                            <span className="bookingFlow__doctorBadgeAvatar bookingFlow__doctorBadgeAvatar--all">
+                                                <span className="bookingFlow__doctorBadgeFallback bookingFlow__doctorBadgeFallback--all">Todos</span>
+                                            </span>
+                                        </button>
+                                        <div className="bookingFlow__doctorTooltip" role="tooltip">
+                                            <div className="bookingFlow__doctorTooltipName">Todos</div>
+                                            <div className="bookingFlow__doctorTooltipSub">Mostra a agenda mais ampla da unidade.</div>
                                         </div>
-                                    </button>
-                                </ScrollPicker>
+                                    </div>
+                                </div>
                             )}
                         </div>
                     </div>

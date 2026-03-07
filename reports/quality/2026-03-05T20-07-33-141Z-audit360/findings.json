@@ -1,0 +1,18 @@
+[
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/agendamento (desktop) mudou de 1440x1275 para 1440x1285.",
+    "page": "/agendamento",
+    "evidence": "reports/quality/2026-03-05T20-07-33-141Z-audit360/screenshots/desktop/agendamento.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/agendamento (mobile) mudou de 1170x5202 para 1170x5232.",
+    "page": "/agendamento",
+    "evidence": "reports/quality/2026-03-05T20-07-33-141Z-audit360/screenshots/mobile/agendamento.png"
+  }
+]

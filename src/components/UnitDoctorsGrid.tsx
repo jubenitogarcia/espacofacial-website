@@ -534,7 +534,15 @@ export default function UnitDoctorsGrid() {
                                                 preload="metadata"
                                             />
                                         ) : (
-                                            <img className="instagramViewerMedia" src={activeInstagramMedia.thumbnailUrl} alt={`Publicação de ${activeInstagram.name}`} loading="lazy" />
+                                            <Image
+                                                className="instagramViewerMedia"
+                                                src={activeInstagramMedia.thumbnailUrl}
+                                                alt={`Publicação de ${activeInstagram.name}`}
+                                                width={1200}
+                                                height={1200}
+                                                loading="lazy"
+                                                unoptimized
+                                            />
                                         )}
                                     </div>
 
@@ -554,7 +562,15 @@ export default function UnitDoctorsGrid() {
                                                 onClick={() => setActiveInstagramMediaId(item.id)}
                                                 aria-label={`Abrir ${label.toLowerCase()} de ${activeInstagram.name}`}
                                             >
-                                                <img className="instagramMediaThumb" src={item.thumbnailUrl} alt={`Publicação de ${activeInstagram.name}`} loading="lazy" />
+                                                <Image
+                                                    className="instagramMediaThumb"
+                                                    src={item.thumbnailUrl}
+                                                    alt={`Publicação de ${activeInstagram.name}`}
+                                                    width={320}
+                                                    height={320}
+                                                    loading="lazy"
+                                                    unoptimized
+                                                />
                                                 {label !== "Post" ? <span className="instagramMediaBadge">{label}</span> : null}
                                             </button>
                                         );

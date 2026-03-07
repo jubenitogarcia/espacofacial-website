@@ -1,0 +1,10 @@
+[
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "Lighthouse performance baixo",
+    "details": "/ com score 64.",
+    "page": "/",
+    "evidence": "reports/quality/2026-03-05T21-15-46-518Z-audit360/lighthouse/home.json"
+  }
+]

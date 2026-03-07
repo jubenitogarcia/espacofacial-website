@@ -1,0 +1,16 @@
+[
+  {
+    "route": "/",
+    "performance": 71,
+    "seo": 92,
+    "accessibility": 87,
+    "bestPractices": 100
+  },
+  {
+    "route": "/agendamento",
+    "performance": 74,
+    "seo": 61,
+    "accessibility": 95,
+    "bestPractices": 100
+  }
+]

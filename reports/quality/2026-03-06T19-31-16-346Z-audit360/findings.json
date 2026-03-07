@@ -1,0 +1,42 @@
+[
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/unidades (desktop) mudou de 1440x2299 para 1440x2761.",
+    "page": "/unidades",
+    "evidence": "reports/quality/2026-03-06T19-31-16-346Z-audit360/screenshots/desktop/unidades.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/doutores (desktop) mudou de 1440x1862 para 1440x2368.",
+    "page": "/doutores",
+    "evidence": "reports/quality/2026-03-06T19-31-16-346Z-audit360/screenshots/desktop/doutores.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/unidades (mobile) mudou de 1170x14838 para 1170x17799.",
+    "page": "/unidades",
+    "evidence": "reports/quality/2026-03-06T19-31-16-346Z-audit360/screenshots/mobile/unidades.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/doutores (mobile) mudou de 1170x12900 para 1170x16341.",
+    "page": "/doutores",
+    "evidence": "reports/quality/2026-03-06T19-31-16-346Z-audit360/screenshots/mobile/doutores.png"
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "Lighthouse performance baixo",
+    "details": "/ com score 68.",
+    "page": "/",
+    "evidence": "reports/quality/2026-03-06T19-31-16-346Z-audit360/lighthouse/home.json"
+  }
+]

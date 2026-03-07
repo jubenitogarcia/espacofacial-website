@@ -1,0 +1,72 @@
+[
+  {
+    "route": "/",
+    "status": 200,
+    "titleLength": 13,
+    "descriptionLength": 63,
+    "canonical": true,
+    "h1Count": 1,
+    "jsonLd": 1,
+    "noindex": false
+  },
+  {
+    "route": "/agendamento",
+    "status": 200,
+    "titleLength": 27,
+    "descriptionLength": 80,
+    "canonical": true,
+    "h1Count": 0,
+    "jsonLd": 1,
+    "noindex": true
+  },
+  {
+    "route": "/unidades",
+    "status": 200,
+    "titleLength": 13,
+    "descriptionLength": 63,
+    "canonical": true,
+    "h1Count": 1,
+    "jsonLd": 1,
+    "noindex": false
+  },
+  {
+    "route": "/doutores",
+    "status": 200,
+    "titleLength": 13,
+    "descriptionLength": 63,
+    "canonical": true,
+    "h1Count": 1,
+    "jsonLd": 1,
+    "noindex": false
+  },
+  {
+    "route": "/sobre",
+    "status": 200,
+    "titleLength": 13,
+    "descriptionLength": 63,
+    "canonical": true,
+    "h1Count": 1,
+    "jsonLd": 1,
+    "noindex": false
+  },
+  {
+    "route": "/privacidade",
+    "status": 200,
+    "titleLength": 37,
+    "descriptionLength": 63,
+    "canonical": true,
+    "h1Count": 1,
+    "jsonLd": 1,
+    "noindex": true
+  },
+  {
+    "route": "/termos",
+    "status": 200,
+    "titleLength": 29,
+    "descriptionLength": 63,
+    "canonical": true,
+    "h1Count": 1,
+    "jsonLd": 1,
+    "noindex": true
+  }
+]

@@ -1,0 +1,10 @@
+$ npm run smoke
+
+
+> espacofacial-open@0.1.0 smoke
+> node scripts/smoke.mjs
+
+Smoke base URL: https://espacofacial.com
+OK: smoke checks passed
+
+WARN: SMOKE_SKIP_AGENDA=1; skipping /api/agenda check

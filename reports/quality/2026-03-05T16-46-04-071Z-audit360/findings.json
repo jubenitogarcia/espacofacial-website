@@ -1,0 +1,10 @@
+[
+  {
+    "pillar": "visual",
+    "severity": "high",
+    "title": "Regressão visual significativa",
+    "details": "/ (desktop) com 14.8548% de pixels alterados.",
+    "page": "/",
+    "evidence": "reports/quality/2026-03-05T16-46-04-071Z-audit360/diffs/desktop/home.png"
+  }
+]

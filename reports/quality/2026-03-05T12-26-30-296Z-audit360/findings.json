@@ -1,0 +1,50 @@
+[
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "TTFB acima do alvo",
+    "details": "/ (mobile) com TTFB 2479ms.",
+    "page": "/",
+    "evidence": null
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "FCP acima do alvo",
+    "details": "/ (mobile) com FCP 4236ms.",
+    "page": "/",
+    "evidence": null
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "TTFB acima do alvo",
+    "details": "/termos (mobile) com TTFB 909ms.",
+    "page": "/termos",
+    "evidence": null
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "Lighthouse performance baixo",
+    "details": "/ com score 60.",
+    "page": "/",
+    "evidence": "reports/quality/2026-03-05T12-26-30-296Z-audit360/lighthouse/home.json"
+  },
+  {
+    "pillar": "performance",
+    "severity": "low",
+    "title": "Load event alto",
+    "details": "/ (desktop) com load 4646ms.",
+    "page": "/",
+    "evidence": null
+  },
+  {
+    "pillar": "performance",
+    "severity": "low",
+    "title": "Load event alto",
+    "details": "/ (mobile) com load 8034ms.",
+    "page": "/",
+    "evidence": null
+  }
+]

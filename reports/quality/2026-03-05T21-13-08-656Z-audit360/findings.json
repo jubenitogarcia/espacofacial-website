@@ -1,0 +1,10 @@
+[
+  {
+    "pillar": "quality",
+    "severity": "high",
+    "title": "Quality suite falhou",
+    "details": "Lint/typecheck/test/build/smoke strict não passaram.",
+    "page": null,
+    "evidence": "reports/quality/2026-03-05T21-13-08-656Z-audit360/logs/quality-check.log"
+  }
+]

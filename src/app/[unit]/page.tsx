@@ -52,8 +52,9 @@ function isIndexableUnitPath(path: string): boolean {
     return normalized === "novohamburgo" || normalized === "barrashoppingsul";
 }
 
-export function generateMetadata({ params }: { params: { unit: string } }): Metadata {
-    const unit = resolveUnitFromParam(params.unit);
+export async function generateMetadata({ params }: { params: Promise<{ unit: string }> }): Promise<Metadata> {
+    const { unit: unitParam } = await params;
+    const unit = resolveUnitFromParam(unitParam);
     if (!unit) {
         return {
             title: "Espaço Facial",
@@ -86,18 +87,20 @@ export default async function UnitHomePage({
     params,
     searchParams,
 }: {
-    params: { unit: string };
-    searchParams?: Record<string, string | string[] | undefined>;
+    params: Promise<{ unit: string }>;
+    searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
-    const unit = resolveUnitFromParam(params.unit);
+    const { unit: unitParam } = await params;
+    const resolvedSearchParams = searchParams ? await searchParams : undefined;
+    const unit = resolveUnitFromParam(unitParam);
     if (!unit) {
         redirect("/");
     }
 
     const canonicalPath = canonicalUnitPath(unit.slug);
-    if (normalizeSlug(params.unit) !== normalizeSlug(canonicalPath)) {
+    if (normalizeSlug(unitParam) !== normalizeSlug(canonicalPath)) {
         const qs = new URLSearchParams();
-        for (const [key, raw] of Object.entries(searchParams ?? {})) {
+        for (const [key, raw] of Object.entries(resolvedSearchParams ?? {})) {
             if (typeof raw === "string") qs.set(key, raw);
             else if (Array.isArray(raw)) raw.forEach((v) => typeof v === "string" && qs.append(key, v));
         }
@@ -109,7 +112,7 @@ export default async function UnitHomePage({
     const locality = unitLocality(unit.slug);
     const telephone = normalizeTelephone(unit.whatsappPhone) ?? normalizeTelephone(unit.phone);
     const email = unit.email ? unit.email.replace(/^mailto:/, "").split("?")[0] : null;
-    const ua = headers().get("user-agent");
+    const ua = (await headers()).get("user-agent");
     const variant = heroVariantFromUserAgent(ua);
     const { items: heroItems } = await getHeroMediaItems({ variant });
 

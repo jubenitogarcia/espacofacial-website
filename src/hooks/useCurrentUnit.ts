@@ -38,9 +38,6 @@ export function useCurrentUnit(): Unit | null {
 
     const [storedSlug, setStoredSlug] = useState<string | null>(() => {
         if (typeof window === "undefined") return null;
-        // Requirement: opening the site on `/` should show the placeholder
-        // (do not auto-select from persisted storage on first paint).
-        if (window.location?.pathname === "/") return null;
         return getStoredUnitSlug();
     });
 

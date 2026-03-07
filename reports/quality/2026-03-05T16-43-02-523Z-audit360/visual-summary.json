@@ -1,0 +1,120 @@
+[
+  {
+    "mode": "desktop",
+    "route": "/",
+    "baselineCreated": false,
+    "diffPercent": 14.8548,
+    "baselinePath": "reports/quality/baseline/desktop/home.png",
+    "diffPath": "reports/quality/2026-03-05T16-43-02-523Z-audit360/diffs/desktop/home.png"
+  },
+  {
+    "mode": "desktop",
+    "route": "/agendamento",
+    "baselineCreated": false,
+    "diffPercent": 0,
+    "baselinePath": "reports/quality/baseline/desktop/agendamento.png",
+    "diffPath": "reports/quality/2026-03-05T16-43-02-523Z-audit360/diffs/desktop/agendamento.png"
+  },
+  {
+    "mode": "desktop",
+    "route": "/unidades",
+    "baselineCreated": false,
+    "diffPercent": 0,
+    "baselinePath": null,
+    "diffPath": null,
+    "skipped": true
+  },
+  {
+    "mode": "desktop",
+    "route": "/doutores",
+    "baselineCreated": false,
+    "diffPercent": 0,
+    "baselinePath": null,
+    "diffPath": null,
+    "skipped": true
+  },
+  {
+    "mode": "desktop",
+    "route": "/sobre",
+    "baselineCreated": false,
+    "diffPercent": 0,
+    "baselinePath": null,
+    "diffPath": null,
+    "skipped": true
+  },
+  {
+    "mode": "desktop",
+    "route": "/privacidade",
+    "baselineCreated": false,
+    "diffPercent": 0,
+    "baselinePath": "reports/quality/baseline/desktop/privacidade.png",
+    "diffPath": "reports/quality/2026-03-05T16-43-02-523Z-audit360/diffs/desktop/privacidade.png"
+  },
+  {
+    "mode": "desktop",
+    "route": "/termos",
+    "baselineCreated": false,
+    "diffPercent": 0,
+    "baselinePath": "reports/quality/baseline/desktop/termos.png",
+    "diffPath": "reports/quality/2026-03-05T16-43-02-523Z-audit360/diffs/desktop/termos.png"
+  },
+  {
+    "mode": "mobile",
+    "route": "/",
+    "baselineCreated": false,
+    "diffPercent": 0,
+    "baselinePath": "reports/quality/baseline/mobile/home.png",
+    "diffPath": "reports/quality/2026-03-05T16-43-02-523Z-audit360/diffs/mobile/home.png"
+  },
+  {
+    "mode": "mobile",
+    "route": "/agendamento",
+    "baselineCreated": false,
+    "diffPercent": 0,
+    "baselinePath": "reports/quality/baseline/mobile/agendamento.png",
+    "diffPath": "reports/quality/2026-03-05T16-43-02-523Z-audit360/diffs/mobile/agendamento.png"
+  },
+  {
+    "mode": "mobile",
+    "route": "/unidades",
+    "baselineCreated": false,
+    "diffPercent": 0,
+    "baselinePath": null,
+    "diffPath": null,
+    "skipped": true
+  },
+  {
+    "mode": "mobile",
+    "route": "/doutores",
+    "baselineCreated": false,
+    "diffPercent": 0,
+    "baselinePath": null,
+    "diffPath": null,
+    "skipped": true
+  },
+  {
+    "mode": "mobile",
+    "route": "/sobre",
+    "baselineCreated": false,
+    "diffPercent": 0,
+    "baselinePath": null,
+    "diffPath": null,
+    "skipped": true
+  },
+  {
+    "mode": "mobile",
+    "route": "/privacidade",
+    "baselineCreated": false,
+    "diffPercent": 0,
+    "baselinePath": "reports/quality/baseline/mobile/privacidade.png",
+    "diffPath": "reports/quality/2026-03-05T16-43-02-523Z-audit360/diffs/mobile/privacidade.png"
+  },
+  {
+    "mode": "mobile",
+    "route": "/termos",
+    "baselineCreated": false,
+    "diffPercent": 0,
+    "baselinePath": "reports/quality/baseline/mobile/termos.png",
+    "diffPath": "reports/quality/2026-03-05T16-43-02-523Z-audit360/diffs/mobile/termos.png"
+  }
+]

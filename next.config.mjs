@@ -1,6 +1,10 @@
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+
 /** @type {import('next').NextConfig} */
 const buildSha = process.env.NEXT_PUBLIC_BUILD_SHA || "";
 const buildTime = process.env.NEXT_PUBLIC_BUILD_TIME || "";
+
+initOpenNextCloudflareForDev();
 
 const nextConfig = {
   poweredByHeader: false,

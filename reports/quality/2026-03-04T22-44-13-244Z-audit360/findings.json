@@ -1,0 +1,210 @@
+[
+  {
+    "pillar": "security",
+    "severity": "high",
+    "title": "Vulnerabilidades de produção pendentes",
+    "details": "npm audit reportou 0 critical e 1 high em produção.",
+    "page": null,
+    "evidence": "reports/quality/2026-03-04T22-44-13-244Z-audit360/npm-audit-prod.json"
+  },
+  {
+    "pillar": "seo",
+    "severity": "high",
+    "title": "Meta noindex detectada",
+    "details": "Rota crítica contém noindex.",
+    "page": "/agendamento",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "high",
+    "title": "Meta noindex detectada",
+    "details": "Rota crítica contém noindex.",
+    "page": "/privacidade",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "high",
+    "title": "Meta noindex detectada",
+    "details": "Rota crítica contém noindex.",
+    "page": "/termos",
+    "evidence": null
+  },
+  {
+    "pillar": "accessibility",
+    "severity": "high",
+    "title": "Violações de acessibilidade detectadas",
+    "details": "/ possui 4 violações no axe.",
+    "page": "/",
+    "evidence": "reports/quality/2026-03-04T22-44-13-244Z-audit360/a11y/home.json"
+  },
+  {
+    "pillar": "accessibility",
+    "severity": "high",
+    "title": "Violações de acessibilidade detectadas",
+    "details": "/unidades possui 4 violações no axe.",
+    "page": "/unidades",
+    "evidence": "reports/quality/2026-03-04T22-44-13-244Z-audit360/a11y/unidades.json"
+  },
+  {
+    "pillar": "accessibility",
+    "severity": "high",
+    "title": "Violações de acessibilidade detectadas",
+    "details": "/doutores possui 4 violações no axe.",
+    "page": "/doutores",
+    "evidence": "reports/quality/2026-03-04T22-44-13-244Z-audit360/a11y/doutores.json"
+  },
+  {
+    "pillar": "visual",
+    "severity": "high",
+    "title": "Regressão visual significativa",
+    "details": "/sobre (desktop) com 23.7833% de pixels alterados.",
+    "page": "/sobre",
+    "evidence": "reports/quality/2026-03-04T22-44-13-244Z-audit360/diffs/desktop/sobre.png"
+  },
+  {
+    "pillar": "accessibility",
+    "severity": "high",
+    "title": "Violações de acessibilidade detectadas",
+    "details": "/sobre possui 4 violações no axe.",
+    "page": "/sobre",
+    "evidence": "reports/quality/2026-03-04T22-44-13-244Z-audit360/a11y/sobre.json"
+  },
+  {
+    "pillar": "visual",
+    "severity": "high",
+    "title": "Regressão visual significativa",
+    "details": "/doutores (mobile) com 10.3088% de pixels alterados.",
+    "page": "/doutores",
+    "evidence": "reports/quality/2026-03-04T22-44-13-244Z-audit360/diffs/mobile/doutores.png"
+  },
+  {
+    "pillar": "seo",
+    "severity": "medium",
+    "title": "Quantidade de H1 não ideal",
+    "details": "Encontrados 0 h1; recomendado: 1.",
+    "page": "/agendamento",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "medium",
+    "title": "sitemap.xml incompleto",
+    "details": "sitemap retornou 200 com 3 URLs.",
+    "page": "/sitemap.xml",
+    "evidence": null
+  },
+  {
+    "pillar": "accessibility",
+    "severity": "medium",
+    "title": "Violações de acessibilidade detectadas",
+    "details": "/agendamento possui 3 violações no axe.",
+    "page": "/agendamento",
+    "evidence": "reports/quality/2026-03-04T22-44-13-244Z-audit360/a11y/agendamento.json"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Alteração visual moderada",
+    "details": "/unidades (desktop) com 1.3528% de pixels alterados.",
+    "page": "/unidades",
+    "evidence": "reports/quality/2026-03-04T22-44-13-244Z-audit360/diffs/desktop/unidades.png"
+  },
+  {
+    "pillar": "seo",
+    "severity": "medium",
+    "title": "Lighthouse SEO baixo",
+    "details": "/agendamento com score 61.",
+    "page": "/agendamento",
+    "evidence": "reports/quality/2026-03-04T22-44-13-244Z-audit360/lighthouse/agendamento.json"
+  },
+  {
+    "pillar": "performance",
+    "severity": "low",
+    "title": "Uso de <img> detectado no lint",
+    "details": "Converter para next/image pode melhorar LCP e otimização de imagens.",
+    "page": null,
+    "evidence": "reports/quality/2026-03-04T22-44-13-244Z-audit360/logs/quality-check.log"
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Title fora do range recomendado",
+    "details": "Comprimento atual: 13 chars.",
+    "page": "/",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Meta description fora do range recomendado",
+    "details": "Comprimento atual: 63 chars.",
+    "page": "/",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Title fora do range recomendado",
+    "details": "Comprimento atual: 13 chars.",
+    "page": "/unidades",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Meta description fora do range recomendado",
+    "details": "Comprimento atual: 63 chars.",
+    "page": "/unidades",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Title fora do range recomendado",
+    "details": "Comprimento atual: 13 chars.",
+    "page": "/doutores",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Meta description fora do range recomendado",
+    "details": "Comprimento atual: 63 chars.",
+    "page": "/doutores",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Title fora do range recomendado",
+    "details": "Comprimento atual: 13 chars.",
+    "page": "/sobre",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Meta description fora do range recomendado",
+    "details": "Comprimento atual: 63 chars.",
+    "page": "/sobre",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Meta description fora do range recomendado",
+    "details": "Comprimento atual: 63 chars.",
+    "page": "/privacidade",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Meta description fora do range recomendado",
+    "details": "Comprimento atual: 63 chars.",
+    "page": "/termos",
+    "evidence": null
+  }
+]

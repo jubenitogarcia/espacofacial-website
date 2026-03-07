@@ -1,0 +1,226 @@
+[
+  {
+    "pillar": "ux",
+    "severity": "high",
+    "title": "Falha de navegação em página crítica",
+    "details": "/sobre (desktop) não pôde ser auditada: page.goto: net::ERR_NETWORK_CHANGED at https://espacofacial.com/sobre\nCall log:\n\u001b[2m  - navigating to \"https://espacofacial.com/sobre\", waiting until \"networkidle\"\u001b[22m\n",
+    "page": "/sobre",
+    "evidence": null
+  },
+  {
+    "pillar": "ux",
+    "severity": "high",
+    "title": "Falha de navegação em página crítica",
+    "details": "/privacidade (desktop) não pôde ser auditada: page.goto: Navigation to \"https://espacofacial.com/privacidade\" is interrupted by another navigation to \"chrome-error://chromewebdata/\"\nCall log:\n\u001b[2m  - navigating to \"https://espacofacial.com/privacidade\", waiting until \"networkidle\"\u001b[22m\n",
+    "page": "/privacidade",
+    "evidence": null
+  },
+  {
+    "pillar": "ux",
+    "severity": "high",
+    "title": "Falha de navegação em página crítica",
+    "details": "/termos (desktop) não pôde ser auditada: page.goto: Navigation to \"https://espacofacial.com/termos\" is interrupted by another navigation to \"https://espacofacial.com/privacidade\"\nCall log:\n\u001b[2m  - navigating to \"https://espacofacial.com/termos\", waiting until \"networkidle\"\u001b[22m\n",
+    "page": "/termos",
+    "evidence": null
+  },
+  {
+    "pillar": "accessibility",
+    "severity": "medium",
+    "title": "Violações de acessibilidade detectadas",
+    "details": "/ possui 1 violações no axe.",
+    "page": "/",
+    "evidence": "reports/quality/2026-03-05T13-07-14-371Z-audit360/a11y/home.json"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Alteração visual moderada",
+    "details": "/ (desktop) com 1.3396% de pixels alterados.",
+    "page": "/",
+    "evidence": "reports/quality/2026-03-05T13-07-14-371Z-audit360/diffs/desktop/home.png"
+  },
+  {
+    "pillar": "accessibility",
+    "severity": "medium",
+    "title": "Violações de acessibilidade detectadas",
+    "details": "/agendamento possui 1 violações no axe.",
+    "page": "/agendamento",
+    "evidence": "reports/quality/2026-03-05T13-07-14-371Z-audit360/a11y/agendamento.json"
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "TTFB acima do alvo",
+    "details": "/unidades (desktop) com TTFB 7942ms.",
+    "page": "/unidades",
+    "evidence": null
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "FCP acima do alvo",
+    "details": "/unidades (desktop) com FCP 8156ms.",
+    "page": "/unidades",
+    "evidence": null
+  },
+  {
+    "pillar": "accessibility",
+    "severity": "medium",
+    "title": "Violações de acessibilidade detectadas",
+    "details": "/unidades possui 1 violações no axe.",
+    "page": "/unidades",
+    "evidence": "reports/quality/2026-03-05T13-07-14-371Z-audit360/a11y/unidades.json"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/unidades (desktop) mudou de 1440x1086 para 1440x1901.",
+    "page": "/unidades",
+    "evidence": "reports/quality/2026-03-05T13-07-14-371Z-audit360/screenshots/desktop/unidades.png"
+  },
+  {
+    "pillar": "accessibility",
+    "severity": "medium",
+    "title": "Violações de acessibilidade detectadas",
+    "details": "/doutores possui 1 violações no axe.",
+    "page": "/doutores",
+    "evidence": "reports/quality/2026-03-05T13-07-14-371Z-audit360/a11y/doutores.json"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/doutores (desktop) mudou de 1440x900 para 1440x1901.",
+    "page": "/doutores",
+    "evidence": "reports/quality/2026-03-05T13-07-14-371Z-audit360/screenshots/desktop/doutores.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/ (mobile) mudou de 1170x11121 para 1170x10509.",
+    "page": "/",
+    "evidence": "reports/quality/2026-03-05T13-07-14-371Z-audit360/screenshots/mobile/home.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/unidades (mobile) mudou de 1170x8592 para 1170x10509.",
+    "page": "/unidades",
+    "evidence": "reports/quality/2026-03-05T13-07-14-371Z-audit360/screenshots/mobile/unidades.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/doutores (mobile) mudou de 1170x1992 para 1170x10509.",
+    "page": "/doutores",
+    "evidence": "reports/quality/2026-03-05T13-07-14-371Z-audit360/screenshots/mobile/doutores.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/sobre (mobile) mudou de 1170x2031 para 1170x10509.",
+    "page": "/sobre",
+    "evidence": "reports/quality/2026-03-05T13-07-14-371Z-audit360/screenshots/mobile/sobre.png"
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "Lighthouse performance baixo",
+    "details": "/agendamento com score 60.",
+    "page": "/agendamento",
+    "evidence": "reports/quality/2026-03-05T13-07-14-371Z-audit360/lighthouse/agendamento.json"
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Title fora do range recomendado",
+    "details": "Comprimento atual: 13 chars.",
+    "page": "/",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Meta description fora do range recomendado",
+    "details": "Comprimento atual: 63 chars.",
+    "page": "/",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Title fora do range recomendado",
+    "details": "Comprimento atual: 13 chars.",
+    "page": "/unidades",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Meta description fora do range recomendado",
+    "details": "Comprimento atual: 63 chars.",
+    "page": "/unidades",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Title fora do range recomendado",
+    "details": "Comprimento atual: 13 chars.",
+    "page": "/doutores",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Meta description fora do range recomendado",
+    "details": "Comprimento atual: 63 chars.",
+    "page": "/doutores",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Title fora do range recomendado",
+    "details": "Comprimento atual: 13 chars.",
+    "page": "/sobre",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Meta description fora do range recomendado",
+    "details": "Comprimento atual: 63 chars.",
+    "page": "/sobre",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Meta description fora do range recomendado",
+    "details": "Comprimento atual: 63 chars.",
+    "page": "/privacidade",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Meta description fora do range recomendado",
+    "details": "Comprimento atual: 63 chars.",
+    "page": "/termos",
+    "evidence": null
+  },
+  {
+    "pillar": "performance",
+    "severity": "low",
+    "title": "Load event alto",
+    "details": "/unidades (desktop) com load 8220ms.",
+    "page": "/unidades",
+    "evidence": null
+  }
+]

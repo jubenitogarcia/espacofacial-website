@@ -1,0 +1,110 @@
+[
+  {
+    "mode": "desktop",
+    "route": "/",
+    "ttfb": 152.10000000009313,
+    "domContentLoaded": 360.6999999997206,
+    "load": 360.79999999981374,
+    "fcp": 332,
+    "lcp": null,
+    "interactive": 62,
+    "forms": 0,
+    "unlabeledInputs": 0
+  },
+  {
+    "mode": "desktop",
+    "route": "/agendamento",
+    "ttfb": 101.5,
+    "domContentLoaded": 156.5,
+    "load": 173.20000000018626,
+    "fcp": 164,
+    "lcp": null,
+    "interactive": 45,
+    "forms": 0,
+    "unlabeledInputs": 0
+  },
+  {
+    "mode": "desktop",
+    "route": "/unidades",
+    "ttfb": 108.39999999990687,
+    "domContentLoaded": 179.1999999997206,
+    "load": 188.89999999990687,
+    "fcp": 184,
+    "lcp": null,
+    "interactive": 62,
+    "forms": 0,
+    "unlabeledInputs": 0
+  },
+  {
+    "mode": "desktop",
+    "route": "/doutores",
+    "ttfb": 94.29999999981374,
+    "domContentLoaded": 173.79999999981374,
+    "load": 174.10000000009313,
+    "fcp": 176,
+    "lcp": null,
+    "interactive": 62,
+    "forms": 0,
+    "unlabeledInputs": 0
+  },
+  {
+    "mode": "desktop",
+    "route": "/sobre",
+    "ttfb": 112,
+    "domContentLoaded": 161.79999999981374,
+    "load": 182.09999999962747,
+    "fcp": 172,
+    "lcp": null,
+    "interactive": 62,
+    "forms": 0,
+    "unlabeledInputs": 0
+  },
+  {
+    "mode": "desktop",
+    "route": "/privacidade",
+    "ttfb": 88.39999999990687,
+    "domContentLoaded": 181.89999999990687,
+    "load": 193.79999999981374,
+    "fcp": 192,
+    "lcp": null,
+    "interactive": 3,
+    "forms": 0,
+    "unlabeledInputs": 0
+  },
+  {
+    "mode": "desktop",
+    "route": "/termos",
+    "ttfb": 50.10000000009313,
+    "domContentLoaded": 120.10000000009313,
+    "load": 129,
+    "fcp": 124,
+    "lcp": null,
+    "interactive": 3,
+    "forms": 0,
+    "unlabeledInputs": 0
+  },
+  {
+    "mode": "mobile",
+    "route": "/",
+    "ttfb": 173.70000000018626,
+    "domContentLoaded": 335.70000000018626,
+    "load": 778.6000000000931,
+    "fcp": 308,
+    "lcp": null,
+    "interactive": 86,
+    "forms": 0,
+    "unlabeledInputs": 0
+  },
+  {
+    "mode": "mobile",
+    "route": "/agendamento",
+    "ttfb": 89.09999999962747,
+    "domContentLoaded": 171.39999999990687,
+    "load": 194.29999999981374,
+    "fcp": 176,
+    "lcp": null,
+    "interactive": 45,
+    "forms": 0,
+    "unlabeledInputs": 0
+  }
+]

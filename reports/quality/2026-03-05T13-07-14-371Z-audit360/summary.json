@@ -1,0 +1,82 @@
+{
+  "baseUrl": "https://espacofacial.com",
+  "runTs": "2026-03-05T13-07-14-371Z",
+  "checks": {
+    "quality": {
+      "status": "PASS",
+      "detail": "quality:check passou"
+    },
+    "security": {
+      "status": "PASS",
+      "detail": "0 critical / 0 high"
+    },
+    "seo": {
+      "status": "WARN",
+      "detail": "10 achados"
+    },
+    "visual": {
+      "status": "WARN",
+      "detail": "11 screenshots"
+    },
+    "ux": {
+      "status": "WARN",
+      "detail": "11 páginas verificadas"
+    },
+    "ui": {
+      "status": "PASS",
+      "detail": "11 páginas verificadas"
+    },
+    "accessibility": {
+      "status": "WARN",
+      "detail": "4 páginas com axe"
+    },
+    "performance": {
+      "status": "WARN",
+      "detail": "11 medições"
+    },
+    "strategy": {
+      "status": "PASS",
+      "detail": "6 reformas priorizadas"
+    }
+  },
+  "findingsCount": 28,
+  "findingsBySeverity": {
+    "high": 3,
+    "medium": 14,
+    "low": 11,
+    "info": 0
+  },
+  "scores": {
+    "quality": 100,
+    "security": 100,
+    "seo": 60,
+    "visual": 30,
+    "ui": 100,
+    "ux": 40,
+    "accessibility": 60,
+    "performance": 66
+  },
+  "overall": 70,
+  "strategic": {
+    "lensScores": {
+      "technicalSenior": 95,
+      "growthStrategist": 100,
+      "artDirectionSenior": 93,
+      "performanceMarketing": 100
+    },
+    "reformBacklogCount": 6,
+    "roadmap": {
+      "sprint0_14dias": [
+        "Checkout de agendamento com fricção mínima"
+      ],
+      "sprint15_45dias": [
+        "Redesign do hero para proposta de valor e conversão imediata",
+        "Landing local orientada por intenção e proximidade",
+        "Página de especialistas com narrativa de autoridade",
+        "Design system visual e verbal v2 com governança",
+        "Programa contínuo de experimentação (A/B e multivariada)"
+      ],
+      "sprint46_90dias": []
+    }
+  }
+}

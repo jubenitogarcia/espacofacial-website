@@ -1,0 +1,79 @@
+[
+  {
+    "route": "/",
+    "violations": 0,
+    "sevCount": {
+      "critical": 0,
+      "serious": 0,
+      "moderate": 0,
+      "minor": 0,
+      "unknown": 0
+    }
+  },
+  {
+    "route": "/agendamento",
+    "violations": 0,
+    "sevCount": {
+      "critical": 0,
+      "serious": 0,
+      "moderate": 0,
+      "minor": 0,
+      "unknown": 0
+    }
+  },
+  {
+    "route": "/unidades",
+    "violations": 0,
+    "sevCount": {
+      "critical": 0,
+      "serious": 0,
+      "moderate": 0,
+      "minor": 0,
+      "unknown": 0
+    }
+  },
+  {
+    "route": "/doutores",
+    "violations": 0,
+    "sevCount": {
+      "critical": 0,
+      "serious": 0,
+      "moderate": 0,
+      "minor": 0,
+      "unknown": 0
+    }
+  },
+  {
+    "route": "/sobre",
+    "violations": 0,
+    "sevCount": {
+      "critical": 0,
+      "serious": 0,
+      "moderate": 0,
+      "minor": 0,
+      "unknown": 0
+    }
+  },
+  {
+    "route": "/privacidade",
+    "violations": 0,
+    "sevCount": {
+      "critical": 0,
+      "serious": 0,
+      "moderate": 0,
+      "minor": 0,
+      "unknown": 0
+    }
+  },
+  {
+    "route": "/termos",
+    "violations": 0,
+    "sevCount": {
+      "critical": 0,
+      "serious": 0,
+      "moderate": 0,
+      "minor": 0,
+      "unknown": 0
+    }
+  }
+]

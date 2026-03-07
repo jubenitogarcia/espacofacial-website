@@ -1,0 +1,79 @@
+[
+  {
+    "mode": "desktop",
+    "route": "/",
+    "interactive": 62,
+    "forms": 0,
+    "unlabeledInputs": 0
+  },
+  {
+    "mode": "desktop",
+    "route": "/agendamento",
+    "interactive": 45,
+    "forms": 0,
+    "unlabeledInputs": 0
+  },
+  {
+    "mode": "desktop",
+    "route": "/unidades",
+    "interactive": 62,
+    "forms": 0,
+    "unlabeledInputs": 0
+  },
+  {
+    "mode": "desktop",
+    "route": "/doutores",
+    "interactive": 62,
+    "forms": 0,
+    "unlabeledInputs": 0
+  },
+  {
+    "mode": "mobile",
+    "route": "/",
+    "interactive": 62,
+    "forms": 0,
+    "unlabeledInputs": 0
+  },
+  {
+    "mode": "mobile",
+    "route": "/agendamento",
+    "interactive": 45,
+    "forms": 0,
+    "unlabeledInputs": 0
+  },
+  {
+    "mode": "mobile",
+    "route": "/unidades",
+    "interactive": 62,
+    "forms": 0,
+    "unlabeledInputs": 0
+  },
+  {
+    "mode": "mobile",
+    "route": "/doutores",
+    "interactive": 62,
+    "forms": 0,
+    "unlabeledInputs": 0
+  },
+  {
+    "mode": "mobile",
+    "route": "/sobre",
+    "interactive": 62,
+    "forms": 0,
+    "unlabeledInputs": 0
+  },
+  {
+    "mode": "mobile",
+    "route": "/privacidade",
+    "interactive": 3,
+    "forms": 0,
+    "unlabeledInputs": 0
+  },
+  {
+    "mode": "mobile",
+    "route": "/termos",
+    "interactive": 3,
+    "forms": 0,
+    "unlabeledInputs": 0
+  }
+]

@@ -1,0 +1,116 @@
+$ npm run quality:check
+
+
+> espacofacial-open@0.1.0 quality:check
+> npm run lint && npm run typecheck && npm run test:agenda && npm run build && npm run smoke:strict
+
+
+> espacofacial-open@0.1.0 lint
+> next lint
+
+✔ No ESLint warnings or errors
+
+> espacofacial-open@0.1.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> espacofacial-open@0.1.0 test:agenda
+> tsx --test tests/agendaDb.test.ts
+
+✔ parseDateKey returns yyyy-mm-dd (0.711291ms)
+✔ parseDateKey rejects invalid (0.083833ms)
+✔ parseTimeKey returns hh:mm (0.135042ms)
+✔ parseTimeKey rejects invalid (0.063334ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 253.832708
+
+> espacofacial-open@0.1.0 build
+> next build
+
+   ▲ Next.js 15.5.12
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 3.2s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/19) ...
+   Generating static pages (4/19) 
+   Generating static pages (9/19) 
+   Generating static pages (14/19) 
+ ✓ Generating static pages (19/19)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS  Revalidate  Expire
+┌ ○ /                                    1.74 kB         155 kB          5m      1y
+├ ○ /_not-found                            215 B         102 kB
+├ ƒ /[unit]                              1.79 kB         155 kB
+├ ƒ /[unit]/faleconosco                    215 B         102 kB
+├ ƒ /[unit]/faleconsco                     215 B         102 kB
+├ ○ /agendamento                         1.71 kB         120 kB
+├ ƒ /api/agenda                            215 B         102 kB
+├ ƒ /api/agenda/sync                       215 B         102 kB
+├ ƒ /api/booking/decision                  215 B         102 kB
+├ ƒ /api/booking/request                   215 B         102 kB
+├ ƒ /api/booking/services                  215 B         102 kB
+├ ƒ /api/booking/slots                     215 B         102 kB
+├ ƒ /api/booking/status                    215 B         102 kB
+├ ƒ /api/booking/webhook/decision          215 B         102 kB
+├ ƒ /api/drive-media/[id]                  215 B         102 kB
+├ ƒ /api/equipe                            215 B         102 kB
+├ ƒ /api/gbp/accounts                      215 B         102 kB
+├ ƒ /api/gbp/health                        215 B         102 kB
+├ ƒ /api/gbp/photos                        215 B         102 kB
+├ ƒ /api/gbp/reviews                       215 B         102 kB
+├ ƒ /api/hero-media                        215 B         102 kB
+├ ƒ /api/instagram-avatar                  215 B         102 kB
+├ ƒ /api/instagram-feed                    215 B         102 kB
+├ ƒ /api/places/details                    215 B         102 kB
+├ ƒ /api/places/photo                      215 B         102 kB
+├ ƒ /api/sugereaqui                        215 B         102 kB
+├ ○ /doutores                              601 B         122 kB          1h      1y
+├ ƒ /doutores/[slug]                       498 B         118 kB
+├ ƒ /faleconosco/[sigla]                   215 B         102 kB
+├ ƒ /faleconsco/[sigla]                    215 B         102 kB
+├ ○ /icon.svg                                0 B            0 B
+├ ○ /opengraph-image                       215 B         102 kB
+├ ○ /privacidade                           215 B         102 kB
+├ ○ /robots.txt                            215 B         102 kB
+├ ○ /sitemap.xml                           215 B         102 kB
+├ ○ /sobre                                 227 B         123 kB
+├ ○ /sugereaqui                           1.5 kB         104 kB
+├ ○ /termos                                215 B         102 kB
+├ ○ /twitter-image                         215 B         102 kB
+├ ○ /unidades                              226 B         145 kB
+└ ƒ /unidades/[slug]                       215 B         102 kB
++ First Load JS shared by all             102 kB
+  ├ chunks/1255-a390e12b70b4a9fb.js        46 kB
+  ├ chunks/4bd1b696-f785427dddbba9fb.js  54.2 kB
+  └ other shared chunks (total)          1.96 kB
+
+
+ƒ Middleware                             35.7 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+> espacofacial-open@0.1.0 smoke:strict
+> SMOKE_REQUIRE_AGENDA=1 node scripts/smoke.mjs
+
+Smoke base URL: https://espacofacial.com
+OK: smoke checks passed
+
+`next lint` is deprecated and will be removed in Next.js 16.
+For new projects, use create-next-app to choose your preferred linter.
+For existing projects, migrate to the ESLint CLI:
+npx @next/codemod@canary next-lint-to-eslint-cli .
+
+WARN: SMOKE_AGENDA_TOKEN not set; skipping /api/agenda check

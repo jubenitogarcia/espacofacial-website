@@ -1,0 +1,56 @@
+{
+  "baseUrl": "https://espacofacial.com",
+  "runTs": "2026-03-04T23-43-57-775Z",
+  "checks": {
+    "quality": {
+      "status": "PASS",
+      "detail": "quality:check passou"
+    },
+    "security": {
+      "status": "WARN",
+      "detail": "0 critical / 1 high"
+    },
+    "seo": {
+      "status": "PASS",
+      "detail": "0 achados"
+    },
+    "visual": {
+      "status": "PASS",
+      "detail": "14 screenshots"
+    },
+    "ux": {
+      "status": "PASS",
+      "detail": "14 páginas verificadas"
+    },
+    "ui": {
+      "status": "PASS",
+      "detail": "14 páginas verificadas"
+    },
+    "accessibility": {
+      "status": "PASS",
+      "detail": "7 páginas com axe"
+    },
+    "performance": {
+      "status": "PASS",
+      "detail": "14 medições"
+    }
+  },
+  "findingsCount": 1,
+  "findingsBySeverity": {
+    "high": 1,
+    "medium": 0,
+    "low": 0,
+    "info": 0
+  },
+  "scores": {
+    "quality": 100,
+    "security": 80,
+    "seo": 100,
+    "visual": 100,
+    "ui": 100,
+    "ux": 100,
+    "accessibility": 100,
+    "performance": 100
+  },
+  "overall": 98
+}

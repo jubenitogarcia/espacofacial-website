@@ -1,0 +1,9 @@
+$ npm run smoke
+
+
+> espacofacial-open@0.1.0 smoke
+> node scripts/smoke.mjs
+
+Smoke base URL: https://espacofacial.com
+
+Smoke FAILED: /api/agenda?unit_slug=barrashoppingsul&date_from=2026-03-06&date_to=2026-03-06 expected 200, got 401

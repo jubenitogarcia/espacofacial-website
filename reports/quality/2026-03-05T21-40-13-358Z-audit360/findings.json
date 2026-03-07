@@ -1,0 +1,10 @@
+[
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "TTFB acima do alvo",
+    "details": "/sobre (mobile) com TTFB 1075ms.",
+    "page": "/sobre",
+    "evidence": null
+  }
+]

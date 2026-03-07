@@ -1,0 +1,18 @@
+[
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "TTFB acima do alvo",
+    "details": "/doutores (desktop) com TTFB 1621ms.",
+    "page": "/doutores",
+    "evidence": null
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "TTFB acima do alvo",
+    "details": "/doutores (mobile) com TTFB 931ms.",
+    "page": "/doutores",
+    "evidence": null
+  }
+]

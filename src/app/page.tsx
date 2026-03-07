@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const ua = headers().get("user-agent");
+  const ua = (await headers()).get("user-agent");
   const variant = heroVariantFromUserAgent(ua);
   const { items: heroItems } = await getHeroMediaItems({ variant });
 

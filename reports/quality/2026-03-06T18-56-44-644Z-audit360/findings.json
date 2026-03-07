@@ -1,0 +1,10 @@
+[
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/agendamento (mobile) mudou de 1170x15855 para 1170x15987.",
+    "page": "/agendamento",
+    "evidence": "reports/quality/2026-03-06T18-56-44-644Z-audit360/screenshots/mobile/agendamento.png"
+  }
+]

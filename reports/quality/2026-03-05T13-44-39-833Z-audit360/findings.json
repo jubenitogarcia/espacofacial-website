@@ -1,0 +1,18 @@
+[
+  {
+    "pillar": "visual",
+    "severity": "high",
+    "title": "Regressão visual significativa",
+    "details": "/doutores (mobile) com 5.7977% de pixels alterados.",
+    "page": "/doutores",
+    "evidence": "reports/quality/2026-03-05T13-44-39-833Z-audit360/diffs/mobile/doutores.png"
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "Lighthouse performance baixo",
+    "details": "/agendamento com score 64.",
+    "page": "/agendamento",
+    "evidence": "reports/quality/2026-03-05T13-44-39-833Z-audit360/lighthouse/agendamento.json"
+  }
+]

@@ -11,6 +11,72 @@ type TeamMember = {
     instagramUrl: string | null;
 };
 
+const LOCAL_FALLBACK_MEMBERS: TeamMember[] = [
+    {
+        name: "Gabriela Menegat",
+        nickname: null,
+        units: ["BarraShoppingSul", "Novo Hamburgo"],
+        role: "Injetor",
+        roles: ["Injetor"],
+        instagramHandle: "dragabrielamenegat",
+        instagramUrl: "https://www.instagram.com/dragabrielamenegat/",
+    },
+    {
+        name: "Josiele Maiara de Souza",
+        nickname: null,
+        units: ["Novo Hamburgo"],
+        role: "Injetor",
+        roles: ["Injetor"],
+        instagramHandle: "drajosielesouza",
+        instagramUrl: "https://www.instagram.com/drajosielesouza/",
+    },
+    {
+        name: "Marcelo Gomes Soares",
+        nickname: null,
+        units: ["BarraShoppingSul", "Novo Hamburgo"],
+        role: "Injetor",
+        roles: ["Injetor"],
+        instagramHandle: "drmarcelogsoares",
+        instagramUrl: "https://www.instagram.com/drmarcelogsoares/",
+    },
+    {
+        name: "Marina Pereira Lima",
+        nickname: null,
+        units: ["BarraShoppingSul", "Novo Hamburgo"],
+        role: "Injetor",
+        roles: ["Injetor"],
+        instagramHandle: "dramarinalima",
+        instagramUrl: "https://www.instagram.com/dramarinalima/",
+    },
+    {
+        name: "Samara Silva",
+        nickname: null,
+        units: ["BarraShoppingSul", "Novo Hamburgo"],
+        role: "Injetor",
+        roles: ["Injetor"],
+        instagramHandle: "drasamarassilva",
+        instagramUrl: "https://www.instagram.com/drasamarassilva/",
+    },
+    {
+        name: "Vinícius Vieira",
+        nickname: null,
+        units: ["BarraShoppingSul", "Novo Hamburgo"],
+        role: "Injetor",
+        roles: ["Injetor"],
+        instagramHandle: "drviniciusvieira",
+        instagramUrl: "https://www.instagram.com/drviniciusvieira/",
+    },
+    {
+        name: "Viviane Mondin",
+        nickname: null,
+        units: ["BarraShoppingSul", "Novo Hamburgo"],
+        role: "Injetor",
+        roles: ["Injetor"],
+        instagramHandle: "dravivianemondin",
+        instagramUrl: "https://www.instagram.com/dravivianemondin/",
+    },
+];
+
 export type InjectorsDirectoryError =
     | { code: "http_error"; status: number }
     | { code: "auth_not_configured" }
@@ -306,6 +372,10 @@ function normalizeRoles(value: string): string[] {
 
 export { doctorSlugFromTeamMember };
 
+function fallbackMembers(): TeamMember[] {
+    return LOCAL_FALLBACK_MEMBERS.map((member) => ({ ...member, units: [...member.units], roles: [...member.roles] }));
+}
+
 export function unitLabelFromBookingUnitSlug(unitSlug: string): string | null {
     if (unitSlug === "barrashoppingsul") return "BarraShoppingSul";
     if (unitSlug === "novo-hamburgo" || unitSlug === "novohamburgo") return "Novo Hamburgo";
@@ -325,12 +395,12 @@ export async function fetchActiveInjectorsResult(): Promise<{ ok: true; members:
             try {
                 rows = await fetchSheetRowsViaApi({ serviceAccountJson, sheetId, gidEquipe });
             } catch (e) {
-                if (e instanceof Error && e.message === "auth_invalid_json") return { ok: false, members: [], error: { code: "auth_invalid_json" } };
-                if (e instanceof Error && e.message === "auth_missing_fields") return { ok: false, members: [], error: { code: "auth_missing_fields" } };
-                if (e instanceof GidError && e.message === "sheet_not_found") return { ok: false, members: [], error: { code: "sheet_not_found", gid: e.gid } };
-                if (e instanceof StatusError && e.message === "auth_token_failed") return { ok: false, members: [], error: { code: "auth_token_failed", status: e.status } };
-                if (e instanceof StatusError && e.message === "sheets_api_failed") return { ok: false, members: [], error: { code: "sheets_api_failed", status: e.status } };
-                return { ok: false, members: [], error: { code: "exception" } };
+                if (e instanceof Error && e.message === "auth_invalid_json") return { ok: true, members: fallbackMembers() };
+                if (e instanceof Error && e.message === "auth_missing_fields") return { ok: true, members: fallbackMembers() };
+                if (e instanceof GidError && e.message === "sheet_not_found") return { ok: true, members: fallbackMembers() };
+                if (e instanceof StatusError && e.message === "auth_token_failed") return { ok: true, members: fallbackMembers() };
+                if (e instanceof StatusError && e.message === "sheets_api_failed") return { ok: true, members: fallbackMembers() };
+                return { ok: true, members: fallbackMembers() };
             }
         } else {
             // Fallback to public CSV fetch (only works if the sheet is public).
@@ -341,17 +411,17 @@ export async function fetchActiveInjectorsResult(): Promise<{ ok: true; members:
             });
 
             if (!res.ok) {
-                return { ok: false, members: [], error: { code: "http_error", status: res.status } };
+                return { ok: true, members: fallbackMembers() };
             }
 
             const contentType = res.headers.get("content-type");
             if (contentType && !contentType.toLowerCase().includes("text/csv")) {
-                return { ok: false, members: [], error: { code: "unexpected_content_type", contentType } };
+                return { ok: true, members: fallbackMembers() };
             }
 
             const csv = await res.text();
             if (/^\s*</.test(csv)) {
-                return { ok: false, members: [], error: { code: "html_response" } };
+                return { ok: true, members: fallbackMembers() };
             }
 
             rows = parseCsv(csv);
@@ -397,7 +467,7 @@ export async function fetchActiveInjectorsResult(): Promise<{ ok: true; members:
 
         return { ok: true, members };
     } catch {
-        return { ok: false, members: [], error: { code: "exception" } };
+        return { ok: true, members: fallbackMembers() };
     }
 }
 

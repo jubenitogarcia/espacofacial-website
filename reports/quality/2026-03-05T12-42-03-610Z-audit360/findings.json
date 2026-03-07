@@ -1,0 +1,338 @@
+[
+  {
+    "pillar": "seo",
+    "severity": "high",
+    "title": "Meta noindex detectada",
+    "details": "Rota crítica contém noindex.",
+    "page": "/agendamento",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "high",
+    "title": "Meta noindex detectada",
+    "details": "Rota crítica contém noindex.",
+    "page": "/privacidade",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "high",
+    "title": "Meta noindex detectada",
+    "details": "Rota crítica contém noindex.",
+    "page": "/termos",
+    "evidence": null
+  },
+  {
+    "pillar": "accessibility",
+    "severity": "high",
+    "title": "Violações de acessibilidade detectadas",
+    "details": "/ possui 4 violações no axe.",
+    "page": "/",
+    "evidence": "reports/quality/2026-03-05T12-42-03-610Z-audit360/a11y/home.json"
+  },
+  {
+    "pillar": "accessibility",
+    "severity": "high",
+    "title": "Violações de acessibilidade detectadas",
+    "details": "/unidades possui 4 violações no axe.",
+    "page": "/unidades",
+    "evidence": "reports/quality/2026-03-05T12-42-03-610Z-audit360/a11y/unidades.json"
+  },
+  {
+    "pillar": "accessibility",
+    "severity": "high",
+    "title": "Violações de acessibilidade detectadas",
+    "details": "/doutores possui 4 violações no axe.",
+    "page": "/doutores",
+    "evidence": "reports/quality/2026-03-05T12-42-03-610Z-audit360/a11y/doutores.json"
+  },
+  {
+    "pillar": "accessibility",
+    "severity": "high",
+    "title": "Violações de acessibilidade detectadas",
+    "details": "/sobre possui 4 violações no axe.",
+    "page": "/sobre",
+    "evidence": "reports/quality/2026-03-05T12-42-03-610Z-audit360/a11y/sobre.json"
+  },
+  {
+    "pillar": "seo",
+    "severity": "medium",
+    "title": "sitemap.xml incompleto",
+    "details": "sitemap retornou 200 com 3 URLs.",
+    "page": "/sitemap.xml",
+    "evidence": null
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "TTFB acima do alvo",
+    "details": "/ (desktop) com TTFB 4492ms.",
+    "page": "/",
+    "evidence": null
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "FCP acima do alvo",
+    "details": "/ (desktop) com FCP 6104ms.",
+    "page": "/",
+    "evidence": null
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Alteração visual moderada",
+    "details": "/ (desktop) com 1.3396% de pixels alterados.",
+    "page": "/",
+    "evidence": "reports/quality/2026-03-05T12-42-03-610Z-audit360/diffs/desktop/home.png"
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "TTFB acima do alvo",
+    "details": "/agendamento (desktop) com TTFB 1880ms.",
+    "page": "/agendamento",
+    "evidence": null
+  },
+  {
+    "pillar": "accessibility",
+    "severity": "medium",
+    "title": "Violações de acessibilidade detectadas",
+    "details": "/agendamento possui 3 violações no axe.",
+    "page": "/agendamento",
+    "evidence": "reports/quality/2026-03-05T12-42-03-610Z-audit360/a11y/agendamento.json"
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "TTFB acima do alvo",
+    "details": "/unidades (desktop) com TTFB 1316ms.",
+    "page": "/unidades",
+    "evidence": null
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/unidades (desktop) mudou de 1440x1086 para 1440x1901.",
+    "page": "/unidades",
+    "evidence": "reports/quality/2026-03-05T12-42-03-610Z-audit360/screenshots/desktop/unidades.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/doutores (desktop) mudou de 1440x900 para 1440x1901.",
+    "page": "/doutores",
+    "evidence": "reports/quality/2026-03-05T12-42-03-610Z-audit360/screenshots/desktop/doutores.png"
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "TTFB acima do alvo",
+    "details": "/sobre (desktop) com TTFB 1139ms.",
+    "page": "/sobre",
+    "evidence": null
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "FCP acima do alvo",
+    "details": "/sobre (desktop) com FCP 2580ms.",
+    "page": "/sobre",
+    "evidence": null
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/sobre (desktop) mudou de 1440x900 para 1440x1901.",
+    "page": "/sobre",
+    "evidence": "reports/quality/2026-03-05T12-42-03-610Z-audit360/screenshots/desktop/sobre.png"
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "TTFB acima do alvo",
+    "details": "/ (mobile) com TTFB 1364ms.",
+    "page": "/",
+    "evidence": null
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/ (mobile) mudou de 1170x11121 para 1170x10509.",
+    "page": "/",
+    "evidence": "reports/quality/2026-03-05T12-42-03-610Z-audit360/screenshots/mobile/home.png"
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "TTFB acima do alvo",
+    "details": "/unidades (mobile) com TTFB 1323ms.",
+    "page": "/unidades",
+    "evidence": null
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/unidades (mobile) mudou de 1170x8592 para 1170x10509.",
+    "page": "/unidades",
+    "evidence": "reports/quality/2026-03-05T12-42-03-610Z-audit360/screenshots/mobile/unidades.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/doutores (mobile) mudou de 1170x1992 para 1170x10509.",
+    "page": "/doutores",
+    "evidence": "reports/quality/2026-03-05T12-42-03-610Z-audit360/screenshots/mobile/doutores.png"
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "TTFB acima do alvo",
+    "details": "/sobre (mobile) com TTFB 3738ms.",
+    "page": "/sobre",
+    "evidence": null
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "FCP acima do alvo",
+    "details": "/sobre (mobile) com FCP 4632ms.",
+    "page": "/sobre",
+    "evidence": null
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/sobre (mobile) mudou de 1170x2031 para 1170x10509.",
+    "page": "/sobre",
+    "evidence": "reports/quality/2026-03-05T12-42-03-610Z-audit360/screenshots/mobile/sobre.png"
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "Lighthouse performance baixo",
+    "details": "/ com score 59.",
+    "page": "/",
+    "evidence": "reports/quality/2026-03-05T12-42-03-610Z-audit360/lighthouse/home.json"
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "Lighthouse performance baixo",
+    "details": "/agendamento com score 63.",
+    "page": "/agendamento",
+    "evidence": "reports/quality/2026-03-05T12-42-03-610Z-audit360/lighthouse/agendamento.json"
+  },
+  {
+    "pillar": "seo",
+    "severity": "medium",
+    "title": "Lighthouse SEO baixo",
+    "details": "/agendamento com score 61.",
+    "page": "/agendamento",
+    "evidence": "reports/quality/2026-03-05T12-42-03-610Z-audit360/lighthouse/agendamento.json"
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Title fora do range recomendado",
+    "details": "Comprimento atual: 13 chars.",
+    "page": "/",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Meta description fora do range recomendado",
+    "details": "Comprimento atual: 63 chars.",
+    "page": "/",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Title fora do range recomendado",
+    "details": "Comprimento atual: 13 chars.",
+    "page": "/unidades",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Meta description fora do range recomendado",
+    "details": "Comprimento atual: 63 chars.",
+    "page": "/unidades",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Title fora do range recomendado",
+    "details": "Comprimento atual: 13 chars.",
+    "page": "/doutores",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Meta description fora do range recomendado",
+    "details": "Comprimento atual: 63 chars.",
+    "page": "/doutores",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Title fora do range recomendado",
+    "details": "Comprimento atual: 13 chars.",
+    "page": "/sobre",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Meta description fora do range recomendado",
+    "details": "Comprimento atual: 63 chars.",
+    "page": "/sobre",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Meta description fora do range recomendado",
+    "details": "Comprimento atual: 63 chars.",
+    "page": "/privacidade",
+    "evidence": null
+  },
+  {
+    "pillar": "seo",
+    "severity": "low",
+    "title": "Meta description fora do range recomendado",
+    "details": "Comprimento atual: 63 chars.",
+    "page": "/termos",
+    "evidence": null
+  },
+  {
+    "pillar": "performance",
+    "severity": "low",
+    "title": "Load event alto",
+    "details": "/ (desktop) com load 8722ms.",
+    "page": "/",
+    "evidence": null
+  },
+  {
+    "pillar": "performance",
+    "severity": "low",
+    "title": "Load event alto",
+    "details": "/sobre (mobile) com load 7049ms.",
+    "page": "/sobre",
+    "evidence": null
+  }
+]

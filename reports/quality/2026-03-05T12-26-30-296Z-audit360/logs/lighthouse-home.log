@@ -1,0 +1,3 @@
+$ npx --yes lighthouse https://espacofacial.com/ --quiet --output=json --output-path=reports/quality/2026-03-05T12-26-30-296Z-audit360/lighthouse/home.json --only-categories=performance,seo,accessibility,best-practices --chrome-flags=--headless --no-sandbox --disable-gpu
+
+

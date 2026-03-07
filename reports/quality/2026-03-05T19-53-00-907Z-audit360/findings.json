@@ -1,0 +1,26 @@
+[
+  {
+    "pillar": "quality",
+    "severity": "medium",
+    "title": "Smoke estrito bloqueado por autenticação de agenda",
+    "details": "A suíte principal passou, mas o check estrito de /api/agenda retornou 401/403. Configure SMOKE_AGENDA_TOKEN correto para bloquear regressões autenticadas.",
+    "page": null,
+    "evidence": "reports/quality/2026-03-05T19-53-00-907Z-audit360/logs/quality-check.log"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/agendamento (desktop) mudou de 1440x1285 para 1440x1275.",
+    "page": "/agendamento",
+    "evidence": "reports/quality/2026-03-05T19-53-00-907Z-audit360/screenshots/desktop/agendamento.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/agendamento (mobile) mudou de 1170x5232 para 1170x5202.",
+    "page": "/agendamento",
+    "evidence": "reports/quality/2026-03-05T19-53-00-907Z-audit360/screenshots/mobile/agendamento.png"
+  }
+]

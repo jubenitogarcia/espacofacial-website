@@ -1,0 +1,46 @@
+[
+  {
+    "route": "/",
+    "violations": 1,
+    "sevCount": {
+      "critical": 0,
+      "serious": 1,
+      "moderate": 0,
+      "minor": 0,
+      "unknown": 0
+    }
+  },
+  {
+    "route": "/agendamento",
+    "violations": 1,
+    "sevCount": {
+      "critical": 0,
+      "serious": 1,
+      "moderate": 0,
+      "minor": 0,
+      "unknown": 0
+    }
+  },
+  {
+    "route": "/unidades",
+    "violations": 1,
+    "sevCount": {
+      "critical": 0,
+      "serious": 1,
+      "moderate": 0,
+      "minor": 0,
+      "unknown": 0
+    }
+  },
+  {
+    "route": "/doutores",
+    "violations": 1,
+    "sevCount": {
+      "critical": 0,
+      "serious": 1,
+      "moderate": 0,
+      "minor": 0,
+      "unknown": 0
+    }
+  }
+]

@@ -2,9 +2,10 @@ import { driveFetchFileMedia } from "@/lib/googleDrive";
 
 export async function GET(
     req: Request,
-    { params }: { params: { id: string } },
+    { params }: { params: Promise<{ id: string }> },
 ) {
-    const upstream = await driveFetchFileMedia(params.id, req.headers.get("range"));
+    const { id } = await params;
+    const upstream = await driveFetchFileMedia(id, req.headers.get("range"));
 
     const headers = new Headers();
     const passthrough = [

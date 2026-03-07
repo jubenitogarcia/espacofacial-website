@@ -1,0 +1,90 @@
+[
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Alteração visual moderada",
+    "details": "/ (desktop) com 1.4611% de pixels alterados.",
+    "page": "/",
+    "evidence": "reports/quality/2026-03-05T13-36-57-976Z-audit360/diffs/desktop/home.png"
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "TTFB acima do alvo",
+    "details": "/unidades (desktop) com TTFB 6615ms.",
+    "page": "/unidades",
+    "evidence": null
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "FCP acima do alvo",
+    "details": "/unidades (desktop) com FCP 6780ms.",
+    "page": "/unidades",
+    "evidence": null
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/unidades (desktop) mudou de 1440x1086 para 1440x1901.",
+    "page": "/unidades",
+    "evidence": "reports/quality/2026-03-05T13-36-57-976Z-audit360/screenshots/desktop/unidades.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/doutores (desktop) mudou de 1440x900 para 1440x1901.",
+    "page": "/doutores",
+    "evidence": "reports/quality/2026-03-05T13-36-57-976Z-audit360/screenshots/desktop/doutores.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/sobre (desktop) mudou de 1440x900 para 1440x1901.",
+    "page": "/sobre",
+    "evidence": "reports/quality/2026-03-05T13-36-57-976Z-audit360/screenshots/desktop/sobre.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/ (mobile) mudou de 1170x11121 para 1170x10509.",
+    "page": "/",
+    "evidence": "reports/quality/2026-03-05T13-36-57-976Z-audit360/screenshots/mobile/home.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/unidades (mobile) mudou de 1170x8592 para 1170x10509.",
+    "page": "/unidades",
+    "evidence": "reports/quality/2026-03-05T13-36-57-976Z-audit360/screenshots/mobile/unidades.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/doutores (mobile) mudou de 1170x1992 para 1170x10509.",
+    "page": "/doutores",
+    "evidence": "reports/quality/2026-03-05T13-36-57-976Z-audit360/screenshots/mobile/doutores.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "medium",
+    "title": "Dimensão de screenshot alterada",
+    "details": "/sobre (mobile) mudou de 1170x2031 para 1170x10509.",
+    "page": "/sobre",
+    "evidence": "reports/quality/2026-03-05T13-36-57-976Z-audit360/screenshots/mobile/sobre.png"
+  },
+  {
+    "pillar": "performance",
+    "severity": "low",
+    "title": "Load event alto",
+    "details": "/unidades (desktop) com load 6802ms.",
+    "page": "/unidades",
+    "evidence": null
+  }
+]

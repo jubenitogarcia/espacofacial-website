@@ -1,0 +1,18 @@
+[
+  {
+    "pillar": "visual",
+    "severity": "high",
+    "title": "Regressão visual significativa",
+    "details": "/agendamento (desktop) com 4.8756% de pixels alterados.",
+    "page": "/agendamento",
+    "evidence": "reports/quality/2026-03-05T19-41-50-541Z-audit360/diffs/desktop/agendamento.png"
+  },
+  {
+    "pillar": "visual",
+    "severity": "high",
+    "title": "Regressão visual significativa",
+    "details": "/agendamento (mobile) com 2.4206% de pixels alterados.",
+    "page": "/agendamento",
+    "evidence": "reports/quality/2026-03-05T19-41-50-541Z-audit360/diffs/mobile/agendamento.png"
+  }
+]

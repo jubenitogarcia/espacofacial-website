@@ -1,0 +1,10 @@
+[
+  {
+    "pillar": "security",
+    "severity": "high",
+    "title": "Vulnerabilidades de produção pendentes",
+    "details": "npm audit reportou 0 critical e 1 high em produção.",
+    "page": null,
+    "evidence": "reports/quality/2026-03-04T23-43-57-775Z-audit360/npm-audit-prod.json"
+  }
+]

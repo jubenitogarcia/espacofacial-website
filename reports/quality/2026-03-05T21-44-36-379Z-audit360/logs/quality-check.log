@@ -1,0 +1,108 @@
+$ npm run quality:check
+
+
+> espacofacial-open@0.1.0 quality:check
+> npm run lint && npm run typecheck && npm run test:agenda && npm run build && npm run smoke:strict
+
+
+> espacofacial-open@0.1.0 lint
+> eslint src scripts tests workers/esfa-redirector --ext .js,.mjs,.ts,.tsx
+
+
+> espacofacial-open@0.1.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> espacofacial-open@0.1.0 test:agenda
+> tsx --test tests/agendaDb.test.ts
+
+✔ parseDateKey returns yyyy-mm-dd (0.595792ms)
+✔ parseDateKey rejects invalid (0.050334ms)
+✔ parseTimeKey returns hh:mm (0.075625ms)
+✔ parseTimeKey rejects invalid (0.036708ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 122.6815
+
+> espacofacial-open@0.1.0 build
+> next build
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 1756.8ms
+  Running TypeScript ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/24) ...
+  Generating static pages using 7 workers (6/24) 
+  Generating static pages using 7 workers (12/24) 
+  Generating static pages using 7 workers (18/24) 
+✓ Generating static pages using 7 workers (24/24) in 188.1ms
+  Finalizing page optimization ...
+
+Route (app)                        Revalidate  Expire
+┌ ƒ /
+├ ○ /_not-found
+├ ƒ /[unit]
+├ ƒ /[unit]/faleconosco
+├ ƒ /[unit]/faleconsco
+├ ○ /agendamento
+├ ƒ /api/agenda
+├ ƒ /api/agenda/sync
+├ ƒ /api/booking/decision
+├ ƒ /api/booking/request
+├ ƒ /api/booking/services
+├ ƒ /api/booking/slots
+├ ƒ /api/booking/status
+├ ƒ /api/booking/webhook/decision
+├ ƒ /api/drive-media/[id]
+├ ƒ /api/equipe
+├ ƒ /api/gbp/accounts
+├ ƒ /api/gbp/health
+├ ƒ /api/gbp/photos
+├ ƒ /api/gbp/reviews
+├ ƒ /api/hero-media
+├ ƒ /api/instagram-avatar
+├ ƒ /api/places/details
+├ ƒ /api/places/photo
+├ ƒ /api/sugereaqui
+├ ○ /doutores                              1h      1y
+├ ● /doutores/[slug]                       1h      1y
+│ ├ /doutores/drmarcelogsoares             1h      1y
+│ ├ /doutores/drasamarassilva              1h      1y
+│ ├ /doutores/dravivianemondin             1h      1y
+│ └ [+4 more paths]
+├ ƒ /faleconosco/[sigla]
+├ ƒ /faleconsco/[sigla]
+├ ○ /opengraph-image
+├ ○ /privacidade
+├ ○ /robots.txt
+├ ○ /sitemap.xml
+├ ○ /sobre
+├ ○ /sugereaqui
+├ ○ /termos
+├ ○ /twitter-image
+├ ○ /unidades
+└ ƒ /unidades/[slug]
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+
+
+> espacofacial-open@0.1.0 smoke:strict
+> SMOKE_REQUIRE_AGENDA=1 node scripts/smoke.mjs
+
+Smoke base URL: https://espacofacial.com
+OK: smoke checks passed
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy

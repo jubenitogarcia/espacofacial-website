@@ -1,0 +1,26 @@
+[
+  {
+    "pillar": "security",
+    "severity": "high",
+    "title": "Vulnerabilidades de produção pendentes",
+    "details": "npm audit reportou 0 critical e 1 high em produção.",
+    "page": null,
+    "evidence": "reports/quality/2026-03-04T23-40-10-728Z-audit360/npm-audit-prod.json"
+  },
+  {
+    "pillar": "visual",
+    "severity": "high",
+    "title": "Regressão visual significativa",
+    "details": "/ (mobile) com 8.9943% de pixels alterados.",
+    "page": "/",
+    "evidence": "reports/quality/2026-03-04T23-40-10-728Z-audit360/diffs/mobile/home.png"
+  },
+  {
+    "pillar": "performance",
+    "severity": "medium",
+    "title": "Lighthouse performance baixo",
+    "details": "/agendamento com score 65.",
+    "page": "/agendamento",
+    "evidence": "reports/quality/2026-03-04T23-40-10-728Z-audit360/lighthouse/agendamento.json"
+  }
+]
