@@ -206,7 +206,7 @@ function HoverScrollPicker(props: { ariaLabel: string; children: ReactNode }) {
         hoverTimerRef.current = setInterval(() => {
             const el = ref.current;
             if (!el) return;
-            el.scrollLeft += dir * 18;
+            el.scrollLeft += dir * 10;
             update();
         }, 16);
     };
@@ -220,7 +220,7 @@ function HoverScrollPicker(props: { ariaLabel: string; children: ReactNode }) {
     const scrollByDir = (dir: -1 | 1) => {
         const el = ref.current;
         if (!el) return;
-        el.scrollBy({ left: dir * 240, behavior: "smooth" });
+        el.scrollBy({ left: dir * 180, behavior: "smooth" });
     };
 
     return (
@@ -285,10 +285,6 @@ export default function BookingFlow() {
 
     const [doctor, setDoctor] = useState<DoctorSelection | null>(null);
     const [selectedServices, setSelectedServices] = useState<Service[]>([]);
-
-    const [includeAvaliacao, setIncludeAvaliacao] = useState(true);
-    const [includeProcedimento, setIncludeProcedimento] = useState(false);
-    const [includeRevisao, setIncludeRevisao] = useState(false);
 
     const [dateKey, setDateKey] = useState<string | null>(null);
     const [timeKey, setTimeKey] = useState<string | null>(null);
@@ -355,13 +351,11 @@ export default function BookingFlow() {
     }, [allowedUnitSlugs, currentUnit?.slug]);
 
     const primaryService = selectedServices[0] ?? null;
+    const primaryServiceId = primaryService?.id ?? null;
     const selectedServiceIds = useMemo(() => selectedServices.map((item) => item.id), [selectedServices]);
     const selectedServiceNames = useMemo(() => selectedServices.map((item) => item.name), [selectedServices]);
     const selectedServicesLabel = useMemo(() => selectedServiceNames.join(", "), [selectedServiceNames]);
-
-    const durationMinutes = useMemo(() => {
-        return (includeAvaliacao ? 30 : 0) + (includeProcedimento ? 30 : 0) + (includeRevisao ? 15 : 0);
-    }, [includeAvaliacao, includeProcedimento, includeRevisao]);
+    const durationMinutes = 30;
 
     const lastUnitSlugRef = useRef<string | null>(null);
     const appliedDoctorQueryRef = useRef<string | null>(null);
@@ -379,9 +373,6 @@ export default function BookingFlow() {
             setDoctor(null);
         }
         setSelectedServices([]);
-        setIncludeAvaliacao(true);
-        setIncludeProcedimento(false);
-        setIncludeRevisao(false);
         setDateKey(null);
         setDateTouched(false);
         setTimeKey(null);
@@ -426,9 +417,6 @@ export default function BookingFlow() {
             );
         }
 
-        setIncludeAvaliacao(draft.includeAvaliacao);
-        setIncludeProcedimento(draft.includeProcedimento);
-        setIncludeRevisao(draft.includeRevisao);
         setDateKey(draft.dateKey);
         setDateTouched(Boolean(draft.dateKey));
         setTimeKey(draft.timeKey);
@@ -534,8 +522,9 @@ export default function BookingFlow() {
         async function loadDateAvailability() {
             setDateAvailability({});
             const doctorSlug = doctor?.slug ?? null;
+            const serviceId = primaryServiceId;
 
-            if (!unitSlug || durationMinutes <= 0 || !doctorSlug) return;
+            if (!unitSlug || durationMinutes <= 0 || !doctorSlug || !serviceId) return;
 
             const entries = await Promise.all(
                 upcomingDays.map(async (day) => {
@@ -544,7 +533,7 @@ export default function BookingFlow() {
                         const url = new URL("/api/booking/slots", window.location.origin);
                         url.searchParams.set("unit", unitSlug);
                         url.searchParams.set("doctor", doctorSlug);
-                        url.searchParams.set("service", primaryService?.id ?? "any");
+                        url.searchParams.set("service", serviceId);
                         url.searchParams.set("durationMinutes", String(durationMinutes));
                         url.searchParams.set("date", day);
 
@@ -570,21 +559,22 @@ export default function BookingFlow() {
         return () => {
             cancelled = true;
         };
-    }, [doctor?.slug, durationMinutes, primaryService?.id, unitSlug, upcomingDays]);
+    }, [doctor?.slug, durationMinutes, primaryServiceId, unitSlug, upcomingDays]);
 
     useEffect(() => {
         async function loadSlots() {
             setSlots(null);
             setSlotsError(null);
+            const serviceId = primaryServiceId;
 
-            if (!unitSlug || !dateKey || durationMinutes <= 0) return;
+            if (!unitSlug || !dateKey || durationMinutes <= 0 || !serviceId) return;
 
             setSlotsLoading(true);
             try {
                 const url = new URL("/api/booking/slots", window.location.origin);
                 url.searchParams.set("unit", unitSlug);
                 url.searchParams.set("doctor", doctor?.slug ?? "any");
-                url.searchParams.set("service", primaryService?.id ?? "any");
+                url.searchParams.set("service", serviceId);
                 url.searchParams.set("durationMinutes", String(durationMinutes));
                 url.searchParams.set("date", dateKey);
 
@@ -610,7 +600,7 @@ export default function BookingFlow() {
         }
 
         loadSlots();
-    }, [unitSlug, doctor?.slug, primaryService?.id, durationMinutes, dateKey]);
+    }, [unitSlug, doctor?.slug, primaryServiceId, durationMinutes, dateKey]);
 
     async function submit() {
         setSubmitError(null);
@@ -665,9 +655,9 @@ export default function BookingFlow() {
                     selectedServiceIds,
                     durationMinutes,
                     includes: {
-                        avaliacao: includeAvaliacao,
-                        procedimento: includeProcedimento,
-                        revisao: includeRevisao,
+                        avaliacao: true,
+                        procedimento: false,
+                        revisao: false,
                     },
                     date: dateKey,
                     time: timeKey,
@@ -784,8 +774,7 @@ export default function BookingFlow() {
     }, [submitted]);
 
     const canPickProcedure = !!unitSlug;
-    const canPickServices = canPickProcedure && selectedServices.length > 0;
-    const canPick = !!unitSlug && durationMinutes > 0; // date+time
+    const canPick = !!unitSlug && selectedServices.length > 0;
     const hasResolvedDateAvailability = upcomingDays.every((day) => typeof dateAvailability[day] === "boolean");
 
     useEffect(() => {
@@ -951,9 +940,9 @@ export default function BookingFlow() {
             doctorHandle: doctor?.handle ?? null,
             serviceId: primaryService?.id ?? null,
             serviceIds: selectedServiceIds,
-            includeAvaliacao,
-            includeProcedimento,
-            includeRevisao,
+            includeAvaliacao: true,
+            includeProcedimento: false,
+            includeRevisao: false,
             dateKey,
             timeKey,
             step: step === "details" ? "details" : "pick",
@@ -974,9 +963,6 @@ export default function BookingFlow() {
         doctor?.name,
         doctor?.slug,
         email,
-        includeAvaliacao,
-        includeProcedimento,
-        includeRevisao,
         notes,
         patientName,
         primaryService?.id,
@@ -1005,13 +991,13 @@ export default function BookingFlow() {
                         className={`card bookingFlow__cardDoctor ${unitSlug ? "bookingFlow__cardDoctor--full" : "bookingFlow__cardDoctor--withUnit"}`.trim()}
                         style={{ padding: 16 }}
                     >
-                        <div className="bookingFlow__entryTitle">Escolha o doutor</div>
+                        <div className="bookingFlow__entryTitle">Escolha o seu doutor</div>
                         {unit ? (
                             <div className="small bookingFlow__unitStatus">
-                                Unidade selecionada: <span className="bookingFlow__unitName">{unit.name}</span>
+                                Unidade: <span className="bookingFlow__unitName">{unit.name}</span>
                             </div>
                         ) : null}
-                        <div className="bookingFlow__cardSub">Passe o mouse sobre a badge para ver os dados do doutor e clique para selecionar.</div>
+                        <div className="bookingFlow__cardSub">Clique e selecione um de nossos doutores para o seu atendimento.</div>
                         <div style={{ marginTop: 10 }}>
                             {!unitLabel ? (
                                 <div className="small bookingFlow__unitStatus bookingFlow__unitStatus--error" role="status">
@@ -1107,8 +1093,8 @@ export default function BookingFlow() {
                     </div>
 
                     <div className={`card bookingFlow__cardProcedure ${canPickProcedure ? "" : "bookingFlow__card--locked"}`.trim()} style={{ padding: 16 }}>
-                        <div style={{ fontWeight: 900 }}>2) Procedimento</div>
-                        <div className="bookingFlow__cardSub">Selecione um ou mais procedimentos. O primeiro item escolhido guia a agenda e você pode complementar com outros interesses.</div>
+                        <div className="bookingFlow__entryTitle">Escolha o procedimento</div>
+                        <div className="bookingFlow__cardSub">Selecione um ou mais procedimentos para o seu atendimento.</div>
                         {!canPickProcedure ? (
                             <div className="bookingFlow__lockOverlay" aria-hidden="true">
                                 <div className="bookingFlow__lockText">Selecione a unidade no topo para continuar.</div>
@@ -1167,79 +1153,12 @@ export default function BookingFlow() {
                         </HoverScrollPicker>
                     </div>
 
-                    <div className={`card bookingFlow__cardServices ${canPickServices ? "" : "bookingFlow__card--locked"}`.trim()} style={{ padding: 16 }}>
-                        <div style={{ fontWeight: 900 }}>3) Serviços</div>
-                        <div className="bookingFlow__cardSub">Selecione um ou mais serviços para calcular o tempo. O total ajuda a filtrar a grade real de horários.</div>
-                        {!canPickServices ? (
-                            <div className="bookingFlow__lockOverlay" aria-hidden="true">
-                                <div className="bookingFlow__lockText">Selecione um procedimento para continuar.</div>
-                            </div>
-                        ) : null}
-                        <div style={{ marginTop: 10, display: "grid", gap: 10 }}>
-                            <div className="small" style={{ color: "var(--muted)" }}>
-                                Total: <span style={{ fontWeight: 900 }}>{durationMinutes} min</span>
-                            </div>
-                            <div style={{ display: "grid", gap: 10 }}>
-                                {[
-                                    {
-                                        key: "avaliacao" as const,
-                                        label: "Avaliação",
-                                        minutes: 30,
-                                        active: includeAvaliacao,
-                                        toggle: () => setIncludeAvaliacao((v) => !v),
-                                    },
-                                    {
-                                        key: "procedimento" as const,
-                                        label: "Procedimento",
-                                        minutes: 30,
-                                        active: includeProcedimento,
-                                        toggle: () => setIncludeProcedimento((v) => !v),
-                                    },
-                                    {
-                                        key: "revisao" as const,
-                                        label: "Revisão",
-                                        minutes: 15,
-                                        active: includeRevisao,
-                                        toggle: () => setIncludeRevisao((v) => !v),
-                                    },
-                                ].map((opt) => (
-                                    <button
-                                        key={opt.key}
-                                        type="button"
-                                        aria-pressed={opt.active}
-                                        disabled={!canPickServices}
-                                        className="bookingFlow__selectItem bookingFlow__serviceBtn bookingFlow__tooltipTrigger"
-                                        data-active={opt.active ? "true" : "false"}
-                                        data-tooltip={`+- ${opt.minutes} min`}
-                                        onClick={() => {
-                                            opt.toggle();
-                                            setDateKey(null);
-                                            setDateTouched(false);
-                                            setTimeKey(null);
-                                            setStep("pick");
-                                        }}
-                                        style={{
-                                            padding: "10px 12px",
-                                            fontWeight: 900,
-                                            opacity: canPickServices ? 1 : 0.6,
-                                            textAlign: "left",
-                                        }}
-                                    >
-                                        <span>{opt.label}</span>
-                                    </button>
-                                ))}
-                            </div>
-                            {durationMinutes <= 0 ? (
-                                <div className="small" style={{ color: "#b91c1c", fontWeight: 700 }}>
-                                    Selecione ao menos uma opção para calcular o tempo.
-                                </div>
-                            ) : null}
-                        </div>
-                    </div>
-
                     <div className={`card bookingFlow__cardFull bookingFlow__cardDateTime ${canPick ? "" : "bookingFlow__card--locked"}`.trim()} style={{ padding: 16 }}>
                         <div className="bookingFlow__cardHeader">
-                            <div style={{ fontWeight: 900 }}>4) Data e horário</div>
+                            <div>
+                                <div className="bookingFlow__entryTitle">Data e horário</div>
+                                <div className="bookingFlow__cardSub">Selecione uma data e verifique os horários disponíveis.</div>
+                            </div>
                             <div className="bookingFlow__legend" aria-hidden="true">
                                 <div className="bookingFlow__legendItem">
                                     <span className="bookingFlow__legendSwatch bookingFlow__legendSwatch--past" />
@@ -1250,11 +1169,6 @@ export default function BookingFlow() {
                                     Ocupado
                                 </div>
                             </div>
-                        </div>
-                        <div className="bookingFlow__cardSub">
-                            {upcomingDays.length ? `${formatDatePtBr(upcomingDays[0])} – ${formatDatePtBr(upcomingDays[upcomingDays.length - 1] ?? upcomingDays[0])}` : null}
-                            {doctor ? ` · ${doctor.name}` : ""}
-                            {selectedServicesLabel ? ` · ${selectedServicesLabel}` : ""}
                         </div>
                         {!canPick ? (
                             <div className="bookingFlow__lockOverlay" aria-hidden="true">
@@ -1456,9 +1370,6 @@ export default function BookingFlow() {
                                     setStep("pick");
                                     setDoctor(null);
                                     setSelectedServices([]);
-                                    setIncludeAvaliacao(true);
-                                    setIncludeProcedimento(false);
-                                    setIncludeRevisao(false);
                                     setDateKey(null);
                                     setDateTouched(false);
                                     setTimeKey(null);
