@@ -7,6 +7,7 @@ export type BookingDraftState = {
     doctorName: string | null;
     doctorHandle: string | null;
     serviceId: string | null;
+    serviceIds: string[];
     includeAvaliacao: boolean;
     includeProcedimento: boolean;
     includeRevisao: boolean;
@@ -74,6 +75,11 @@ export function readBookingDraft(): BookingDraftState | null {
         doctorName: raw.doctorName,
         doctorHandle: raw.doctorHandle,
         serviceId: raw.serviceId,
+        serviceIds: Array.isArray((raw as { serviceIds?: unknown }).serviceIds)
+            ? ((raw as { serviceIds?: unknown[] }).serviceIds ?? []).map((item) => String(item)).filter(Boolean)
+            : raw.serviceId
+                ? [raw.serviceId]
+                : [],
         includeAvaliacao: raw.includeAvaliacao,
         includeProcedimento: raw.includeProcedimento,
         includeRevisao: raw.includeRevisao,
