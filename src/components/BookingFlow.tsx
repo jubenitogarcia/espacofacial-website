@@ -206,9 +206,9 @@ function HoverScrollPicker(props: { ariaLabel: string; children: ReactNode }) {
         hoverTimerRef.current = setInterval(() => {
             const el = ref.current;
             if (!el) return;
-            el.scrollLeft += dir * 10;
+            el.scrollLeft += dir * 6;
             update();
-        }, 16);
+        }, 20);
     };
 
     useEffect(() => {
@@ -220,7 +220,7 @@ function HoverScrollPicker(props: { ariaLabel: string; children: ReactNode }) {
     const scrollByDir = (dir: -1 | 1) => {
         const el = ref.current;
         if (!el) return;
-        el.scrollBy({ left: dir * 180, behavior: "smooth" });
+        el.scrollBy({ left: dir * 140, behavior: "smooth" });
     };
 
     return (
@@ -1093,7 +1093,7 @@ export default function BookingFlow() {
                     </div>
 
                     <div className={`card bookingFlow__cardProcedure ${canPickProcedure ? "" : "bookingFlow__card--locked"}`.trim()} style={{ padding: 16 }}>
-                        <div className="bookingFlow__entryTitle">Escolha o procedimento</div>
+                        <div className="bookingFlow__entryTitle">Escolha os procedimentos</div>
                         <div className="bookingFlow__cardSub">Selecione um ou mais procedimentos para o seu atendimento.</div>
                         {!canPickProcedure ? (
                             <div className="bookingFlow__lockOverlay" aria-hidden="true">
@@ -1141,14 +1141,14 @@ export default function BookingFlow() {
                                     disabled={!canPickProcedure}
                                     className="bookingFlow__procedureBadge"
                                     data-active={selectedServices.some((item) => item.id === OTHER_SERVICE.id) ? "true" : "false"}
-                                    onClick={() => toggleProcedure(OTHER_SERVICE)}
-                                >
-                                    <span className="bookingFlow__procedureBadgeAvatar bookingFlow__procedureBadgeAvatar--all">
-                                        <span className="bookingFlow__procedureBadgeFallback bookingFlow__procedureBadgeFallback--all">Outro</span>
-                                    </span>
-                                    <span className="bookingFlow__procedureBadgeLabel">Outro</span>
-                                    <span className="bookingFlow__procedureBadgeSub">Outro procedimento ou combinação</span>
-                                </button>
+                                            onClick={() => toggleProcedure(OTHER_SERVICE)}
+                                        >
+                                            <span className="bookingFlow__procedureBadgeAvatar bookingFlow__procedureBadgeAvatar--all">
+                                                <span className="bookingFlow__procedureBadgeFallback bookingFlow__procedureBadgeFallback--all">Outro</span>
+                                            </span>
+                                            <span className="bookingFlow__procedureBadgeLabel">Outro</span>
+                                            <span className="bookingFlow__procedureBadgeSub">Outro procedimento ou combinação</span>
+                                        </button>
                             </div>
                         </HoverScrollPicker>
                     </div>
@@ -1172,7 +1172,9 @@ export default function BookingFlow() {
                         </div>
                         {!canPick ? (
                             <div className="bookingFlow__lockOverlay" aria-hidden="true">
-                                <div className="bookingFlow__lockText">Selecione a unidade no topo para ver horários.</div>
+                                <div className="bookingFlow__lockText">
+                                    {!unitSlug ? "Selecione a unidade no topo para ver horários." : "Escolha ao menos um procedimento para liberar a agenda."}
+                                </div>
                             </div>
                         ) : null}
 
