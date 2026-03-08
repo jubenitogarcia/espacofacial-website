@@ -173,7 +173,7 @@ function isDateKeyBeforeToday(dateKey: string): boolean {
     return candidate.getTime() < today.getTime();
 }
 
-function HoverScrollPicker(props: { ariaLabel: string; children: ReactNode }) {
+function HoverScrollPicker(props: { ariaLabel: string; children: ReactNode; className?: string; scrollWindowClassName?: string }) {
     const ref = useRef<HTMLDivElement | null>(null);
     const hoverTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const [canLeft, setCanLeft] = useState(false);
@@ -224,7 +224,7 @@ function HoverScrollPicker(props: { ariaLabel: string; children: ReactNode }) {
     };
 
     return (
-        <div className="bookingFlow__picker">
+        <div className={["bookingFlow__picker", props.className].filter(Boolean).join(" ")}>
             <button
                 type="button"
                 className="bookingFlow__hoverZone bookingFlow__hoverZone--left"
@@ -245,7 +245,7 @@ function HoverScrollPicker(props: { ariaLabel: string; children: ReactNode }) {
 
             <div
                 ref={ref}
-                className="bookingFlow__scrollWindow"
+                className={["bookingFlow__scrollWindow", props.scrollWindowClassName].filter(Boolean).join(" ")}
                 role="list"
                 aria-label={props.ariaLabel}
                 onScroll={update}
@@ -996,7 +996,7 @@ export default function BookingFlow() {
                     ) : null}
 
                     <div
-                        className={`card bookingFlow__cardDoctor ${unitSlug ? "bookingFlow__cardDoctor--full" : "bookingFlow__cardDoctor--withUnit"}`.trim()}
+                        className={`card bookingFlow__cardDoctor ${unitSlug ? "bookingFlow__cardDoctor--half" : "bookingFlow__cardDoctor--withUnit"}`.trim()}
                         style={{ padding: 16 }}
                     >
                         <div className="bookingFlow__entryTitle">Escolha o seu doutor</div>
@@ -1022,90 +1022,96 @@ export default function BookingFlow() {
                                     {membersError ? "Equipe indisponível no momento. Tente novamente mais tarde." : "Nenhum doutor encontrado para esta unidade."}
                                 </div>
                             ) : (
-                                <div className="bookingFlow__doctorBadgeGrid" role="list" aria-label="Lista de profissionais">
-                                    {doctorsForUnit.map((d) => {
-                                        const active = doctor?.slug === d.slug;
-                                        const instagramHref = d.instagramUrl ?? (d.handle ? `https://instagram.com/${d.handle.replace(/^@/, "")}` : null);
-                                        return (
-                                            <div key={d.slug} className="bookingFlow__doctorBadgeWrap" data-active={active ? "true" : "false"} role="listitem">
-                                                <button
-                                                    type="button"
-                                                    className="bookingFlow__doctorBadge"
-                                                    data-active={active ? "true" : "false"}
-                                                    onClick={() => selectDoctor({ slug: d.slug, name: d.name, handle: d.handle })}
-                                                    aria-label={active ? `Remover seleção de ${d.name}` : `Selecionar ${d.name}`}
-                                                    aria-pressed={active}
-                                                >
-                                                    <span className="bookingFlow__doctorBadgeAvatar">
-                                                        {d.handle ? (
-                                                            <Image
-                                                                src={avatarUrl(d.handle, d.nickname ?? d.name)}
-                                                                alt={d.nickname ?? d.name}
-                                                                fill
-                                                                sizes="76px"
-                                                                style={{ objectFit: "cover" }}
-                                                                unoptimized
-                                                            />
-                                                        ) : (
-                                                            <span className="bookingFlow__doctorBadgeFallback">{initialsFromName(d.nickname ?? d.name)}</span>
-                                                        )}
-                                                    </span>
-                                                </button>
-                                                <div className="bookingFlow__doctorTooltip" role="tooltip">
-                                                    <div className="bookingFlow__doctorTooltipHeader">
-                                                        <div className="bookingFlow__doctorTooltipName">{d.name}</div>
-                                                        {instagramHref ? (
-                                                            <button
-                                                                type="button"
-                                                                className="bookingFlow__doctorTooltipLink"
-                                                                aria-label={`Abrir Instagram de ${d.name}`}
-                                                                title="Abrir Instagram"
-                                                                onClick={(event) => {
-                                                                    event.stopPropagation();
-                                                                    openDoctorInstagram({
-                                                                        name: d.name,
-                                                                        handle: d.handle,
-                                                                        instagramUrl: instagramHref,
-                                                                    });
-                                                                }}
-                                                            >
-                                                                <InstagramIcon size={14} />
-                                                            </button>
-                                                        ) : null}
+                                <HoverScrollPicker
+                                    ariaLabel="Lista de profissionais"
+                                    className="bookingFlow__picker--bleed bookingFlow__picker--doctor"
+                                    scrollWindowClassName="bookingFlow__scrollWindow--doctor"
+                                >
+                                    <div className="bookingFlow__doctorBadgeGrid">
+                                        {doctorsForUnit.map((d) => {
+                                            const active = doctor?.slug === d.slug;
+                                            const instagramHref = d.instagramUrl ?? (d.handle ? `https://instagram.com/${d.handle.replace(/^@/, "")}` : null);
+                                            return (
+                                                <div key={d.slug} className="bookingFlow__doctorBadgeWrap" data-active={active ? "true" : "false"} role="listitem">
+                                                    <button
+                                                        type="button"
+                                                        className="bookingFlow__doctorBadge"
+                                                        data-active={active ? "true" : "false"}
+                                                        onClick={() => selectDoctor({ slug: d.slug, name: d.name, handle: d.handle })}
+                                                        aria-label={active ? `Remover seleção de ${d.name}` : `Selecionar ${d.name}`}
+                                                        aria-pressed={active}
+                                                    >
+                                                        <span className="bookingFlow__doctorBadgeAvatar">
+                                                            {d.handle ? (
+                                                                <Image
+                                                                    src={avatarUrl(d.handle, d.nickname ?? d.name)}
+                                                                    alt={d.nickname ?? d.name}
+                                                                    fill
+                                                                    sizes="76px"
+                                                                    style={{ objectFit: "cover" }}
+                                                                    unoptimized
+                                                                />
+                                                            ) : (
+                                                                <span className="bookingFlow__doctorBadgeFallback">{initialsFromName(d.nickname ?? d.name)}</span>
+                                                            )}
+                                                        </span>
+                                                    </button>
+                                                    <div className="bookingFlow__doctorTooltip" role="tooltip">
+                                                        <div className="bookingFlow__doctorTooltipHeader">
+                                                            <div className="bookingFlow__doctorTooltipName">{d.name}</div>
+                                                            {instagramHref ? (
+                                                                <button
+                                                                    type="button"
+                                                                    className="bookingFlow__doctorTooltipLink"
+                                                                    aria-label={`Abrir Instagram de ${d.name}`}
+                                                                    title="Abrir Instagram"
+                                                                    onClick={(event) => {
+                                                                        event.stopPropagation();
+                                                                        openDoctorInstagram({
+                                                                            name: d.name,
+                                                                            handle: d.handle,
+                                                                            instagramUrl: instagramHref,
+                                                                        });
+                                                                    }}
+                                                                >
+                                                                    <InstagramIcon size={14} />
+                                                                </button>
+                                                            ) : null}
+                                                        </div>
+                                                        <div className="bookingFlow__doctorTooltipSub">{d.nickname || unitLabel}</div>
                                                     </div>
-                                                    <div className="bookingFlow__doctorTooltipSub">{d.nickname || unitLabel}</div>
                                                 </div>
-                                            </div>
-                                        );
-                                    })}
+                                            );
+                                        })}
 
-                                    <div className="bookingFlow__doctorBadgeWrap" data-active={doctor?.slug === ANY_DOCTOR.slug ? "true" : "false"} role="listitem">
-                                        <button
-                                            type="button"
-                                            className="bookingFlow__doctorBadge bookingFlow__doctorBadge--all"
-                                            data-active={doctor?.slug === ANY_DOCTOR.slug ? "true" : "false"}
-                                            onClick={() => selectDoctor(ANY_DOCTOR)}
-                                            aria-label={doctor?.slug === ANY_DOCTOR.slug ? "Remover seleção de sem preferência" : "Selecionar sem preferência de doutor"}
-                                            aria-pressed={doctor?.slug === ANY_DOCTOR.slug}
-                                        >
-                                            <span className="bookingFlow__doctorBadgeAvatar bookingFlow__doctorBadgeAvatar--all">
-                                                <span className="bookingFlow__doctorBadgeFallback bookingFlow__doctorBadgeFallback--all">
-                                                    <span>Sem</span>
-                                                    <span>Preferência</span>
+                                        <div className="bookingFlow__doctorBadgeWrap" data-active={doctor?.slug === ANY_DOCTOR.slug ? "true" : "false"} role="listitem">
+                                            <button
+                                                type="button"
+                                                className="bookingFlow__doctorBadge bookingFlow__doctorBadge--all"
+                                                data-active={doctor?.slug === ANY_DOCTOR.slug ? "true" : "false"}
+                                                onClick={() => selectDoctor(ANY_DOCTOR)}
+                                                aria-label={doctor?.slug === ANY_DOCTOR.slug ? "Remover seleção de sem preferência" : "Selecionar sem preferência de doutor"}
+                                                aria-pressed={doctor?.slug === ANY_DOCTOR.slug}
+                                            >
+                                                <span className="bookingFlow__doctorBadgeAvatar bookingFlow__doctorBadgeAvatar--all">
+                                                    <span className="bookingFlow__doctorBadgeFallback bookingFlow__doctorBadgeFallback--all">
+                                                        <span>Sem</span>
+                                                        <span>Preferência</span>
+                                                    </span>
                                                 </span>
-                                            </span>
-                                        </button>
-                                        <div className="bookingFlow__doctorTooltip" role="tooltip">
-                                            <div className="bookingFlow__doctorTooltipName">Sem Preferência</div>
-                                            <div className="bookingFlow__doctorTooltipSub">Mostra a agenda mais ampla da unidade.</div>
+                                            </button>
+                                            <div className="bookingFlow__doctorTooltip" role="tooltip">
+                                                <div className="bookingFlow__doctorTooltipName">Sem Preferência</div>
+                                                <div className="bookingFlow__doctorTooltipSub">Mostra a agenda mais ampla da unidade.</div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                </HoverScrollPicker>
                             )}
                         </div>
                     </div>
 
-                    <div className={`card bookingFlow__cardProcedure ${canPickProcedure ? "" : "bookingFlow__card--locked"}`.trim()} style={{ padding: 16 }}>
+                    <div className={`card bookingFlow__cardProcedure ${unitSlug ? "bookingFlow__cardProcedure--half" : "bookingFlow__cardProcedure--full"} ${canPickProcedure ? "" : "bookingFlow__card--locked"}`.trim()} style={{ padding: 16 }}>
                         <div className="bookingFlow__entryTitle">Escolha os procedimentos</div>
                         <div className="bookingFlow__cardSub">Selecione um ou mais procedimentos para o seu atendimento.</div>
                         {!canPickProcedure ? (
@@ -1113,7 +1119,7 @@ export default function BookingFlow() {
                                 <div className="bookingFlow__lockText">Selecione a unidade no topo para continuar.</div>
                             </div>
                         ) : null}
-                        <HoverScrollPicker ariaLabel="Lista de procedimentos">
+                        <HoverScrollPicker ariaLabel="Lista de procedimentos" className="bookingFlow__picker--bleed">
                             <div className="bookingFlow__procedureBadgeGrid">
                                 {services.map((s) => {
                                     const active = selectedServices.some((item) => item.id === s.id);
