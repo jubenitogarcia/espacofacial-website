@@ -1536,9 +1536,10 @@ button:focus-visible {
 .bookingFlow__procedureBadgeGrid {
   display: flex;
   flex-wrap: nowrap;
-  gap: 16px;
+  gap: 14px;
   align-items: flex-start;
   width: max-content;
+  padding: 4px 0 8px;
 }
 
 .bookingFlow__procedureBadge {
@@ -1766,6 +1767,8 @@ button:focus-visible {
   margin-top: 0;
   padding-left: 52px;
   padding-right: 52px;
+  padding-top: 6px;
+  padding-bottom: 14px;
   scroll-padding-left: 52px;
   scroll-padding-right: 52px;
 }
@@ -1847,7 +1850,6 @@ button:focus-visible {
   display: flex;
   gap: 10px;
   overflow: auto;
-  padding-bottom: 8px;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
