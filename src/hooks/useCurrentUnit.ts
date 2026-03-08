@@ -40,11 +40,6 @@ export function useCurrentUnit(): Unit | null {
 
     useEffect(() => {
         if (typeof window === "undefined") return;
-        // Keep SSR and first client render aligned, then hydrate persisted choice after mount.
-        if (window.location?.pathname === "/") {
-            setStoredSlug(null);
-            return;
-        }
         setStoredSlug(getStoredUnitSlug());
     }, [pathname]);
 

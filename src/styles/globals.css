@@ -861,6 +861,41 @@ button:focus-visible {
   font-weight: 900;
 }
 
+.bookingFlow__entryEyebrow {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--brand);
+}
+
+.bookingFlow__entryTitle {
+  margin-top: 8px;
+  font-size: clamp(24px, 3.2vw, 34px);
+  line-height: .98;
+  letter-spacing: -0.05em;
+  font-weight: 900;
+}
+
+.bookingFlow__embeddedUnitChooser {
+  margin-top: 18px;
+  max-width: 320px;
+}
+
+.bookingFlow__embeddedUnitChooser .unitChooser,
+.bookingFlow__embeddedUnitChooser .unitChooserBtn {
+  width: 100%;
+}
+
+.bookingFlow__embeddedUnitChooser .unitChooserBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-radius: 18px;
+  font-size: 14px;
+}
+
 .bookingFlow__supportPill {
   display: inline-flex;
   align-items: center;
@@ -1056,11 +1091,22 @@ button:focus-visible {
   grid-column: 1 / -1;
 }
 
-.bookingFlow__cardDoctor {
+.bookingFlow__cardEntryUnit,
+.bookingFlow__cardDoctor,
+.bookingFlow__cardDoctor--full,
+.bookingFlow__cardDoctor--withUnit {
   grid-column: 1 / -1;
 }
 
 @media (min-width: 960px) {
+  .bookingFlow__cardEntryUnit {
+    grid-column: span 4;
+  }
+
+  .bookingFlow__cardDoctor--withUnit {
+    grid-column: span 8;
+  }
+
   .bookingFlow__cardProcedure {
     grid-column: span 9;
   }
@@ -1289,14 +1335,6 @@ button:focus-visible {
   cursor: not-allowed;
 }
 
-.bookingFlow__doctorCard {
-  border-radius: 14px;
-}
-
-.bookingFlow__doctorCard[data-active="true"] {
-  border-width: 2px;
-}
-
 .bookingFlow__serviceBtn[data-active="true"] {
   border-width: 2px;
 }
@@ -1370,6 +1408,129 @@ button:focus-visible {
 .bookingFlow__selectItem:hover:not(:disabled) .bookingFlow__doctorSub,
 .bookingFlow__selectItem[data-active="true"] .bookingFlow__doctorSub {
   color: rgba(255, 255, 255, 0.72);
+}
+
+.bookingFlow__doctorBadgeGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.bookingFlow__doctorBadgeWrap {
+  position: relative;
+}
+
+.bookingFlow__doctorBadge {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.bookingFlow__doctorBadgeAvatar {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  border-radius: 999px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border: 3px solid rgba(17, 17, 17, 0.1);
+  background: linear-gradient(180deg, #fbf7f0 0%, #f2eadf 100%);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.bookingFlow__doctorBadgeAvatar img {
+  object-fit: cover;
+}
+
+.bookingFlow__doctorBadge:hover .bookingFlow__doctorBadgeAvatar,
+.bookingFlow__doctorBadge:focus-visible .bookingFlow__doctorBadgeAvatar,
+.bookingFlow__doctorBadgeWrap[data-active="true"] .bookingFlow__doctorBadgeAvatar {
+  transform: translateY(-2px);
+  border-color: rgba(17, 17, 17, 0.88);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.16);
+}
+
+.bookingFlow__doctorBadge:focus-visible {
+  outline: none;
+}
+
+.bookingFlow__doctorBadgeFallback {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: #111;
+}
+
+.bookingFlow__doctorBadgeAvatar--all {
+  background: #111;
+}
+
+.bookingFlow__doctorBadgeFallback--all {
+  font-size: 16px;
+  color: #fff;
+}
+
+.bookingFlow__doctorTooltip {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 12px);
+  transform: translateX(-50%) translateY(6px);
+  width: max-content;
+  min-width: 180px;
+  max-width: 220px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(17, 17, 17, 0.96);
+  color: #fff;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease, transform 150ms ease;
+  z-index: 4;
+}
+
+.bookingFlow__doctorBadgeWrap:hover .bookingFlow__doctorTooltip,
+.bookingFlow__doctorBadgeWrap:focus-within .bookingFlow__doctorTooltip {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.bookingFlow__doctorTooltipName {
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.bookingFlow__doctorTooltipSub {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.bookingFlow__doctorTooltipLink {
+  display: inline-flex;
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.bookingFlow__doctorTooltipLink:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .bookingFlow__procedureCard {
