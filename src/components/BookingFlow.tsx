@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { units } from "@/data/units";
@@ -49,6 +49,10 @@ type BookingStatus = {
 
 type StatusResponse = { ok: true; booking: BookingStatus } | { ok: false; error: string };
 type DetailsStage = "contact" | "identity";
+type DoctorSelection = { slug: string; name: string; handle: string | null };
+
+const ANY_DOCTOR: DoctorSelection = { slug: "any", name: "Sem Preferência", handle: null };
+const OTHER_SERVICE: Service = { id: "any", name: "Outro", subtitle: "Outro procedimento ou combinação" };
 
 function isOkResponse(value: unknown): value is { ok: true } {
     return !!value && typeof value === "object" && (value as { ok?: unknown }).ok === true;
@@ -153,6 +157,123 @@ function formatCpf(input: string): string {
     return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
 }
 
+function startOfCurrentWeek(date: Date): Date {
+    const start = new Date(date);
+    const mondayIndex = (date.getDay() + 6) % 7;
+    start.setDate(date.getDate() - mondayIndex);
+    start.setHours(0, 0, 0, 0);
+    return start;
+}
+
+function isDateKeyBeforeToday(dateKey: string): boolean {
+    const candidate = parseLocalDateKey(dateKey);
+    if (!candidate) return true;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return candidate.getTime() < today.getTime();
+}
+
+function HoverScrollPicker(props: { ariaLabel: string; children: ReactNode }) {
+    const ref = useRef<HTMLDivElement | null>(null);
+    const hoverTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const [canLeft, setCanLeft] = useState(false);
+    const [canRight, setCanRight] = useState(false);
+
+    const update = () => {
+        const el = ref.current;
+        if (!el) return;
+        const left = el.scrollLeft;
+        const maxLeft = el.scrollWidth - el.clientWidth;
+        setCanLeft(left > 1);
+        setCanRight(left < maxLeft - 1);
+    };
+
+    useEffect(() => {
+        update();
+        const onResize = () => update();
+        window.addEventListener("resize", onResize);
+        return () => window.removeEventListener("resize", onResize);
+    }, []);
+
+    const stopHoverScroll = () => {
+        if (!hoverTimerRef.current) return;
+        clearInterval(hoverTimerRef.current);
+        hoverTimerRef.current = null;
+    };
+
+    const startHoverScroll = (dir: -1 | 1) => {
+        stopHoverScroll();
+        hoverTimerRef.current = setInterval(() => {
+            const el = ref.current;
+            if (!el) return;
+            el.scrollLeft += dir * 18;
+            update();
+        }, 16);
+    };
+
+    useEffect(() => {
+        return () => {
+            if (hoverTimerRef.current) clearInterval(hoverTimerRef.current);
+        };
+    }, []);
+
+    const scrollByDir = (dir: -1 | 1) => {
+        const el = ref.current;
+        if (!el) return;
+        el.scrollBy({ left: dir * 240, behavior: "smooth" });
+    };
+
+    return (
+        <div className="bookingFlow__picker">
+            <button
+                type="button"
+                className="bookingFlow__hoverZone bookingFlow__hoverZone--left"
+                aria-label="Mover lista para a esquerda"
+                disabled={!canLeft}
+                onMouseEnter={() => startHoverScroll(-1)}
+                onMouseLeave={stopHoverScroll}
+                onFocus={() => startHoverScroll(-1)}
+                onBlur={stopHoverScroll}
+                onClick={() => scrollByDir(-1)}
+            >
+                <span className="bookingFlow__scrollArrow bookingFlow__scrollArrow--left" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="18" height="18">
+                        <path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                </span>
+            </button>
+
+            <div
+                ref={ref}
+                className="bookingFlow__scrollWindow"
+                role="list"
+                aria-label={props.ariaLabel}
+                onScroll={update}
+            >
+                {props.children}
+            </div>
+
+            <button
+                type="button"
+                className="bookingFlow__hoverZone bookingFlow__hoverZone--right"
+                aria-label="Mover lista para a direita"
+                disabled={!canRight}
+                onMouseEnter={() => startHoverScroll(1)}
+                onMouseLeave={stopHoverScroll}
+                onFocus={() => startHoverScroll(1)}
+                onBlur={stopHoverScroll}
+                onClick={() => scrollByDir(1)}
+            >
+                <span className="bookingFlow__scrollArrow bookingFlow__scrollArrow--right" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="18" height="18">
+                        <path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                </span>
+            </button>
+        </div>
+    );
+}
+
 export default function BookingFlow() {
     const currentUnit = useCurrentUnit();
     const searchParams = useSearchParams();
@@ -162,8 +283,8 @@ export default function BookingFlow() {
     const [step, setStep] = useState<"pick" | "details" | "submitted">("pick");
     const [detailsStage, setDetailsStage] = useState<DetailsStage>("contact");
 
-    const [doctor, setDoctor] = useState<{ slug: string; name: string; handle: string | null } | null>(null);
-    const [service, setService] = useState<Service | null>(null);
+    const [doctor, setDoctor] = useState<DoctorSelection | null>(null);
+    const [selectedServices, setSelectedServices] = useState<Service[]>([]);
 
     const [includeAvaliacao, setIncludeAvaliacao] = useState(true);
     const [includeProcedimento, setIncludeProcedimento] = useState(false);
@@ -233,6 +354,11 @@ export default function BookingFlow() {
         return allowedUnitSlugs.has(slug) ? slug : null;
     }, [allowedUnitSlugs, currentUnit?.slug]);
 
+    const primaryService = selectedServices[0] ?? null;
+    const selectedServiceIds = useMemo(() => selectedServices.map((item) => item.id), [selectedServices]);
+    const selectedServiceNames = useMemo(() => selectedServices.map((item) => item.name), [selectedServices]);
+    const selectedServicesLabel = useMemo(() => selectedServiceNames.join(", "), [selectedServiceNames]);
+
     const durationMinutes = useMemo(() => {
         return (includeAvaliacao ? 30 : 0) + (includeProcedimento ? 30 : 0) + (includeRevisao ? 15 : 0);
     }, [includeAvaliacao, includeProcedimento, includeRevisao]);
@@ -248,11 +374,11 @@ export default function BookingFlow() {
         appliedServiceQueryRef.current = null;
 
         if (unitSlug) {
-            setDoctor({ slug: "any", name: "Todos", handle: null });
+            setDoctor(ANY_DOCTOR);
         } else {
             setDoctor(null);
         }
-        setService(null);
+        setSelectedServices([]);
         setIncludeAvaliacao(true);
         setIncludeProcedimento(false);
         setIncludeRevisao(false);
@@ -288,16 +414,16 @@ export default function BookingFlow() {
         if (draft.doctorSlug && draft.doctorName) {
             setDoctor({ slug: draft.doctorSlug, name: draft.doctorName, handle: draft.doctorHandle });
         } else if (unitSlug) {
-            setDoctor({ slug: "any", name: "Todos", handle: null });
+            setDoctor(ANY_DOCTOR);
         }
 
-        if (draft.serviceId) {
-            if (draft.serviceId === "any") {
-                setService({ id: "any", name: "Quero orientação", subtitle: "Ainda não sei qual procedimento" });
-            } else {
-                const serviceMatch = services.find((item) => item.id === draft.serviceId) ?? null;
-                setService(serviceMatch);
-            }
+        const restoredServiceIds = draft.serviceIds?.length ? draft.serviceIds : draft.serviceId ? [draft.serviceId] : [];
+        if (restoredServiceIds.length) {
+            setSelectedServices(
+                restoredServiceIds
+                    .map((id) => (id === "any" ? OTHER_SERVICE : services.find((item) => item.id === id) ?? null))
+                    .filter((item): item is Service => !!item),
+            );
         }
 
         setIncludeAvaliacao(draft.includeAvaliacao);
@@ -312,7 +438,7 @@ export default function BookingFlow() {
         setCpf(draft.cpf);
         setAddress(draft.address);
         setNotes(draft.notes);
-        const canRestoreDetails = draft.step === "details" && !!draft.serviceId && !!draft.dateKey && !!draft.timeKey && !!draft.doctorSlug;
+        const canRestoreDetails = draft.step === "details" && restoredServiceIds.length > 0 && !!draft.dateKey && !!draft.timeKey && !!draft.doctorSlug;
         setStep(canRestoreDetails ? "details" : "pick");
         setDetailsStage(canRestoreDetails ? draft.detailsStage : "contact");
         if (canRestoreDetails) setDetailsStartedAtMs(Date.now());
@@ -356,7 +482,7 @@ export default function BookingFlow() {
         if (appliedDoctorQueryRef.current === doctorQuery) return;
 
         if (doctorQuery === "any") {
-            setDoctor({ slug: "any", name: "Todos", handle: null });
+            setDoctor(ANY_DOCTOR);
             appliedDoctorQueryRef.current = doctorQuery;
             return;
         }
@@ -377,7 +503,7 @@ export default function BookingFlow() {
         if (appliedServiceQueryRef.current === serviceQuery) return;
 
         if (serviceQuery === "any") {
-            setService({ id: "any", name: "Quero orientação", subtitle: "Ainda não sei qual procedimento" });
+            setSelectedServices([OTHER_SERVICE]);
             appliedServiceQueryRef.current = serviceQuery;
             return;
         }
@@ -387,14 +513,14 @@ export default function BookingFlow() {
         });
 
         if (!match) return;
-        setService(match);
+        setSelectedServices([match]);
         appliedServiceQueryRef.current = serviceQuery;
     }, [serviceQuery, unitSlug]);
 
     const upcomingDays = useMemo(() => {
         const out: string[] = [];
-        const base = new Date();
-        for (let i = 0; i < 14; i++) {
+        const base = startOfCurrentWeek(new Date());
+        for (let i = 0; i < 28; i++) {
             const d = new Date(base);
             d.setDate(base.getDate() + i);
             out.push(formatLocalDateKey(d));
@@ -414,10 +540,11 @@ export default function BookingFlow() {
             const entries = await Promise.all(
                 upcomingDays.map(async (day) => {
                     try {
+                        if (isDateKeyBeforeToday(day)) return [day, false] as const;
                         const url = new URL("/api/booking/slots", window.location.origin);
                         url.searchParams.set("unit", unitSlug);
                         url.searchParams.set("doctor", doctorSlug);
-                        url.searchParams.set("service", service?.id ?? "any");
+                        url.searchParams.set("service", primaryService?.id ?? "any");
                         url.searchParams.set("durationMinutes", String(durationMinutes));
                         url.searchParams.set("date", day);
 
@@ -443,7 +570,7 @@ export default function BookingFlow() {
         return () => {
             cancelled = true;
         };
-    }, [doctor?.slug, durationMinutes, service?.id, unitSlug, upcomingDays]);
+    }, [doctor?.slug, durationMinutes, primaryService?.id, unitSlug, upcomingDays]);
 
     useEffect(() => {
         async function loadSlots() {
@@ -457,7 +584,7 @@ export default function BookingFlow() {
                 const url = new URL("/api/booking/slots", window.location.origin);
                 url.searchParams.set("unit", unitSlug);
                 url.searchParams.set("doctor", doctor?.slug ?? "any");
-                url.searchParams.set("service", service?.id ?? "any");
+                url.searchParams.set("service", primaryService?.id ?? "any");
                 url.searchParams.set("durationMinutes", String(durationMinutes));
                 url.searchParams.set("date", dateKey);
 
@@ -483,7 +610,7 @@ export default function BookingFlow() {
         }
 
         loadSlots();
-    }, [unitSlug, doctor?.slug, service?.id, durationMinutes, dateKey]);
+    }, [unitSlug, doctor?.slug, primaryService?.id, durationMinutes, dateKey]);
 
     async function submit() {
         setSubmitError(null);
@@ -492,7 +619,7 @@ export default function BookingFlow() {
             setSubmitError("Selecione a unidade no topo para agendar.");
             return;
         }
-        if (!doctor || !service || !dateKey || !timeKey) {
+        if (!doctor || !primaryService || !dateKey || !timeKey) {
             setSubmitError("Selecione profissional, procedimento, data e horário.");
             return;
         }
@@ -534,7 +661,8 @@ export default function BookingFlow() {
                     unitSlug,
                     doctorSlug: doctor.slug,
                     doctorName: doctor.name,
-                    serviceId: service.id,
+                    serviceId: primaryService.id,
+                    selectedServiceIds,
                     durationMinutes,
                     includes: {
                         avaliacao: includeAvaliacao,
@@ -612,7 +740,7 @@ export default function BookingFlow() {
                 bookingId: json.id,
                 unitSlug,
                 doctorSlug: doctor.slug,
-                serviceId: service.id,
+                serviceId: primaryService.id,
                 durationMinutes,
                 date: dateKey,
                 time: timeKey,
@@ -656,7 +784,7 @@ export default function BookingFlow() {
     }, [submitted]);
 
     const canPickProcedure = !!unitSlug;
-    const canPickServices = canPickProcedure && !!service;
+    const canPickServices = canPickProcedure && selectedServices.length > 0;
     const canPick = !!unitSlug && durationMinutes > 0; // date+time
     const hasResolvedDateAvailability = upcomingDays.every((day) => typeof dateAvailability[day] === "boolean");
 
@@ -697,7 +825,7 @@ export default function BookingFlow() {
             step: "details_opened",
             unitSlug,
             doctorSlug: doctor?.slug ?? null,
-            serviceId: service?.id ?? null,
+            serviceId: primaryService?.id ?? null,
             date: dateKey,
             time: nextTime,
             detailsStage: "contact",
@@ -727,7 +855,7 @@ export default function BookingFlow() {
         addressSeemsValid &&
         (!turnstileRequired || !!turnstileToken);
 
-    const showDetailsModal = step === "details" && !!unitSlug && !!doctor && !!service && !!dateKey && !!timeKey;
+    const showDetailsModal = step === "details" && !!unitSlug && !!doctor && !!primaryService && !!dateKey && !!timeKey;
 
     useEffect(() => {
         if (!showDetailsModal) return;
@@ -753,9 +881,26 @@ export default function BookingFlow() {
         return () => window.removeEventListener("keydown", onKey);
     }, [showDetailsModal]);
 
-    function selectDoctor(nextDoctor: { slug: string; name: string; handle: string | null }) {
+    function selectDoctor(nextDoctor: DoctorSelection) {
         if (doctor?.slug === nextDoctor.slug) return;
         setDoctor(nextDoctor);
+        setDateKey(null);
+        setDateTouched(false);
+        setTimeKey(null);
+        setStep("pick");
+    }
+
+    function toggleProcedure(nextService: Service) {
+        setSelectedServices((current) => {
+            const exists = current.some((item) => item.id === nextService.id);
+            if (nextService.id === OTHER_SERVICE.id) {
+                return exists ? [] : [OTHER_SERVICE];
+            }
+
+            const withoutOther = current.filter((item) => item.id !== OTHER_SERVICE.id);
+            if (exists) return withoutOther.filter((item) => item.id !== nextService.id);
+            return [...withoutOther, nextService];
+        });
         setDateKey(null);
         setDateTouched(false);
         setTimeKey(null);
@@ -783,7 +928,7 @@ export default function BookingFlow() {
         const hasData = Boolean(
             unitSlug ||
                 doctor?.slug ||
-                service?.id ||
+                selectedServiceIds.length > 0 ||
                 dateKey ||
                 timeKey ||
                 patientName.trim() ||
@@ -804,7 +949,8 @@ export default function BookingFlow() {
             doctorSlug: doctor?.slug ?? null,
             doctorName: doctor?.name ?? null,
             doctorHandle: doctor?.handle ?? null,
-            serviceId: service?.id ?? null,
+            serviceId: primaryService?.id ?? null,
+            serviceIds: selectedServiceIds,
             includeAvaliacao,
             includeProcedimento,
             includeRevisao,
@@ -833,7 +979,8 @@ export default function BookingFlow() {
         includeRevisao,
         notes,
         patientName,
-        service?.id,
+        primaryService?.id,
+        selectedServiceIds,
         step,
         timeKey,
         unitSlug,
@@ -910,45 +1057,47 @@ export default function BookingFlow() {
                                                     </span>
                                                 </button>
                                                 <div className="bookingFlow__doctorTooltip" role="tooltip">
-                                                    <div className="bookingFlow__doctorTooltipName">{d.name}</div>
+                                                    <div className="bookingFlow__doctorTooltipHeader">
+                                                        <div className="bookingFlow__doctorTooltipName">{d.name}</div>
+                                                        {instagramHref ? (
+                                                            <button
+                                                                type="button"
+                                                                className="bookingFlow__doctorTooltipLink"
+                                                                aria-label={`Abrir Instagram de ${d.name}`}
+                                                                title="Abrir Instagram"
+                                                                onClick={(event) => {
+                                                                    event.stopPropagation();
+                                                                    openDoctorInstagram({
+                                                                        name: d.name,
+                                                                        handle: d.handle,
+                                                                        instagramUrl: instagramHref,
+                                                                    });
+                                                                }}
+                                                            >
+                                                                <InstagramIcon size={14} />
+                                                            </button>
+                                                        ) : null}
+                                                    </div>
                                                     <div className="bookingFlow__doctorTooltipSub">{d.nickname || unitLabel}</div>
-                                                    {instagramHref ? (
-                                                        <button
-                                                            type="button"
-                                                            className="bookingFlow__doctorTooltipLink"
-                                                            aria-label={`Abrir Instagram de ${d.name}`}
-                                                            title="Abrir Instagram"
-                                                            onClick={(event) => {
-                                                                event.stopPropagation();
-                                                                openDoctorInstagram({
-                                                                    name: d.name,
-                                                                    handle: d.handle,
-                                                                    instagramUrl: instagramHref,
-                                                                });
-                                                            }}
-                                                        >
-                                                            <InstagramIcon size={14} />
-                                                        </button>
-                                                    ) : null}
                                                 </div>
                                             </div>
                                         );
                                     })}
 
-                                    <div className="bookingFlow__doctorBadgeWrap" data-active={doctor?.slug === "any" ? "true" : "false"} role="listitem">
+                                    <div className="bookingFlow__doctorBadgeWrap" data-active={doctor?.slug === ANY_DOCTOR.slug ? "true" : "false"} role="listitem">
                                         <button
                                             type="button"
                                             className="bookingFlow__doctorBadge bookingFlow__doctorBadge--all"
-                                            data-active={doctor?.slug === "any" ? "true" : "false"}
-                                            onClick={() => selectDoctor({ slug: "any", name: "Todos", handle: null })}
-                                            aria-label="Selecionar todos os doutores"
+                                            data-active={doctor?.slug === ANY_DOCTOR.slug ? "true" : "false"}
+                                            onClick={() => selectDoctor(ANY_DOCTOR)}
+                                            aria-label="Selecionar sem preferência de doutor"
                                         >
                                             <span className="bookingFlow__doctorBadgeAvatar bookingFlow__doctorBadgeAvatar--all">
-                                                <span className="bookingFlow__doctorBadgeFallback bookingFlow__doctorBadgeFallback--all">Todos</span>
+                                                <span className="bookingFlow__doctorBadgeFallback bookingFlow__doctorBadgeFallback--all">Sem</span>
                                             </span>
                                         </button>
                                         <div className="bookingFlow__doctorTooltip" role="tooltip">
-                                            <div className="bookingFlow__doctorTooltipName">Todos</div>
+                                            <div className="bookingFlow__doctorTooltipName">Sem Preferência</div>
                                             <div className="bookingFlow__doctorTooltipSub">Mostra a agenda mais ampla da unidade.</div>
                                         </div>
                                     </div>
@@ -959,80 +1108,63 @@ export default function BookingFlow() {
 
                     <div className={`card bookingFlow__cardProcedure ${canPickProcedure ? "" : "bookingFlow__card--locked"}`.trim()} style={{ padding: 16 }}>
                         <div style={{ fontWeight: 900 }}>2) Procedimento</div>
-                        <div className="bookingFlow__cardSub">Selecione o procedimento (ou peça orientação).</div>
+                        <div className="bookingFlow__cardSub">Selecione um ou mais procedimentos. O primeiro item escolhido guia a agenda e você pode complementar com outros interesses.</div>
                         {!canPickProcedure ? (
                             <div className="bookingFlow__lockOverlay" aria-hidden="true">
                                 <div className="bookingFlow__lockText">Selecione a unidade no topo para continuar.</div>
                             </div>
                         ) : null}
-                        <div className="bookingFlow__procedureBadgeGrid" role="list" aria-label="Lista de procedimentos" style={{ marginTop: 12 }}>
-                            {services.map((s) => {
-                                const active = service?.id === s.id;
-                                return (
-                                    <button
-                                        key={s.id}
-                                        type="button"
-                                        disabled={!canPickProcedure}
-                                        className="bookingFlow__procedureBadge"
-                                        data-active={active ? "true" : "false"}
-                                        onClick={() => {
-                                            if (active) {
-                                                setService(null);
-                                            } else {
-                                                setService(s);
-                                            }
-                                            setDateKey(null);
-                                            setDateTouched(false);
-                                            setTimeKey(null);
-                                            setStep("pick");
-                                        }}
-                                    >
-                                        <span className="bookingFlow__procedureBadgeAvatar">
-                                            {s.highlightImage ? (
-                                                <Image
-                                                    src={s.highlightImage}
-                                                    alt=""
-                                                    fill
-                                                    sizes="76px"
-                                                    style={{ objectFit: "cover" }}
-                                                    unoptimized
-                                                    aria-hidden="true"
-                                                />
-                                            ) : (
-                                                <span className="bookingFlow__procedureBadgeFallback">EF</span>
-                                            )}
-                                        </span>
-                                        <span className="bookingFlow__procedureBadgeLabel">{s.name}</span>
-                                        {s.subtitle ? <span className="bookingFlow__procedureBadgeSub">{s.subtitle}</span> : null}
-                                    </button>
-                                );
-                            })}
+                        <HoverScrollPicker ariaLabel="Lista de procedimentos">
+                            <div className="bookingFlow__procedureBadgeGrid">
+                                {services.map((s) => {
+                                    const active = selectedServices.some((item) => item.id === s.id);
+                                    return (
+                                        <button
+                                            key={s.id}
+                                            type="button"
+                                            role="listitem"
+                                            disabled={!canPickProcedure}
+                                            className="bookingFlow__procedureBadge"
+                                            data-active={active ? "true" : "false"}
+                                            onClick={() => toggleProcedure(s)}
+                                        >
+                                            <span className="bookingFlow__procedureBadgeAvatar">
+                                                {s.highlightImage ? (
+                                                    <Image
+                                                        src={s.highlightImage}
+                                                        alt=""
+                                                        fill
+                                                        sizes="76px"
+                                                        style={{ objectFit: "cover" }}
+                                                        unoptimized
+                                                        aria-hidden="true"
+                                                    />
+                                                ) : (
+                                                    <span className="bookingFlow__procedureBadgeFallback">EF</span>
+                                                )}
+                                            </span>
+                                            <span className="bookingFlow__procedureBadgeLabel">{s.name}</span>
+                                            {s.subtitle ? <span className="bookingFlow__procedureBadgeSub">{s.subtitle}</span> : null}
+                                        </button>
+                                    );
+                                })}
 
-                            <button
-                                type="button"
-                                disabled={!canPickProcedure}
-                                className="bookingFlow__procedureBadge"
-                                data-active={service?.id === "any" ? "true" : "false"}
-                                onClick={() => {
-                                    const active = service?.id === "any";
-                                    if (active) {
-                                        setService(null);
-                                    } else {
-                                        setService({ id: "any", name: "Quero orientação", subtitle: "Ainda não sei qual procedimento" });
-                                    }
-                                    setDateKey(null);
-                                    setDateTouched(false);
-                                    setTimeKey(null);
-                                    setStep("pick");
-                                }}
-                            >
-                                <span className="bookingFlow__procedureBadgeAvatar bookingFlow__procedureBadgeAvatar--all">
-                                    <span className="bookingFlow__procedureBadgeFallback bookingFlow__procedureBadgeFallback--all">Todos</span>
-                                </span>
-                                <span className="bookingFlow__procedureBadgeLabel">Quero orientação</span>
-                                <span className="bookingFlow__procedureBadgeSub">Ainda não sei qual procedimento</span>
-                            </button>
-                        </div>
+                                <button
+                                    type="button"
+                                    role="listitem"
+                                    disabled={!canPickProcedure}
+                                    className="bookingFlow__procedureBadge"
+                                    data-active={selectedServices.some((item) => item.id === OTHER_SERVICE.id) ? "true" : "false"}
+                                    onClick={() => toggleProcedure(OTHER_SERVICE)}
+                                >
+                                    <span className="bookingFlow__procedureBadgeAvatar bookingFlow__procedureBadgeAvatar--all">
+                                        <span className="bookingFlow__procedureBadgeFallback bookingFlow__procedureBadgeFallback--all">Outro</span>
+                                    </span>
+                                    <span className="bookingFlow__procedureBadgeLabel">Outro</span>
+                                    <span className="bookingFlow__procedureBadgeSub">Outro procedimento ou combinação</span>
+                                </button>
+                            </div>
+                        </HoverScrollPicker>
                     </div>
 
                     <div className={`card bookingFlow__cardServices ${canPickServices ? "" : "bookingFlow__card--locked"}`.trim()} style={{ padding: 16 }}>
@@ -1122,7 +1254,7 @@ export default function BookingFlow() {
                         <div className="bookingFlow__cardSub">
                             {upcomingDays.length ? `${formatDatePtBr(upcomingDays[0])} – ${formatDatePtBr(upcomingDays[upcomingDays.length - 1] ?? upcomingDays[0])}` : null}
                             {doctor ? ` · ${doctor.name}` : ""}
-                            {service ? ` · ${service.name}` : ""}
+                            {selectedServicesLabel ? ` · ${selectedServicesLabel}` : ""}
                         </div>
                         {!canPick ? (
                             <div className="bookingFlow__lockOverlay" aria-hidden="true">
@@ -1323,7 +1455,7 @@ export default function BookingFlow() {
                                     // restart
                                     setStep("pick");
                                     setDoctor(null);
-                                    setService(null);
+                                    setSelectedServices([]);
                                     setIncludeAvaliacao(true);
                                     setIncludeProcedimento(false);
                                     setIncludeRevisao(false);
@@ -1354,7 +1486,7 @@ export default function BookingFlow() {
 
             <DoctorInstagramModal profile={activeInstagram} onClose={() => setActiveInstagram(null)} />
 
-            {showDetailsModal && unitSlug && doctor && service && dateKey && timeKey ? (
+            {showDetailsModal && unitSlug && doctor && primaryService && dateKey && timeKey ? (
                 <div
                     className="bookingFlow__modalBackdrop"
                     role="dialog"
@@ -1373,7 +1505,7 @@ export default function BookingFlow() {
                             <div>
                                 <div style={{ fontWeight: 900 }}>Finalizar agendamento</div>
                                 <div className="small" style={{ marginTop: 4 }}>
-                                    {service.name} ({durationMinutes} min) · {formatDatePtBr(dateKey)} às {timeKey}
+                                    {selectedServicesLabel} ({durationMinutes} min) · {formatDatePtBr(dateKey)} às {timeKey}
                                 </div>
                             </div>
                             <button
@@ -1488,7 +1620,7 @@ export default function BookingFlow() {
                                                     step: "identity_opened",
                                                     unitSlug,
                                                     doctorSlug: doctor.slug,
-                                                    serviceId: service.id,
+                                                    serviceId: primaryService.id,
                                                     date: dateKey,
                                                     time: timeKey,
                                                     detailsStage: "identity",
@@ -1593,7 +1725,7 @@ export default function BookingFlow() {
                                                     step: "contact_reopened",
                                                     unitSlug,
                                                     doctorSlug: doctor.slug,
-                                                    serviceId: service.id,
+                                                    serviceId: primaryService.id,
                                                     date: dateKey,
                                                     time: timeKey,
                                                     detailsStage: "contact",

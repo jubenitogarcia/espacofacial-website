@@ -11,6 +11,7 @@ type Payload = {
     doctorSlug?: string;
     doctorName?: string;
     serviceId?: string;
+    selectedServiceIds?: string[];
     durationMinutes?: number;
     includes?: { avaliacao?: boolean; procedimento?: boolean; revisao?: boolean };
     date?: string; // YYYY-MM-DD
@@ -159,6 +160,11 @@ export async function POST(request: Request) {
     const doctorSlugRaw = sanitizeOneLine(body.doctorSlug ?? "");
     const doctorName = sanitizeOneLine(body.doctorName ?? "");
     const serviceId = sanitizeOneLine(body.serviceId ?? "");
+    const selectedServiceIds = Array.isArray(body.selectedServiceIds)
+        ? Array.from(new Set(body.selectedServiceIds.map((value) => sanitizeOneLine(String(value))).filter(Boolean))).slice(0, 8)
+        : serviceId
+            ? [serviceId]
+            : [];
     const durationMinutesRaw = typeof body.durationMinutes === "number" ? body.durationMinutes : Number(body.durationMinutes ?? NaN);
     const date = sanitizeOneLine(body.date ?? "");
     const time = sanitizeOneLine(body.time ?? "");
@@ -173,7 +179,7 @@ export async function POST(request: Request) {
     const address = clampText(sanitizeOneLine(body.address ?? ""), 160);
 
     // Optional field, but avoid sensitive prompts.
-    const notes = clampText((body.notes ?? "").trim(), 300) || null;
+    const rawNotes = clampText((body.notes ?? "").trim(), 300) || null;
 
     if (!unitSlug || !doctorSlugRaw || !serviceId || !date || !time) {
         return json({ ok: false, error: "missing_fields" }, { status: 400 });
@@ -209,11 +215,21 @@ export async function POST(request: Request) {
 
     const service =
         serviceId === "any"
-            ? { id: "any", name: "Sem preferência" }
+            ? { id: "any", name: "Outro" }
             : getServiceById(serviceId);
     if (!service) {
         return json({ ok: false, error: "invalid_service" }, { status: 400 });
     }
+
+    const selectedProcedures = selectedServiceIds
+        .map((id) => (id === "any" ? { id: "any", name: "Outro" } : getServiceById(id)))
+        .filter((item): item is { id: string; name: string; subtitle?: string } => !!item);
+    const selectedProcedureNames = selectedProcedures.map((item) => item.name);
+    const procedureNotesPrefix =
+        selectedProcedureNames.length > 1
+            ? `Procedimentos selecionados: ${selectedProcedureNames.join(", ")}`
+            : null;
+    const notes = [procedureNotesPrefix, rawNotes].filter(Boolean).join("\n\n") || null;
 
     if (!Number.isFinite(durationMinutesRaw)) {
         return json({ ok: false, error: "missing_duration" }, { status: 400 });
@@ -411,6 +427,7 @@ export async function POST(request: Request) {
             durationMinutes,
             includes: body.includes ?? null,
             service: { id: service.id, name: service.name },
+            selectedServices: selectedProcedures.map((item) => ({ id: item.id, name: item.name })),
             startAtMs,
             endAtMs,
             confirmByMs,
