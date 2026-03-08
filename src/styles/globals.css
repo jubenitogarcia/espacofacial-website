@@ -1108,11 +1108,7 @@ button:focus-visible {
   }
 
   .bookingFlow__cardProcedure {
-    grid-column: span 9;
-  }
-
-  .bookingFlow__cardServices {
-    grid-column: span 3;
+    grid-column: 1 / -1;
   }
 }
 
@@ -1538,7 +1534,7 @@ button:focus-visible {
   flex-wrap: nowrap;
   gap: 14px;
   align-items: flex-start;
-  width: max-content;
+  width: 100%;
   padding: 4px 0 8px;
 }
 
@@ -1555,6 +1551,7 @@ button:focus-visible {
   background: transparent;
   color: inherit;
   cursor: pointer;
+  transition: transform 160ms ease;
 }
 
 .bookingFlow__procedureBadge:disabled {
@@ -1584,12 +1581,19 @@ button:focus-visible {
   box-shadow: 0 16px 32px rgba(0, 0, 0, 0.16);
 }
 
+.bookingFlow__procedureBadge:hover:not(:disabled),
+.bookingFlow__procedureBadge:focus-visible,
+.bookingFlow__procedureBadge[data-active="true"] {
+  transform: translateY(-1px);
+}
+
 .bookingFlow__procedureBadgeAvatar img {
   object-fit: cover;
 }
 
 .bookingFlow__procedureBadgeAvatar--all {
   background: #111;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
 .bookingFlow__procedureBadgeFallback {
@@ -1761,6 +1765,7 @@ button:focus-visible {
   margin-top: 10px;
   overflow: hidden;
   border-radius: 18px;
+  width: 100%;
 }
 
 .bookingFlow__picker .bookingFlow__scrollWindow {
@@ -1846,7 +1851,6 @@ button:focus-visible {
 .bookingFlow__scrollWindow {
   margin-top: 10px;
   width: 100%;
-  max-width: 100%;
   display: flex;
   gap: 10px;
   overflow: auto;

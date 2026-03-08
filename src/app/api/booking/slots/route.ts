@@ -30,26 +30,42 @@ function formatTimeHHMM(hours: number, minutes: number): string {
     return `${hh}:${mm}`;
 }
 
-function buildDaySlots(durationMinutes: number) {
-    // MVP: fixed schedule window, 15-min grid.
-    // Can be expanded per unit/doctor later.
-    const slots: Array<{ time: string; startOffsetMin: number }> = [];
+function parseDateKey(dateKey: string): Date | null {
+    const [y, m, d] = dateKey.split("-").map((value) => Number(value));
+    if (!y || !m || !d) return null;
+    return new Date(y, m - 1, d);
+}
 
-    const startHour = 9;
-    const endHour = 18;
+function getUnitSchedule(unitSlug: string, dateKey: string): { startMinutes: number; endMinutes: number } | null {
+    const date = parseDateKey(dateKey);
+    if (!date) return null;
+
+    const day = date.getDay();
+    if (day === 0) return null;
+
+    if (unitSlug === "novo-hamburgo") {
+        if (day === 6) return { startMinutes: 9 * 60 + 30, endMinutes: 18 * 60 + 30 };
+        return { startMinutes: 10 * 60, endMinutes: 19 * 60 };
+    }
+
+    if (unitSlug === "barrashoppingsul") {
+        return { startMinutes: 11 * 60 + 30, endMinutes: 20 * 60 + 30 };
+    }
+
+    return null;
+}
+
+function buildDaySlots(unitSlug: string, dateKey: string, durationMinutes: number) {
+    const slots: Array<{ time: string; startOffsetMin: number }> = [];
+    const schedule = getUnitSchedule(unitSlug, dateKey);
+    if (!schedule) return slots;
+
     const step = 15;
 
-    for (let h = startHour; h < endHour; h++) {
-        for (let m = 0; m < 60; m += step) {
-            const startMin = h * 60 + m;
-            const endMin = startMin + durationMinutes;
-            if (endMin > endHour * 60) continue;
-
-            // Simple lunch break exclusion (12:00-13:00)
-            if (startMin >= 12 * 60 && startMin < 13 * 60) continue;
-
-            slots.push({ time: formatTimeHHMM(h, m), startOffsetMin: startMin });
-        }
+    for (let startMin = schedule.startMinutes; startMin <= schedule.endMinutes - durationMinutes; startMin += step) {
+        const hours = Math.floor(startMin / 60);
+        const minutes = startMin % 60;
+        slots.push({ time: formatTimeHHMM(hours, minutes), startOffsetMin: startMin });
     }
 
     return slots;
@@ -112,7 +128,7 @@ export async function GET(req: Request) {
     if (durationMinutes <= 0 || durationMinutes > 180 || durationMinutes % 15 !== 0) {
         return json({ ok: false, error: "invalid_duration" }, { status: 400 });
     }
-    const daySlots = buildDaySlots(durationMinutes);
+    const daySlots = buildDaySlots(unitSlug, date, durationMinutes);
 
     const db = await getBookingDb();
     const wantsAnyDoctor = doctorSlug === "any";
