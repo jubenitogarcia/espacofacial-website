@@ -25,6 +25,7 @@ type TeamDirectoryState = {
 let cachedMembers: TeamDirectoryMember[] | null = null;
 let cachedError: string | null = null;
 let inflightLoad: Promise<void> | null = null;
+let retryTimer: ReturnType<typeof setTimeout> | null = null;
 
 const listeners = new Set<() => void>();
 
@@ -42,19 +43,40 @@ function notifyListeners() {
 }
 
 async function loadTeamDirectory() {
-    if (cachedMembers !== null || cachedError !== null) return;
+    if (cachedMembers !== null) return;
     if (inflightLoad) return inflightLoad;
+
+    if (retryTimer) {
+        clearTimeout(retryTimer);
+        retryTimer = null;
+    }
 
     inflightLoad = (async () => {
         try {
             const res = await fetch("/api/equipe", { cache: "no-store" });
             const json = (await res.json().catch(() => null)) as TeamDirectoryResponse | null;
 
-            cachedMembers = Array.isArray(json?.members) ? json.members : [];
-            cachedError = json && json.ok === false ? json.error?.code ?? "unknown" : null;
+            const nextMembers = Array.isArray(json?.members) ? json.members : [];
+            const nextError = json && json.ok === false ? json.error?.code ?? "unknown" : null;
+
+            if (nextError) {
+                cachedMembers = null;
+                cachedError = nextError;
+                retryTimer = setTimeout(() => {
+                    retryTimer = null;
+                    void loadTeamDirectory();
+                }, 4000);
+            } else {
+                cachedMembers = nextMembers;
+                cachedError = null;
+            }
         } catch {
-            cachedMembers = [];
+            cachedMembers = null;
             cachedError = "exception";
+            retryTimer = setTimeout(() => {
+                retryTimer = null;
+                void loadTeamDirectory();
+            }, 4000);
         } finally {
             inflightLoad = null;
             notifyListeners();

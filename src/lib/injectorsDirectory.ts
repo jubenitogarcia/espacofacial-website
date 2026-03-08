@@ -36,6 +36,17 @@ type CloudflareEnv = {
     GOOGLE_SERVICE_ACCOUNT_JSON?: string;
 };
 
+type InjectorsResult = { ok: true; members: TeamMember[] } | { ok: false; members: TeamMember[]; error: InjectorsDirectoryError };
+type InjectorsCacheEntry = {
+    expiresAtMs: number;
+    result: InjectorsResult;
+};
+
+const INJECTORS_CACHE_TTL_MS = 5 * 60_000;
+const INJECTORS_ERROR_CACHE_TTL_MS = 10_000;
+let injectorsCache: InjectorsCacheEntry | null = null;
+let inflightInjectorsLoad: Promise<InjectorsResult> | null = null;
+
 type GoogleServiceAccount = {
     client_email?: string;
     private_key?: string;
@@ -312,7 +323,12 @@ export function unitLabelFromBookingUnitSlug(unitSlug: string): string | null {
     return null;
 }
 
-export async function fetchActiveInjectorsResult(): Promise<{ ok: true; members: TeamMember[] } | { ok: false; members: TeamMember[]; error: InjectorsDirectoryError }> {
+export async function fetchActiveInjectorsResult(): Promise<InjectorsResult> {
+    const now = Date.now();
+    if (injectorsCache && injectorsCache.expiresAtMs > now) return injectorsCache.result;
+    if (inflightInjectorsLoad) return inflightInjectorsLoad;
+
+    inflightInjectorsLoad = (async () => {
     try {
         const env = getEnv();
         const serviceAccountJson = (env.GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON ?? env.GOOGLE_SERVICE_ACCOUNT_JSON ?? "").trim();
@@ -398,6 +414,18 @@ export async function fetchActiveInjectorsResult(): Promise<{ ok: true; members:
         return { ok: true, members };
     } catch {
         return { ok: false, members: [], error: { code: "exception" } };
+    }
+    })();
+
+    try {
+        const result = await inflightInjectorsLoad;
+        injectorsCache = {
+            expiresAtMs: Date.now() + (result.ok ? INJECTORS_CACHE_TTL_MS : INJECTORS_ERROR_CACHE_TTL_MS),
+            result,
+        };
+        return result;
+    } finally {
+        inflightInjectorsLoad = null;
     }
 }
 
