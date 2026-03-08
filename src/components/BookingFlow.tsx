@@ -351,7 +351,8 @@ export default function BookingFlow() {
     }, [allowedUnitSlugs, currentUnit?.slug]);
 
     const primaryService = selectedServices[0] ?? null;
-    const primaryServiceId = primaryService?.id ?? null;
+    const effectivePrimaryService = primaryService ?? OTHER_SERVICE;
+    const effectiveServiceId = effectivePrimaryService.id;
     const selectedServiceIds = useMemo(() => selectedServices.map((item) => item.id), [selectedServices]);
     const selectedServiceNames = useMemo(() => selectedServices.map((item) => item.name), [selectedServices]);
     const selectedServicesLabel = useMemo(() => selectedServiceNames.join(", "), [selectedServiceNames]);
@@ -522,7 +523,7 @@ export default function BookingFlow() {
 
         async function loadDateAvailability() {
             setDateAvailability({});
-            const serviceId = primaryServiceId;
+            const serviceId = effectiveServiceId;
 
             if (!unitSlug || durationMinutes <= 0 || !serviceId) return;
 
@@ -559,14 +560,14 @@ export default function BookingFlow() {
         return () => {
             cancelled = true;
         };
-    }, [durationMinutes, effectiveDoctorSlug, primaryServiceId, unitSlug, upcomingDays]);
+    }, [durationMinutes, effectiveDoctorSlug, effectiveServiceId, unitSlug, upcomingDays]);
 
     useEffect(() => {
         async function loadSlots() {
             setSlots(null);
             setSlotsError(null);
             setSlotsLoading(false);
-            const serviceId = primaryServiceId;
+            const serviceId = effectiveServiceId;
 
             if (!unitSlug || !dateKey || durationMinutes <= 0 || !serviceId) return;
 
@@ -601,7 +602,7 @@ export default function BookingFlow() {
         }
 
         loadSlots();
-    }, [dateKey, durationMinutes, effectiveDoctorSlug, primaryServiceId, unitSlug]);
+    }, [dateKey, durationMinutes, effectiveDoctorSlug, effectiveServiceId, unitSlug]);
 
     async function submit() {
         setSubmitError(null);
@@ -775,7 +776,7 @@ export default function BookingFlow() {
     }, [submitted]);
 
     const canPickProcedure = !!unitSlug;
-    const canPick = !!unitSlug && selectedServices.length > 0;
+    const canPick = !!unitSlug;
     const hasResolvedDateAvailability = upcomingDays.every((day) => typeof dateAvailability[day] === "boolean");
     const visibleUpcomingWeeks = useMemo(() => {
         if (!canPick || !hasResolvedDateAvailability) return upcomingWeeks.slice(0, 4);
@@ -809,7 +810,13 @@ export default function BookingFlow() {
         return slots.slots.find((s) => s.time === timeKey) ?? null;
     }, [slots?.slots, timeKey]);
 
+    function ensureDefaultSelections() {
+        if (!doctor) setDoctor(ANY_DOCTOR);
+        if (selectedServices.length === 0) setSelectedServices([OTHER_SERVICE]);
+    }
+
     function openDetailsModal(nextTime: string) {
+        ensureDefaultSelections();
         setTimeKey(nextTime);
         setStep("details");
         setDetailsStage("contact");
@@ -821,7 +828,7 @@ export default function BookingFlow() {
             step: "details_opened",
             unitSlug,
             doctorSlug: effectiveDoctorSlug,
-            serviceId: primaryService?.id ?? null,
+            serviceId: effectiveServiceId,
             date: dateKey,
             time: nextTime,
             detailsStage: "contact",
@@ -997,7 +1004,7 @@ export default function BookingFlow() {
 
                     <div
                         className={`card bookingFlow__cardDoctor ${unitSlug ? "bookingFlow__cardDoctor--half" : "bookingFlow__cardDoctor--withUnit"}`.trim()}
-                        style={{ padding: 16 }}
+                        style={{ padding: 14 }}
                     >
                         <div className="bookingFlow__entryTitle">Escolha o seu doutor</div>
                         {unit ? (
@@ -1006,7 +1013,7 @@ export default function BookingFlow() {
                             </div>
                         ) : null}
                         <div className="bookingFlow__cardSub">Clique e selecione um de nossos doutores para o seu atendimento.</div>
-                        <div style={{ marginTop: 10 }}>
+                        <div style={{ marginTop: 6 }}>
                             {!unitLabel ? (
                                 <div className="small bookingFlow__unitStatus bookingFlow__unitStatus--error" role="status">
                                     Selecione a unidade para liberar os doutores.
@@ -1024,7 +1031,7 @@ export default function BookingFlow() {
                             ) : (
                                 <HoverScrollPicker
                                     ariaLabel="Lista de profissionais"
-                                    className="bookingFlow__picker--bleed bookingFlow__picker--doctor"
+                                    className="bookingFlow__picker--bleed bookingFlow__picker--rail bookingFlow__picker--doctor"
                                     scrollWindowClassName="bookingFlow__scrollWindow--doctor"
                                 >
                                     <div className="bookingFlow__doctorBadgeGrid">
@@ -1111,7 +1118,7 @@ export default function BookingFlow() {
                         </div>
                     </div>
 
-                    <div className={`card bookingFlow__cardProcedure ${unitSlug ? "bookingFlow__cardProcedure--half" : "bookingFlow__cardProcedure--full"} ${canPickProcedure ? "" : "bookingFlow__card--locked"}`.trim()} style={{ padding: 16 }}>
+                    <div className={`card bookingFlow__cardProcedure ${unitSlug ? "bookingFlow__cardProcedure--half" : "bookingFlow__cardProcedure--full"} ${canPickProcedure ? "" : "bookingFlow__card--locked"}`.trim()} style={{ padding: 14 }}>
                         <div className="bookingFlow__entryTitle">Escolha os procedimentos</div>
                         <div className="bookingFlow__cardSub">Selecione um ou mais procedimentos para o seu atendimento.</div>
                         {!canPickProcedure ? (
@@ -1119,7 +1126,7 @@ export default function BookingFlow() {
                                 <div className="bookingFlow__lockText">Selecione a unidade no topo para continuar.</div>
                             </div>
                         ) : null}
-                        <HoverScrollPicker ariaLabel="Lista de procedimentos" className="bookingFlow__picker--bleed">
+                        <HoverScrollPicker ariaLabel="Lista de procedimentos" className="bookingFlow__picker--bleed bookingFlow__picker--rail">
                             <div className="bookingFlow__procedureBadgeGrid">
                                 {services.map((s) => {
                                     const active = selectedServices.some((item) => item.id === s.id);
@@ -1172,7 +1179,7 @@ export default function BookingFlow() {
                         </HoverScrollPicker>
                     </div>
 
-                    <div className={`card bookingFlow__cardFull bookingFlow__cardDateTime ${canPick ? "" : "bookingFlow__card--locked"}`.trim()} style={{ padding: 16 }}>
+                    <div className={`card bookingFlow__cardFull bookingFlow__cardDateTime ${canPick ? "" : "bookingFlow__card--locked"}`.trim()} style={{ padding: 14 }}>
                         <div className="bookingFlow__cardHeader">
                             <div>
                                 <div className="bookingFlow__entryTitle">Data e horário</div>
@@ -1192,7 +1199,7 @@ export default function BookingFlow() {
                         {!canPick ? (
                             <div className="bookingFlow__lockOverlay" aria-hidden="true">
                                 <div className="bookingFlow__lockText">
-                                    {!unitSlug ? "Selecione a unidade no topo para ver horários." : "Escolha ao menos um procedimento para liberar a agenda."}
+                                    Selecione a unidade no topo para ver horários.
                                 </div>
                             </div>
                         ) : null}
@@ -1217,6 +1224,7 @@ export default function BookingFlow() {
                                                         data-active={active ? "true" : "false"}
                                                         data-unavailable={unavailable ? "true" : "false"}
                                                         onClick={() => {
+                                                            ensureDefaultSelections();
                                                             setDateTouched(true);
                                                             if (active) {
                                                                 setDateKey(null);
@@ -1332,7 +1340,7 @@ export default function BookingFlow() {
                                             })}
                                         </div>
                                     ) : (
-                                        <div className="small">Escolha um procedimento para filtrar horários ou selecione uma data.</div>
+                                        <div className="small">Selecione uma data para ver os horários disponíveis.</div>
                                     )}
                                 </div>
                             </div>
