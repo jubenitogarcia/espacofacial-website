@@ -1136,8 +1136,9 @@ export default function BookingFlow() {
                                             type="button"
                                             role="listitem"
                                             disabled={!canPickProcedure}
-                                            className="bookingFlow__procedureBadge"
+                                            className={`bookingFlow__procedureBadge${s.subtitle ? " bookingFlow__tooltipTrigger bookingFlow__procedureBadge--hasTooltip" : ""}`}
                                             data-active={active ? "true" : "false"}
+                                            data-tooltip={s.subtitle ?? undefined}
                                             onClick={() => toggleProcedure(s)}
                                         >
                                             <span className="bookingFlow__procedureBadgeAvatar">
@@ -1156,7 +1157,6 @@ export default function BookingFlow() {
                                                 )}
                                             </span>
                                             <span className="bookingFlow__procedureBadgeLabel">{s.name}</span>
-                                            {s.subtitle ? <span className="bookingFlow__procedureBadgeSub">{s.subtitle}</span> : null}
                                         </button>
                                     );
                                 })}
@@ -1165,16 +1165,16 @@ export default function BookingFlow() {
                                     type="button"
                                     role="listitem"
                                     disabled={!canPickProcedure}
-                                    className="bookingFlow__procedureBadge"
+                                    className="bookingFlow__procedureBadge bookingFlow__tooltipTrigger bookingFlow__procedureBadge--hasTooltip"
                                     data-active={selectedServices.some((item) => item.id === OTHER_SERVICE.id) ? "true" : "false"}
-                                            onClick={() => toggleProcedure(OTHER_SERVICE)}
-                                        >
-                                            <span className="bookingFlow__procedureBadgeAvatar bookingFlow__procedureBadgeAvatar--all">
-                                                <span className="bookingFlow__procedureBadgeFallback bookingFlow__procedureBadgeFallback--all">Outro</span>
-                                            </span>
-                                            <span className="bookingFlow__procedureBadgeLabel">Outro</span>
-                                            <span className="bookingFlow__procedureBadgeSub">Outro procedimento ou combinação</span>
-                                        </button>
+                                    data-tooltip="Outro procedimento ou combinação"
+                                    onClick={() => toggleProcedure(OTHER_SERVICE)}
+                                >
+                                    <span className="bookingFlow__procedureBadgeAvatar bookingFlow__procedureBadgeAvatar--all">
+                                        <span className="bookingFlow__procedureBadgeFallback bookingFlow__procedureBadgeFallback--all">Outro</span>
+                                    </span>
+                                    <span className="bookingFlow__procedureBadgeLabel">Outro</span>
+                                </button>
                             </div>
                         </HoverScrollPicker>
                     </div>
