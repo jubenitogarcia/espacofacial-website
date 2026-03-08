@@ -1507,8 +1507,8 @@ button:focus-visible {
 .bookingFlow__doctorTooltip {
   position: absolute;
   left: 50%;
-  bottom: calc(100% + 6px);
-  top: auto;
+  top: calc(100% + 10px);
+  bottom: auto;
   transform: translateX(-50%);
   display: none;
   width: max-content;
@@ -1591,8 +1591,8 @@ button:focus-visible {
   display: grid;
   justify-items: center;
   gap: 5px;
-  width: 104px;
-  min-width: 104px;
+  width: 76px;
+  min-width: 76px;
   flex: 0 0 auto;
   padding: 0;
   border: 0;
@@ -1666,6 +1666,7 @@ button:focus-visible {
   line-height: 1.1;
   text-align: center;
   text-wrap: balance;
+  width: 100%;
 }
 
 .bookingFlow__procedureBadge[data-active="true"] .bookingFlow__procedureBadgeLabel {
@@ -1736,8 +1737,9 @@ button:focus-visible {
   content: attr(data-tooltip);
   position: absolute;
   left: 50%;
-  bottom: calc(100% + 8px);
-  transform: translateX(-50%) translateY(4px);
+  top: calc(100% + 10px);
+  bottom: auto;
+  transform: translateX(-50%) translateY(-4px);
   padding: 6px 8px;
   font-size: 11px;
   line-height: 1.2;
@@ -1756,7 +1758,8 @@ button:focus-visible {
   content: "";
   position: absolute;
   left: 50%;
-  bottom: calc(100% + 2px);
+  top: calc(100% + 4px);
+  bottom: auto;
   transform: translateX(-50%);
   width: 6px;
   height: 6px;
@@ -1824,21 +1827,23 @@ button:focus-visible {
 .bookingFlow__picker--rail::after {
   content: "";
   position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 56px;
+  top: 8px;
+  bottom: auto;
+  height: 82px;
+  width: 44px;
+  border-radius: 999px;
   pointer-events: none;
   z-index: 1;
 }
 
 .bookingFlow__picker--rail::before {
   left: 0;
-  background: linear-gradient(90deg, rgba(246, 246, 246, 0.72) 0%, rgba(246, 246, 246, 0) 100%);
+  background: linear-gradient(90deg, rgba(246, 246, 246, 0.16) 0%, rgba(246, 246, 246, 0) 100%);
 }
 
 .bookingFlow__picker--rail::after {
   right: 0;
-  background: linear-gradient(270deg, rgba(246, 246, 246, 0.72) 0%, rgba(246, 246, 246, 0) 100%);
+  background: linear-gradient(270deg, rgba(246, 246, 246, 0.16) 0%, rgba(246, 246, 246, 0) 100%);
 }
 
 .bookingFlow__picker .bookingFlow__scrollWindow {
