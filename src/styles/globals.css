@@ -1410,6 +1410,14 @@ button:focus-visible {
   min-width: 100%;
 }
 
+.bookingFlow__doctorBadgeGrid > :first-child {
+  margin-left: 16px;
+}
+
+.bookingFlow__doctorBadgeGrid > :last-child {
+  margin-right: 16px;
+}
+
 .bookingFlow__doctorBadgeWrap {
   position: relative;
   flex: 0 0 auto;
@@ -1503,16 +1511,22 @@ button:focus-visible {
   top: auto;
   transform: translateX(-50%) translateY(4px);
   width: max-content;
-  min-width: 132px;
-  max-width: 210px;
-  padding: 8px 10px;
+  min-width: 0;
+  max-width: 0;
+  padding: 0;
   border-radius: 12px;
   background: rgba(17, 17, 17, 0.96);
   color: #fff;
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
+  overflow: hidden;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 180ms ease 180ms, transform 180ms ease 180ms;
+  transition:
+    opacity 180ms ease 180ms,
+    transform 180ms ease 180ms,
+    min-width 0s linear 180ms,
+    max-width 0s linear 180ms,
+    padding 0s linear 180ms;
   z-index: 4;
 }
 
@@ -1525,10 +1539,13 @@ button:focus-visible {
 
 .bookingFlow__doctorBadgeWrap:hover .bookingFlow__doctorTooltip,
 .bookingFlow__doctorBadgeWrap:focus-within .bookingFlow__doctorTooltip {
+  min-width: 132px;
+  max-width: 210px;
+  padding: 8px 10px;
   opacity: 1;
   pointer-events: auto;
   transform: translateX(-50%) translateY(0);
-  transition-delay: 0s;
+  transition-delay: 0s, 0s, 0s, 0s, 0s;
 }
 
 .bookingFlow__doctorTooltipName {
@@ -1571,6 +1588,14 @@ button:focus-visible {
   width: max-content;
   min-width: 100%;
   padding: 8px 0 14px;
+}
+
+.bookingFlow__procedureBadgeGrid > :first-child {
+  margin-left: 16px;
+}
+
+.bookingFlow__procedureBadgeGrid > :last-child {
+  margin-right: 16px;
 }
 
 .bookingFlow__procedureBadge {
@@ -1814,7 +1839,7 @@ button:focus-visible {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 76px;
+  width: 56px;
   pointer-events: none;
   z-index: 1;
 }
@@ -1831,12 +1856,12 @@ button:focus-visible {
 
 .bookingFlow__picker .bookingFlow__scrollWindow {
   margin-top: 0;
-  padding-left: 78px;
-  padding-right: 78px;
+  padding-left: 0;
+  padding-right: 0;
   padding-top: 8px;
   padding-bottom: 8px;
-  scroll-padding-left: 78px;
-  scroll-padding-right: 78px;
+  scroll-padding-left: 24px;
+  scroll-padding-right: 24px;
 }
 
 .bookingFlow__scrollWindow--doctor {
@@ -1848,7 +1873,7 @@ button:focus-visible {
   top: 8px;
   height: 82px;
   z-index: 3;
-  width: 72px;
+  width: 56px;
   border: 0;
   padding: 0;
   background: transparent;
@@ -1892,11 +1917,11 @@ button:focus-visible {
 }
 
 .bookingFlow__scrollArrow--left {
-  margin-left: 12px;
+  margin-left: 6px;
 }
 
 .bookingFlow__scrollArrow--right {
-  margin-right: 12px;
+  margin-right: 6px;
 }
 
 .bookingFlow__datetimeGrid {
