@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type ReactNode, type WheelEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { units } from "@/data/units";
@@ -9,8 +9,9 @@ import { useCurrentUnit } from "@/hooks/useCurrentUnit";
 import { useTeamDirectory } from "@/hooks/useTeamDirectory";
 import { clearBookingDraft, persistBookingDraft, readBookingDraft, type BookingDraftState } from "@/lib/bookingDraft";
 import { doctorSlugFromTeamMember, normalizeDoctorSlug } from "@/lib/doctorSlug";
-import { trackBookingFunnelStep, trackBookingRequestSubmitted } from "@/lib/leadTracking";
+import { trackBookingFunnelStep, trackBookingRequestSubmitted, trackDoctorInstagramClick } from "@/lib/leadTracking";
 import { setStoredUnitSlug } from "@/lib/unitSelection";
+import DoctorInstagramModal, { InstagramIcon, type DoctorInstagramProfile } from "@/components/DoctorInstagramModal";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import UnitChooser from "@/components/UnitChooser";
 
@@ -79,6 +80,17 @@ function avatarUrl(handle: string, name: string) {
     return `/api/instagram-avatar?handle=${h}&name=${n}`;
 }
 
+function extractInstagramHandle(url: string | null): string | null {
+    if (!url) return null;
+    try {
+        const { pathname } = new URL(url);
+        const handle = pathname.split("/").filter(Boolean)[0];
+        return handle ? handle.replace(/^@/, "") : null;
+    } catch {
+        return null;
+    }
+}
+
 function initialsFromName(name: string) {
     const letters = name
         .split(/\s+/)
@@ -141,81 +153,6 @@ function formatCpf(input: string): string {
     return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
 }
 
-function ScrollPicker(props: { ariaLabel: string; children: ReactNode; className?: string }) {
-    const ref = useRef<HTMLDivElement | null>(null);
-    const [canLeft, setCanLeft] = useState(false);
-    const [canRight, setCanRight] = useState(false);
-
-    const update = () => {
-        const el = ref.current;
-        if (!el) return;
-        const left = el.scrollLeft;
-        const maxLeft = el.scrollWidth - el.clientWidth;
-        setCanLeft(left > 1);
-        setCanRight(left < maxLeft - 1);
-    };
-
-    useEffect(() => {
-        update();
-        const onResize = () => update();
-        window.addEventListener("resize", onResize);
-        return () => window.removeEventListener("resize", onResize);
-    }, []);
-
-    const handleWheel = (event: WheelEvent<HTMLDivElement>) => {
-        if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
-        event.currentTarget.scrollLeft += event.deltaY;
-        event.preventDefault();
-    };
-
-    const scrollByDir = (dir: -1 | 1) => {
-        const el = ref.current;
-        if (!el) return;
-        const delta = Math.max(220, Math.floor(el.clientWidth * 0.8));
-        el.scrollBy({ left: dir * delta, behavior: "smooth" });
-    };
-
-    return (
-        <div className={`bookingFlow__picker ${props.className ?? ""}`.trim()}>
-            <button
-                type="button"
-                className="bookingFlow__scrollArrow bookingFlow__scrollArrow--left"
-                onClick={() => scrollByDir(-1)}
-                disabled={!canLeft}
-                aria-label="Rolagem para a esquerda"
-            >
-                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                    <path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-            </button>
-
-            <button
-                type="button"
-                className="bookingFlow__scrollArrow bookingFlow__scrollArrow--right"
-                onClick={() => scrollByDir(1)}
-                disabled={!canRight}
-                aria-label="Rolagem para a direita"
-            >
-                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                    <path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-            </button>
-
-            <div
-                ref={ref}
-                className="bookingFlow__scrollWindow"
-                onWheel={handleWheel}
-                onScroll={update}
-                role="group"
-                aria-label={props.ariaLabel}
-                tabIndex={0}
-            >
-                {props.children}
-            </div>
-        </div>
-    );
-}
-
 export default function BookingFlow() {
     const currentUnit = useCurrentUnit();
     const searchParams = useSearchParams();
@@ -254,6 +191,8 @@ export default function BookingFlow() {
 
     const [submitting, setSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
+    const [activeInstagram, setActiveInstagram] = useState<DoctorInstagramProfile | null>(null);
+    const [dateAvailability, setDateAvailability] = useState<Record<string, boolean>>({});
 
     const [submitted, setSubmitted] = useState<{ id: string; status: string; confirmByMs: number; notifications?: { email: NotificationResult; whatsapp: NotificationResult } } | null>(null);
     const [status, setStatus] = useState<BookingStatus | null>(null);
@@ -328,6 +267,8 @@ export default function BookingFlow() {
         setTurnstileHadError(false);
         setSlots(null);
         setSlotsError(null);
+        setDateAvailability({});
+        setActiveInstagram(null);
         setPatientName("");
         setEmail("");
         setWhatsapp("");
@@ -400,7 +341,7 @@ export default function BookingFlow() {
             .map((m) => ({
                 name: m.name,
                 slug: doctorSlugFromTeamMember(m),
-                handle: m.instagramHandle,
+                handle: m.instagramHandle ?? extractInstagramHandle(m.instagramUrl),
                 nickname: m.nickname,
                 instagramUrl: m.instagramUrl,
             }));
@@ -460,6 +401,49 @@ export default function BookingFlow() {
         }
         return out;
     }, []);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        async function loadDateAvailability() {
+            setDateAvailability({});
+            const doctorSlug = doctor?.slug ?? null;
+
+            if (!unitSlug || durationMinutes <= 0 || !doctorSlug) return;
+
+            const entries = await Promise.all(
+                upcomingDays.map(async (day) => {
+                    try {
+                        const url = new URL("/api/booking/slots", window.location.origin);
+                        url.searchParams.set("unit", unitSlug);
+                        url.searchParams.set("doctor", doctorSlug);
+                        url.searchParams.set("service", service?.id ?? "any");
+                        url.searchParams.set("durationMinutes", String(durationMinutes));
+                        url.searchParams.set("date", day);
+
+                        const res = await fetch(url.toString(), { cache: "no-store" });
+                        const json = (await res.json().catch(() => null)) as SlotsPayload | { ok: false; error: string } | null;
+
+                        if (!res.ok || !json || !isOkResponse(json)) return [day, false] as const;
+                        const payload = json as SlotsPayload;
+                        return [day, payload.slots.some((slot) => slot.available)] as const;
+                    } catch {
+                        return [day, false] as const;
+                    }
+                }),
+            );
+
+            if (cancelled) return;
+            const nextAvailability = Object.fromEntries(entries);
+            setDateAvailability(nextAvailability);
+
+        }
+
+        void loadDateAvailability();
+        return () => {
+            cancelled = true;
+        };
+    }, [doctor?.slug, durationMinutes, service?.id, unitSlug, upcomingDays]);
 
     useEffect(() => {
         async function loadSlots() {
@@ -674,15 +658,27 @@ export default function BookingFlow() {
     const canPickProcedure = !!unitSlug;
     const canPickServices = canPickProcedure && !!service;
     const canPick = !!unitSlug && durationMinutes > 0; // date+time
+    const hasResolvedDateAvailability = upcomingDays.every((day) => typeof dateAvailability[day] === "boolean");
 
-    // Auto-select today's date once the required selections are ready.
+    useEffect(() => {
+        if (!dateKey) return;
+        if (!hasResolvedDateAvailability) return;
+        if (dateAvailability[dateKey] !== false) return;
+        setDateKey(null);
+        setTimeKey(null);
+        setStep("pick");
+    }, [dateAvailability, dateKey, hasResolvedDateAvailability]);
+
+    // Auto-select the first available date once the required selections are ready.
     useEffect(() => {
         if (!canPick) return;
         if (dateKey) return;
         if (dateTouched) return;
         if (!upcomingDays.length) return;
-        setDateKey(upcomingDays[0] ?? null);
-    }, [canPick, dateKey, dateTouched, upcomingDays]);
+        if (!hasResolvedDateAvailability) return;
+        const firstAvailableDate = upcomingDays.find((day) => dateAvailability[day]);
+        setDateKey(firstAvailableDate ?? null);
+    }, [canPick, dateAvailability, dateKey, dateTouched, hasResolvedDateAvailability, upcomingDays]);
 
     const selectedSlot = useMemo(() => {
         if (!slots?.slots || !timeKey) return null;
@@ -766,6 +762,17 @@ export default function BookingFlow() {
         setStep("pick");
     }
 
+    function openDoctorInstagram(params: { name: string; handle: string | null; instagramUrl: string | null }) {
+        const handle = params.handle?.replace(/^@/, "") ?? null;
+        if (!handle) return;
+        setActiveInstagram({ name: params.name, handle });
+        trackDoctorInstagramClick({
+            unitSlug,
+            doctorName: params.name,
+            instagramUrl: params.instagramUrl ?? `https://www.instagram.com/${handle}/`,
+        });
+    }
+
     useEffect(() => {
         if (!draftReadyRef.current) return;
         if (step === "submitted") {
@@ -839,7 +846,6 @@ export default function BookingFlow() {
                 <div className="bookingFlow__grid">
                     {!unitSlug ? (
                         <div className="card bookingFlow__cardEntryUnit" style={{ padding: 16 }}>
-                            <div className="bookingFlow__entryEyebrow">Entrada 01</div>
                             <div className="bookingFlow__entryTitle">Escolha a unidade</div>
                             <div className="bookingFlow__cardSub">A unidade libera a equipe, o procedimento e os horários reais.</div>
                             <div className="bookingFlow__embeddedUnitChooser">
@@ -852,7 +858,6 @@ export default function BookingFlow() {
                         className={`card bookingFlow__cardDoctor ${unitSlug ? "bookingFlow__cardDoctor--full" : "bookingFlow__cardDoctor--withUnit"}`.trim()}
                         style={{ padding: 16 }}
                     >
-                        <div className="bookingFlow__entryEyebrow">Entrada 02</div>
                         <div className="bookingFlow__entryTitle">Escolha o doutor</div>
                         {unit ? (
                             <div className="small bookingFlow__unitStatus">
@@ -908,15 +913,22 @@ export default function BookingFlow() {
                                                     <div className="bookingFlow__doctorTooltipName">{d.name}</div>
                                                     <div className="bookingFlow__doctorTooltipSub">{d.nickname || unitLabel}</div>
                                                     {instagramHref ? (
-                                                        <a
+                                                        <button
+                                                            type="button"
                                                             className="bookingFlow__doctorTooltipLink"
-                                                            href={instagramHref}
-                                                            target="_blank"
-                                                            rel="noreferrer"
-                                                            onClick={(event) => event.stopPropagation()}
+                                                            aria-label={`Abrir Instagram de ${d.name}`}
+                                                            title="Abrir Instagram"
+                                                            onClick={(event) => {
+                                                                event.stopPropagation();
+                                                                openDoctorInstagram({
+                                                                    name: d.name,
+                                                                    handle: d.handle,
+                                                                    instagramUrl: instagramHref,
+                                                                });
+                                                            }}
                                                         >
-                                                            Instagram
-                                                        </a>
+                                                            <InstagramIcon size={14} />
+                                                        </button>
                                                     ) : null}
                                                 </div>
                                             </div>
@@ -953,7 +965,7 @@ export default function BookingFlow() {
                                 <div className="bookingFlow__lockText">Selecione a unidade no topo para continuar.</div>
                             </div>
                         ) : null}
-                        <ScrollPicker ariaLabel="Lista de procedimentos">
+                        <div className="bookingFlow__procedureBadgeGrid" role="list" aria-label="Lista de procedimentos" style={{ marginTop: 12 }}>
                             {services.map((s) => {
                                 const active = service?.id === s.id;
                                 return (
@@ -961,7 +973,8 @@ export default function BookingFlow() {
                                         key={s.id}
                                         type="button"
                                         disabled={!canPickProcedure}
-                                        className={`bookingFlow__procedureCard ${active ? "bookingFlow__procedureCard--active" : ""}`.trim()}
+                                        className="bookingFlow__procedureBadge"
+                                        data-active={active ? "true" : "false"}
                                         onClick={() => {
                                             if (active) {
                                                 setService(null);
@@ -973,33 +986,24 @@ export default function BookingFlow() {
                                             setTimeKey(null);
                                             setStep("pick");
                                         }}
-                                        style={{
-                                            textAlign: "left",
-                                            width: 240,
-                                            minWidth: 240,
-                                            flex: "0 0 auto",
-                                            scrollSnapAlign: "start",
-                                        }}
                                     >
-                                        {s.highlightImage ? (
-                                            <Image
-                                                src={s.highlightImage}
-                                                alt=""
-                                                fill
-                                                sizes="240px"
-                                                style={{ objectFit: "cover" }}
-                                                unoptimized
-                                                aria-hidden="true"
-                                            />
-                                        ) : (
-                                            <div className="bookingFlow__procedureMediaFallback" aria-hidden="true">
-                                                EF
-                                            </div>
-                                        )}
-                                        <div className="bookingFlow__procedureOverlay">
-                                            <div className="bookingFlow__procedureTitle">{s.name}</div>
-                                            {s.subtitle ? <div className="bookingFlow__procedureSub">{s.subtitle}</div> : null}
-                                        </div>
+                                        <span className="bookingFlow__procedureBadgeAvatar">
+                                            {s.highlightImage ? (
+                                                <Image
+                                                    src={s.highlightImage}
+                                                    alt=""
+                                                    fill
+                                                    sizes="76px"
+                                                    style={{ objectFit: "cover" }}
+                                                    unoptimized
+                                                    aria-hidden="true"
+                                                />
+                                            ) : (
+                                                <span className="bookingFlow__procedureBadgeFallback">EF</span>
+                                            )}
+                                        </span>
+                                        <span className="bookingFlow__procedureBadgeLabel">{s.name}</span>
+                                        {s.subtitle ? <span className="bookingFlow__procedureBadgeSub">{s.subtitle}</span> : null}
                                     </button>
                                 );
                             })}
@@ -1007,7 +1011,8 @@ export default function BookingFlow() {
                             <button
                                 type="button"
                                 disabled={!canPickProcedure}
-                                className={`bookingFlow__procedureCard ${service?.id === "any" ? "bookingFlow__procedureCard--active" : ""}`.trim()}
+                                className="bookingFlow__procedureBadge"
+                                data-active={service?.id === "any" ? "true" : "false"}
                                 onClick={() => {
                                     const active = service?.id === "any";
                                     if (active) {
@@ -1020,17 +1025,14 @@ export default function BookingFlow() {
                                     setTimeKey(null);
                                     setStep("pick");
                                 }}
-                                style={{ textAlign: "left", width: 240, minWidth: 240, flex: "0 0 auto", scrollSnapAlign: "start" }}
                             >
-                                <div className="bookingFlow__procedureMediaFallback" aria-hidden="true">
-                                    EF
-                                </div>
-                                <div className="bookingFlow__procedureOverlay">
-                                    <div className="bookingFlow__procedureTitle">Quero orientação</div>
-                                    <div className="bookingFlow__procedureSub">Ainda não sei qual procedimento</div>
-                                </div>
+                                <span className="bookingFlow__procedureBadgeAvatar bookingFlow__procedureBadgeAvatar--all">
+                                    <span className="bookingFlow__procedureBadgeFallback bookingFlow__procedureBadgeFallback--all">Todos</span>
+                                </span>
+                                <span className="bookingFlow__procedureBadgeLabel">Quero orientação</span>
+                                <span className="bookingFlow__procedureBadgeSub">Ainda não sei qual procedimento</span>
                             </button>
-                        </ScrollPicker>
+                        </div>
                     </div>
 
                     <div className={`card bookingFlow__cardServices ${canPickServices ? "" : "bookingFlow__card--locked"}`.trim()} style={{ padding: 16 }}>
@@ -1074,8 +1076,9 @@ export default function BookingFlow() {
                                         type="button"
                                         aria-pressed={opt.active}
                                         disabled={!canPickServices}
-                                        className="bookingFlow__selectItem bookingFlow__serviceBtn"
+                                        className="bookingFlow__selectItem bookingFlow__serviceBtn bookingFlow__tooltipTrigger"
                                         data-active={opt.active ? "true" : "false"}
+                                        data-tooltip={`+- ${opt.minutes} min`}
                                         onClick={() => {
                                             opt.toggle();
                                             setDateKey(null);
@@ -1091,7 +1094,6 @@ export default function BookingFlow() {
                                         }}
                                     >
                                         <span>{opt.label}</span>
-                                        <span className="bookingFlow__serviceMinutes">{opt.minutes} min</span>
                                     </button>
                                 ))}
                             </div>
@@ -1136,13 +1138,15 @@ export default function BookingFlow() {
                                 <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", gap: 8 }}>
                                     {upcomingDays.map((d) => {
                                         const active = dateKey === d;
+                                        const unavailable = canPick && hasResolvedDateAvailability && dateAvailability[d] === false;
                                         return (
                                             <button
                                                 key={d}
                                                 type="button"
-                                                disabled={!canPick}
+                                                disabled={!canPick || unavailable}
                                                 className="bookingFlow__selectItem bookingFlow__dateBtn"
                                                 data-active={active ? "true" : "false"}
+                                                data-unavailable={unavailable ? "true" : "false"}
                                                 onClick={() => {
                                                     setDateTouched(true);
                                                     if (active) {
@@ -1347,6 +1351,8 @@ export default function BookingFlow() {
                     </div>
                 </div>
             )}
+
+            <DoctorInstagramModal profile={activeInstagram} onClose={() => setActiveInstagram(null)} />
 
             {showDetailsModal && unitSlug && doctor && service && dateKey && timeKey ? (
                 <div

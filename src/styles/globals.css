@@ -1342,30 +1342,20 @@ button:focus-visible {
 .bookingFlow__serviceBtn {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 8px;
-}
-
-.bookingFlow__serviceMinutes {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 66px;
-  min-height: 28px;
-  padding: 0 10px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, .06);
-  font-size: 11px;
-  font-weight: 900;
-}
-
-.bookingFlow__selectItem[data-active="true"] .bookingFlow__serviceMinutes,
-.bookingFlow__selectItem:hover:not(:disabled) .bookingFlow__serviceMinutes {
-  background: rgba(255, 255, 255, .14);
 }
 
 .bookingFlow__dateBtn[data-active="true"] {
   border-width: 2px;
+}
+
+.bookingFlow__dateBtn:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  border-color: #e5e7eb;
+  box-shadow: none;
+  transform: scale(.98);
 }
 
 .bookingFlow__timeBtn[data-active="true"] {
@@ -1520,95 +1510,111 @@ button:focus-visible {
 
 .bookingFlow__doctorTooltipLink {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
   margin-top: 10px;
-  padding: 8px 10px;
+  width: 34px;
+  height: 34px;
   border-radius: 999px;
+  border: 0;
   background: rgba(255, 255, 255, 0.12);
   color: #fff;
-  font-size: 12px;
-  font-weight: 800;
+  cursor: pointer;
 }
 
 .bookingFlow__doctorTooltipLink:hover {
   background: rgba(255, 255, 255, 0.2);
 }
 
-.bookingFlow__procedureCard {
+.bookingFlow__procedureBadgeGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px 16px;
+  align-items: flex-start;
+}
+
+.bookingFlow__procedureBadge {
   appearance: none;
-  position: relative;
-  border: 1px solid rgba(0, 0, 0, 0.14);
-  background: #111;
-  color: #fff;
-  border-radius: 14px;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  width: 112px;
   padding: 0;
-  overflow: hidden;
-  height: 240px;
+  border: 0;
+  background: transparent;
+  color: inherit;
   cursor: pointer;
-  transform: scale(.98);
-  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
-  will-change: transform;
 }
 
-.bookingFlow__procedureCard:disabled {
+.bookingFlow__procedureBadge:disabled {
   cursor: not-allowed;
-  opacity: 0.65;
+  opacity: 0.55;
 }
 
-.bookingFlow__procedureCard:hover:not(:disabled),
-.bookingFlow__procedureCard--active {
-  transform: scale(1.02);
-  border-color: rgba(17, 17, 17, 0.9);
-  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.14);
-}
-
-.bookingFlow__procedureCard--active {
-  border-width: 2px;
-}
-
-.bookingFlow__procedureMediaFallback {
-  width: 100%;
+.bookingFlow__procedureBadgeAvatar {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  border-radius: 999px;
+  overflow: hidden;
   display: grid;
   place-items: center;
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: 900;
-  letter-spacing: -0.6px;
+  border: 3px solid rgba(17, 17, 17, 0.1);
+  background: linear-gradient(180deg, #fbf7f0 0%, #f2eadf 100%);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.bookingFlow__procedureBadge:hover:not(:disabled) .bookingFlow__procedureBadgeAvatar,
+.bookingFlow__procedureBadge:focus-visible .bookingFlow__procedureBadgeAvatar,
+.bookingFlow__procedureBadge[data-active="true"] .bookingFlow__procedureBadgeAvatar {
+  transform: translateY(-2px);
+  border-color: rgba(17, 17, 17, 0.88);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.16);
+}
+
+.bookingFlow__procedureBadgeAvatar img {
+  object-fit: cover;
+}
+
+.bookingFlow__procedureBadgeAvatar--all {
+  background: #111;
+}
+
+.bookingFlow__procedureBadgeFallback {
+  display: grid;
+  place-items: center;
+  width: 100%;
   height: 100%;
-}
-
-.bookingFlow__procedureOverlay {
-  position: absolute;
-  inset: auto 0 0 0;
-  z-index: 2;
-  padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.72);
-  color: rgba(17, 17, 17, 0.92);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.bookingFlow__procedureCard:hover:not(:disabled) .bookingFlow__procedureOverlay,
-.bookingFlow__procedureCard--active .bookingFlow__procedureOverlay {
-  background: rgba(17, 17, 17, 0.62);
-  color: rgba(255, 255, 255, 0.92);
-  border-top-color: rgba(255, 255, 255, 0.12);
-}
-
-.bookingFlow__procedureTitle {
+  padding: 10px;
+  color: #111;
   font-weight: 900;
-  font-size: 13px;
+  letter-spacing: -0.04em;
+}
+
+.bookingFlow__procedureBadgeFallback--all {
+  color: #fff;
+  font-size: 16px;
+}
+
+.bookingFlow__procedureBadgeLabel {
+  font-size: 12px;
+  font-weight: 900;
   line-height: 1.15;
+  text-align: center;
+  text-wrap: balance;
 }
 
-.bookingFlow__procedureSub {
-  font-size: 11.5px;
-  line-height: 1.2;
-  color: rgba(17, 17, 17, 0.72);
+.bookingFlow__procedureBadgeSub {
+  font-size: 11px;
+  line-height: 1.25;
+  color: var(--muted);
+  text-align: center;
+  text-wrap: balance;
 }
 
-.bookingFlow__procedureCard:hover:not(:disabled) .bookingFlow__procedureSub,
-.bookingFlow__procedureCard--active .bookingFlow__procedureSub {
-  color: rgba(255, 255, 255, 0.72);
+.bookingFlow__procedureBadge[data-active="true"] .bookingFlow__procedureBadgeLabel {
+  color: #111;
 }
 
 .bookingFlow__dateBtn {
@@ -1658,11 +1664,13 @@ button:focus-visible {
   border-color: #d1d5db;
 }
 
-.bookingFlow__timeBtn[data-tooltip] {
+.bookingFlow__timeBtn[data-tooltip],
+.bookingFlow__tooltipTrigger[data-tooltip] {
   position: relative;
 }
 
-.bookingFlow__timeBtn[data-tooltip]::after {
+.bookingFlow__timeBtn[data-tooltip]::after,
+.bookingFlow__tooltipTrigger[data-tooltip]::after {
   content: attr(data-tooltip);
   position: absolute;
   left: 50%;
@@ -1681,7 +1689,8 @@ button:focus-visible {
   z-index: 2;
 }
 
-.bookingFlow__timeBtn[data-tooltip]::before {
+.bookingFlow__timeBtn[data-tooltip]::before,
+.bookingFlow__tooltipTrigger[data-tooltip]::before {
   content: "";
   position: absolute;
   left: 50%;
@@ -1697,7 +1706,11 @@ button:focus-visible {
 }
 
 .bookingFlow__timeBtn[data-tooltip]:hover::after,
-.bookingFlow__timeBtn[data-tooltip]:hover::before {
+.bookingFlow__timeBtn[data-tooltip]:hover::before,
+.bookingFlow__tooltipTrigger[data-tooltip]:hover::after,
+.bookingFlow__tooltipTrigger[data-tooltip]:hover::before,
+.bookingFlow__tooltipTrigger[data-tooltip]:focus-visible::after,
+.bookingFlow__tooltipTrigger[data-tooltip]:focus-visible::before {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
