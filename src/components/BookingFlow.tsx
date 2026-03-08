@@ -206,9 +206,9 @@ function HoverScrollPicker(props: { ariaLabel: string; children: ReactNode }) {
         hoverTimerRef.current = setInterval(() => {
             const el = ref.current;
             if (!el) return;
-            el.scrollLeft += dir * 6;
+            el.scrollLeft += dir * 4;
             update();
-        }, 20);
+        }, 26);
     };
 
     useEffect(() => {
@@ -220,7 +220,7 @@ function HoverScrollPicker(props: { ariaLabel: string; children: ReactNode }) {
     const scrollByDir = (dir: -1 | 1) => {
         const el = ref.current;
         if (!el) return;
-        el.scrollBy({ left: dir * 140, behavior: "smooth" });
+        el.scrollBy({ left: dir * 120, behavior: "smooth" });
     };
 
     return (
@@ -356,6 +356,8 @@ export default function BookingFlow() {
     const selectedServiceNames = useMemo(() => selectedServices.map((item) => item.name), [selectedServices]);
     const selectedServicesLabel = useMemo(() => selectedServiceNames.join(", "), [selectedServiceNames]);
     const durationMinutes = 30;
+    const effectiveDoctor = doctor ?? ANY_DOCTOR;
+    const effectiveDoctorSlug = effectiveDoctor.slug;
 
     const lastUnitSlugRef = useRef<string | null>(null);
     const appliedDoctorQueryRef = useRef<string | null>(null);
@@ -367,11 +369,7 @@ export default function BookingFlow() {
         appliedDoctorQueryRef.current = null;
         appliedServiceQueryRef.current = null;
 
-        if (unitSlug) {
-            setDoctor(ANY_DOCTOR);
-        } else {
-            setDoctor(null);
-        }
+        setDoctor(null);
         setSelectedServices([]);
         setDateKey(null);
         setDateTouched(false);
@@ -404,8 +402,6 @@ export default function BookingFlow() {
 
         if (draft.doctorSlug && draft.doctorName) {
             setDoctor({ slug: draft.doctorSlug, name: draft.doctorName, handle: draft.doctorHandle });
-        } else if (unitSlug) {
-            setDoctor(ANY_DOCTOR);
         }
 
         const restoredServiceIds = draft.serviceIds?.length ? draft.serviceIds : draft.serviceId ? [draft.serviceId] : [];
@@ -426,7 +422,7 @@ export default function BookingFlow() {
         setCpf(draft.cpf);
         setAddress(draft.address);
         setNotes(draft.notes);
-        const canRestoreDetails = draft.step === "details" && restoredServiceIds.length > 0 && !!draft.dateKey && !!draft.timeKey && !!draft.doctorSlug;
+        const canRestoreDetails = draft.step === "details" && restoredServiceIds.length > 0 && !!draft.dateKey && !!draft.timeKey;
         setStep(canRestoreDetails ? "details" : "pick");
         setDetailsStage(canRestoreDetails ? draft.detailsStage : "contact");
         if (canRestoreDetails) setDetailsStartedAtMs(Date.now());
@@ -505,26 +501,30 @@ export default function BookingFlow() {
         appliedServiceQueryRef.current = serviceQuery;
     }, [serviceQuery, unitSlug]);
 
-    const upcomingDays = useMemo(() => {
-        const out: string[] = [];
+    const upcomingWeeks = useMemo(() => {
+        const out: string[][] = [];
         const base = startOfCurrentWeek(new Date());
-        for (let i = 0; i < 28; i++) {
-            const d = new Date(base);
-            d.setDate(base.getDate() + i);
-            out.push(formatLocalDateKey(d));
+        for (let weekIndex = 0; weekIndex < 8; weekIndex += 1) {
+            const week: string[] = [];
+            for (let dayIndex = 0; dayIndex < 7; dayIndex += 1) {
+                const d = new Date(base);
+                d.setDate(base.getDate() + weekIndex * 7 + dayIndex);
+                week.push(formatLocalDateKey(d));
+            }
+            out.push(week);
         }
         return out;
     }, []);
+    const upcomingDays = useMemo(() => upcomingWeeks.flat(), [upcomingWeeks]);
 
     useEffect(() => {
         let cancelled = false;
 
         async function loadDateAvailability() {
             setDateAvailability({});
-            const doctorSlug = doctor?.slug ?? null;
             const serviceId = primaryServiceId;
 
-            if (!unitSlug || durationMinutes <= 0 || !doctorSlug || !serviceId) return;
+            if (!unitSlug || durationMinutes <= 0 || !serviceId) return;
 
             const entries = await Promise.all(
                 upcomingDays.map(async (day) => {
@@ -532,7 +532,7 @@ export default function BookingFlow() {
                         if (isDateKeyBeforeToday(day)) return [day, false] as const;
                         const url = new URL("/api/booking/slots", window.location.origin);
                         url.searchParams.set("unit", unitSlug);
-                        url.searchParams.set("doctor", doctorSlug);
+                        url.searchParams.set("doctor", effectiveDoctorSlug);
                         url.searchParams.set("service", serviceId);
                         url.searchParams.set("durationMinutes", String(durationMinutes));
                         url.searchParams.set("date", day);
@@ -559,12 +559,13 @@ export default function BookingFlow() {
         return () => {
             cancelled = true;
         };
-    }, [doctor?.slug, durationMinutes, primaryServiceId, unitSlug, upcomingDays]);
+    }, [durationMinutes, effectiveDoctorSlug, primaryServiceId, unitSlug, upcomingDays]);
 
     useEffect(() => {
         async function loadSlots() {
             setSlots(null);
             setSlotsError(null);
+            setSlotsLoading(false);
             const serviceId = primaryServiceId;
 
             if (!unitSlug || !dateKey || durationMinutes <= 0 || !serviceId) return;
@@ -573,7 +574,7 @@ export default function BookingFlow() {
             try {
                 const url = new URL("/api/booking/slots", window.location.origin);
                 url.searchParams.set("unit", unitSlug);
-                url.searchParams.set("doctor", doctor?.slug ?? "any");
+                url.searchParams.set("doctor", effectiveDoctorSlug);
                 url.searchParams.set("service", serviceId);
                 url.searchParams.set("durationMinutes", String(durationMinutes));
                 url.searchParams.set("date", dateKey);
@@ -600,7 +601,7 @@ export default function BookingFlow() {
         }
 
         loadSlots();
-    }, [unitSlug, doctor?.slug, primaryServiceId, durationMinutes, dateKey]);
+    }, [dateKey, durationMinutes, effectiveDoctorSlug, primaryServiceId, unitSlug]);
 
     async function submit() {
         setSubmitError(null);
@@ -609,8 +610,8 @@ export default function BookingFlow() {
             setSubmitError("Selecione a unidade no topo para agendar.");
             return;
         }
-        if (!doctor || !primaryService || !dateKey || !timeKey) {
-            setSubmitError("Selecione profissional, procedimento, data e horário.");
+        if (!primaryService || !dateKey || !timeKey) {
+            setSubmitError("Selecione procedimento, data e horário.");
             return;
         }
         if (durationMinutes <= 0) {
@@ -649,8 +650,8 @@ export default function BookingFlow() {
                 headers: { "content-type": "application/json" },
                 body: JSON.stringify({
                     unitSlug,
-                    doctorSlug: doctor.slug,
-                    doctorName: doctor.name,
+                    doctorSlug: effectiveDoctor.slug,
+                    doctorName: effectiveDoctor.name,
                     serviceId: primaryService.id,
                     selectedServiceIds,
                     durationMinutes,
@@ -729,7 +730,7 @@ export default function BookingFlow() {
             trackBookingRequestSubmitted({
                 bookingId: json.id,
                 unitSlug,
-                doctorSlug: doctor.slug,
+                doctorSlug: effectiveDoctor.slug,
                 serviceId: primaryService.id,
                 durationMinutes,
                 date: dateKey,
@@ -776,6 +777,12 @@ export default function BookingFlow() {
     const canPickProcedure = !!unitSlug;
     const canPick = !!unitSlug && selectedServices.length > 0;
     const hasResolvedDateAvailability = upcomingDays.every((day) => typeof dateAvailability[day] === "boolean");
+    const visibleUpcomingWeeks = useMemo(() => {
+        if (!canPick || !hasResolvedDateAvailability) return upcomingWeeks.slice(0, 4);
+        const weeksWithAvailability = upcomingWeeks.filter((week) => week.some((day) => dateAvailability[day]));
+        return (weeksWithAvailability.length > 0 ? weeksWithAvailability : upcomingWeeks).slice(0, 4);
+    }, [canPick, dateAvailability, hasResolvedDateAvailability, upcomingWeeks]);
+    const visibleUpcomingDays = useMemo(() => visibleUpcomingWeeks.flat(), [visibleUpcomingWeeks]);
 
     useEffect(() => {
         if (!dateKey) return;
@@ -791,11 +798,11 @@ export default function BookingFlow() {
         if (!canPick) return;
         if (dateKey) return;
         if (dateTouched) return;
-        if (!upcomingDays.length) return;
+        if (!visibleUpcomingDays.length) return;
         if (!hasResolvedDateAvailability) return;
-        const firstAvailableDate = upcomingDays.find((day) => dateAvailability[day]);
+        const firstAvailableDate = visibleUpcomingDays.find((day) => dateAvailability[day]);
         setDateKey(firstAvailableDate ?? null);
-    }, [canPick, dateAvailability, dateKey, dateTouched, hasResolvedDateAvailability, upcomingDays]);
+    }, [canPick, dateAvailability, dateKey, dateTouched, hasResolvedDateAvailability, visibleUpcomingDays]);
 
     const selectedSlot = useMemo(() => {
         if (!slots?.slots || !timeKey) return null;
@@ -813,7 +820,7 @@ export default function BookingFlow() {
         trackBookingFunnelStep({
             step: "details_opened",
             unitSlug,
-            doctorSlug: doctor?.slug ?? null,
+            doctorSlug: effectiveDoctorSlug,
             serviceId: primaryService?.id ?? null,
             date: dateKey,
             time: nextTime,
@@ -844,7 +851,7 @@ export default function BookingFlow() {
         addressSeemsValid &&
         (!turnstileRequired || !!turnstileToken);
 
-    const showDetailsModal = step === "details" && !!unitSlug && !!doctor && !!primaryService && !!dateKey && !!timeKey;
+    const showDetailsModal = step === "details" && !!unitSlug && !!primaryService && !!dateKey && !!timeKey;
 
     useEffect(() => {
         if (!showDetailsModal) return;
@@ -870,9 +877,10 @@ export default function BookingFlow() {
         return () => window.removeEventListener("keydown", onKey);
     }, [showDetailsModal]);
 
-    function selectDoctor(nextDoctor: DoctorSelection) {
-        if (doctor?.slug === nextDoctor.slug) return;
-        setDoctor(nextDoctor);
+    function selectDoctor(nextDoctor: DoctorSelection | null) {
+        const nextSelection = doctor?.slug === nextDoctor?.slug ? null : nextDoctor;
+        if (!doctor && !nextSelection) return;
+        setDoctor(nextSelection);
         setDateKey(null);
         setDateTouched(false);
         setTimeKey(null);
@@ -1025,7 +1033,8 @@ export default function BookingFlow() {
                                                     className="bookingFlow__doctorBadge"
                                                     data-active={active ? "true" : "false"}
                                                     onClick={() => selectDoctor({ slug: d.slug, name: d.name, handle: d.handle })}
-                                                    aria-label={`Selecionar ${d.name}`}
+                                                    aria-label={active ? `Remover seleção de ${d.name}` : `Selecionar ${d.name}`}
+                                                    aria-pressed={active}
                                                 >
                                                     <span className="bookingFlow__doctorBadgeAvatar">
                                                         {d.handle ? (
@@ -1076,10 +1085,14 @@ export default function BookingFlow() {
                                             className="bookingFlow__doctorBadge bookingFlow__doctorBadge--all"
                                             data-active={doctor?.slug === ANY_DOCTOR.slug ? "true" : "false"}
                                             onClick={() => selectDoctor(ANY_DOCTOR)}
-                                            aria-label="Selecionar sem preferência de doutor"
+                                            aria-label={doctor?.slug === ANY_DOCTOR.slug ? "Remover seleção de sem preferência" : "Selecionar sem preferência de doutor"}
+                                            aria-pressed={doctor?.slug === ANY_DOCTOR.slug}
                                         >
                                             <span className="bookingFlow__doctorBadgeAvatar bookingFlow__doctorBadgeAvatar--all">
-                                                <span className="bookingFlow__doctorBadgeFallback bookingFlow__doctorBadgeFallback--all">Sem</span>
+                                                <span className="bookingFlow__doctorBadgeFallback bookingFlow__doctorBadgeFallback--all">
+                                                    <span>Sem</span>
+                                                    <span>Preferência</span>
+                                                </span>
                                             </span>
                                         </button>
                                         <div className="bookingFlow__doctorTooltip" role="tooltip">
@@ -1183,50 +1196,54 @@ export default function BookingFlow() {
                                 <div className="small" style={{ fontWeight: 800, marginBottom: 8 }}>
                                     Datas
                                 </div>
-                                <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", gap: 8 }}>
-                                    {upcomingDays.map((d) => {
-                                        const active = dateKey === d;
-                                        const unavailable = canPick && hasResolvedDateAvailability && dateAvailability[d] === false;
-                                        return (
-                                            <button
-                                                key={d}
-                                                type="button"
-                                                disabled={!canPick || unavailable}
-                                                className="bookingFlow__selectItem bookingFlow__dateBtn"
-                                                data-active={active ? "true" : "false"}
-                                                data-unavailable={unavailable ? "true" : "false"}
-                                                onClick={() => {
-                                                    setDateTouched(true);
-                                                    if (active) {
-                                                        setDateKey(null);
-                                                        setTimeKey(null);
-                                                        setStep("pick");
-                                                        return;
-                                                    }
+                                <div className="bookingFlow__dateWeeks">
+                                    {visibleUpcomingWeeks.map((week) => (
+                                        <div key={week[0]} className="bookingFlow__dateWeekRow">
+                                            {week.map((d) => {
+                                                const active = dateKey === d;
+                                                const unavailable = canPick && hasResolvedDateAvailability && dateAvailability[d] === false;
+                                                return (
+                                                    <button
+                                                        key={d}
+                                                        type="button"
+                                                        disabled={!canPick || unavailable}
+                                                        className="bookingFlow__selectItem bookingFlow__dateBtn"
+                                                        data-active={active ? "true" : "false"}
+                                                        data-unavailable={unavailable ? "true" : "false"}
+                                                        onClick={() => {
+                                                            setDateTouched(true);
+                                                            if (active) {
+                                                                setDateKey(null);
+                                                                setTimeKey(null);
+                                                                setStep("pick");
+                                                                return;
+                                                            }
 
-                                                    setDateKey(d);
-                                                    setTimeKey(null);
-                                                    setStep("pick");
-                                                }}
-                                                style={{
-                                                    opacity: canPick ? 1 : 0.5,
-                                                    fontWeight: 900,
-                                                    borderRadius: 12,
-                                                    padding: "10px 8px",
-                                                    textAlign: "center",
-                                                    display: "grid",
-                                                    gap: 2,
-                                                }}
-                                            >
-                                                <div style={{ fontSize: 11, fontWeight: 800, opacity: active ? 0.9 : 0.75 }}>
-                                                    {weekdayPtBrShort(d)}
-                                                </div>
-                                                <div style={{ fontSize: 14, fontWeight: 950, letterSpacing: "-0.2px" }}>
-                                                    {parseLocalDateKey(d)?.getDate()}
-                                                </div>
-                                            </button>
-                                        );
-                                    })}
+                                                            setDateKey(d);
+                                                            setTimeKey(null);
+                                                            setStep("pick");
+                                                        }}
+                                                        style={{
+                                                            opacity: canPick ? 1 : 0.5,
+                                                            fontWeight: 900,
+                                                            borderRadius: 12,
+                                                            padding: "10px 8px",
+                                                            textAlign: "center",
+                                                            display: "grid",
+                                                            gap: 2,
+                                                        }}
+                                                    >
+                                                        <div style={{ fontSize: 11, fontWeight: 800, opacity: active ? 0.9 : 0.75 }}>
+                                                            {weekdayPtBrShort(d)}
+                                                        </div>
+                                                        <div style={{ fontSize: 14, fontWeight: 950, letterSpacing: "-0.2px" }}>
+                                                            {parseLocalDateKey(d)?.getDate()}
+                                                        </div>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    ))}
                                 </div>
                                 {!canPick ? (
                                     <div className="small" style={{ marginTop: 10 }}>
@@ -1247,7 +1264,7 @@ export default function BookingFlow() {
                                     ) : slotsError ? (
                                         <div className="small">{slotsError}</div>
                                     ) : slots ? (
-                                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: 10 }}>
+                                        <div className="bookingFlow__timeGrid">
                                             {slots.slots.map((s) => {
                                                 const active = timeKey === s.time;
                                                 const isPast = s.reason === "past";
@@ -1296,14 +1313,14 @@ export default function BookingFlow() {
                                                         }}
                                                         tabIndex={ariaDisabled ? -1 : 0}
                                                         style={{
-                                                            padding: "12px 12px",
+                                                            padding: "10px 8px",
                                                             borderRadius: 12,
                                                             fontWeight: 900,
-                                                            textAlign: "left",
+                                                            textAlign: "center",
                                                         }}
                                                     >
-                                                        <div>{s.time}</div>
-                                                        {label ? <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.8 }}>{label}</div> : null}
+                                                        <div className="bookingFlow__timeBtnText">{s.time}</div>
+                                                        {label ? <div className="bookingFlow__timeBtnSub">{label}</div> : null}
                                                     </button>
                                                 );
                                             })}
@@ -1399,7 +1416,7 @@ export default function BookingFlow() {
 
             <DoctorInstagramModal profile={activeInstagram} onClose={() => setActiveInstagram(null)} />
 
-            {showDetailsModal && unitSlug && doctor && primaryService && dateKey && timeKey ? (
+            {showDetailsModal && unitSlug && primaryService && dateKey && timeKey ? (
                 <div
                     className="bookingFlow__modalBackdrop"
                     role="dialog"
@@ -1532,7 +1549,7 @@ export default function BookingFlow() {
                                                 trackBookingFunnelStep({
                                                     step: "identity_opened",
                                                     unitSlug,
-                                                    doctorSlug: doctor.slug,
+                                                    doctorSlug: effectiveDoctorSlug,
                                                     serviceId: primaryService.id,
                                                     date: dateKey,
                                                     time: timeKey,
@@ -1637,7 +1654,7 @@ export default function BookingFlow() {
                                                 trackBookingFunnelStep({
                                                     step: "contact_reopened",
                                                     unitSlug,
-                                                    doctorSlug: doctor.slug,
+                                                    doctorSlug: effectiveDoctorSlug,
                                                     serviceId: primaryService.id,
                                                     date: dateKey,
                                                     time: timeKey,
