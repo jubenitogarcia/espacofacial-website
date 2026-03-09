@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getBookingDb, nowMs, addMinutes, clampText, normalizePhone, normalizeEmail, normalizeCpf, sanitizeOneLine, isValidDateKey, isValidTimeKey, toSaoPauloIso, slugify } from "@/lib/bookingDb";
 import { getServiceById } from "@/data/services";
 import { getUnitDoctorsResult } from "@/lib/injectorsDirectory";
+import { getAgendaDb } from "@/lib/agendaDb";
 import { sendBookingNotifications } from "@/lib/bookingNotifications";
 
 export const dynamic = "force-dynamic";
@@ -146,6 +147,36 @@ async function upsertCustomer(
         .bind(id, params.name, params.email, params.whatsapp, params.cpf, params.address, params.now, params.now)
         .run();
     return id;
+}
+
+async function hasAgendaConflict(params: { unitSlug: string; date: string; startAtMs: number; endAtMs: number }): Promise<boolean> {
+    const agendaDb = await getAgendaDb();
+    const agendaRows = await agendaDb
+        .prepare(
+            `SELECT time_key, duration_min
+             FROM agenda_appointments
+             WHERE unit_slug = ? AND date_key = ? AND removed_at_ms IS NULL`,
+        )
+        .bind(params.unitSlug, params.date)
+        .all<{ time_key: string; duration_min: number | null }>();
+
+    for (const row of agendaRows.results ?? []) {
+        const timeKey = (row.time_key ?? "").toString().trim();
+        if (!isValidTimeKey(timeKey)) continue;
+
+        const agendaStartMs = Date.parse(toSaoPauloIso(params.date, timeKey));
+        if (!Number.isFinite(agendaStartMs)) continue;
+
+        const durationMin = Number(row.duration_min ?? 0);
+        const agendaDurationMs = Number.isFinite(durationMin) && durationMin > 0 ? durationMin * 60_000 : 1;
+        const agendaEndMs = agendaStartMs + agendaDurationMs;
+
+        if (agendaStartMs < params.endAtMs && agendaEndMs > params.startAtMs) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 export async function POST(request: Request) {
@@ -359,6 +390,11 @@ export async function POST(request: Request) {
 
         effectiveDoctorSlug = pick.slug;
         safeDoctorName = clampText(pick.name, 120);
+    }
+
+    const blockedByAgenda = await hasAgendaConflict({ unitSlug, date, startAtMs, endAtMs });
+    if (blockedByAgenda) {
+        return json({ ok: false, error: "no_availability" }, { status: 409 });
     }
 
     // Check overlaps for the same unit+doctor.
