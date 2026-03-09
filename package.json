@@ -25,16 +25,16 @@
   },
   "dependencies": {
     "@svg-maps/brazil": "^2.0.0",
-    "next": "^15.5.10",
-    "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "next": "^16.1.6",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.0",
     "@opennextjs/cloudflare": "^1.15.1",
     "@types/node": "20.14.10",
-    "@types/react": "18.3.3",
-    "@types/react-dom": "18.3.0",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
     "cheerio": "^1.1.2",
     "eslint": "8.57.0",
     "eslint-config-next": "^15.5.10",
